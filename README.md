@@ -126,8 +126,9 @@ SyncTogether follows **Clean Architecture** and **Test-Driven Development (TDD):
 
 [//]: # (This project is licensed under the MIT License.)
 
-## 🤝 Contributing
-Contributions are welcome! Open an issue or create a pull request.
+[//]: # (## 🤝 Contributing)
+
+[//]: # (Contributions are welcome! Open an issue or create a pull request.)
 
 ---
 
