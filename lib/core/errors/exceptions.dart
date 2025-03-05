@@ -37,3 +37,11 @@ class SignOutException extends AuthException {
     required super.statusCode,
   });
 }
+
+/// **Exception thrown during get-current-user errors.**
+class GetCurrentUserException extends AuthException {
+  const GetCurrentUserException({
+    required super.message,
+    required super.statusCode,
+  });
+}

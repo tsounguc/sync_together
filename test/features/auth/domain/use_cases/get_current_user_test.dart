@@ -4,63 +4,63 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/auth/domain/repositories/auth_repository.dart';
-import 'package:sync_together/features/auth/domain/use_cases/sign_in_anonymously.dart';
+import 'package:sync_together/features/auth/domain/use_cases/get_current_user.dart';
 
 import 'auth_repository.mock.dart';
 
 void main() {
   late AuthRepository repository;
-  late SignInAnonymously useCase;
+  late GetCurrentUser useCase;
 
   setUp(() {
     repository = MockAuthRepository();
-    useCase = SignInAnonymously(repository);
+    useCase = GetCurrentUser(repository);
   });
-
   const testUser = UserEntity.empty();
-
   test(
-    'given SignInAnonymously '
+    'given GetCurrentUser '
     'when instantiated '
-    'then call [AuthRepository.signInAnonymously] '
-    'and return [UserEntity]',
+    'then call [AuthRepository.getCurrentUser] '
+    'and return a [UserEntity]',
     () async {
       // Arrange
-      when(() => repository.signInAnonymously()).thenAnswer(
-        (_) async => const Right(testUser),
-      );
-
+      when(
+        () => repository.getCurrentUser(),
+      ).thenAnswer((_) async => const Right(testUser));
       // Act
       final result = await useCase();
 
       // Assert
       expect(result, const Right<Failure, UserEntity>(testUser));
-      verify(() => repository.signInAnonymously()).called(1);
+      verify(
+        () => repository.getCurrentUser(),
+      ).called(1);
       verifyNoMoreInteractions(repository);
     },
   );
 
   test(
-    'given SignInAnonymously '
+    'given GetCurrentUser '
     'when instantiated '
-    'and call [AuthRepository.signInAnonymously] is unsuccessful '
-    'then return [SignInFailure]',
+    'and call [AuthRepository.getCurrentUser] is unsuccessful '
+    'then return a [GetCurrentUserFailure]',
     () async {
       // Arrange
-      final testFailure = SignInFailure(
-        message: 'Anonymous sign-in failed',
-        statusCode: 'ANON_SIGN_IN_ERROR',
+      final testFailure = GetCurrentUserFailure(
+        message: 'Failed to get current user',
+        statusCode: 'CURRENT_USER_ERROR',
       );
       when(
-        () => repository.signInAnonymously(),
+        () => repository.getCurrentUser(),
       ).thenAnswer((_) async => Left(testFailure));
-
       // Act
       final result = await useCase();
 
       // Assert
       expect(result, Left<Failure, UserEntity>(testFailure));
-      verify(() => repository.signInAnonymously()).called(1);
+      verify(
+        () => repository.getCurrentUser(),
+      ).called(1);
       verifyNoMoreInteractions(repository);
     },
   );

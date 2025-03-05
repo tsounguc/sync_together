@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/auth/domain/repositories/auth_repository.dart';
+import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.dart';
 
 import 'auth_repository.mock.dart';
 
@@ -19,7 +20,7 @@ void main() {
   });
 
   const testUser = UserEntity.empty();
-  final testParams = SignInWithEmailParams.empty();
+  const testParams = SignInParams.empty();
 
   test(
     'given SignInWithEmail '

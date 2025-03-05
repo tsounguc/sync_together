@@ -3,8 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
-
-import 'package:sync_together/features/auth/domain/repositories/auth_repository.dart';
+import 'package:sync_together/features/auth/domain/use_cases/sign_up_with_email.dart';
 
 import 'auth_repository.mock.dart';
 
@@ -62,7 +61,7 @@ void main() {
       final result = await useCase(testParams);
 
       // Assert
-      expect(result, const Left<Failure, UserEntity>(testFailure));
+      expect(result, Left<Failure, UserEntity>(testFailure));
       verify(
         () => repository.signUpWithEmail(testParams.email, testParams.password),
       ).called(1);

@@ -1,10 +1,9 @@
-import 'dart:math';
-
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/domain/repositories/auth_repository.dart';
+import 'package:sync_together/features/auth/domain/use_cases/sign_out.dart';
 
 import 'auth_repository.mock.dart';
 
@@ -54,7 +53,7 @@ void main() {
       ).thenAnswer((_) async => Left(testFailure));
 
       // Act
-      final result = useCase();
+      final result = await useCase();
 
       // Assert
       expect(result, Left<Failure, void>(testFailure));

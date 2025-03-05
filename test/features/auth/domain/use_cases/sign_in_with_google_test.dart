@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/auth/domain/repositories/auth_repository.dart';
+import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_google.dart';
 
 import 'auth_repository.mock.dart';
 
@@ -16,7 +17,7 @@ void main() {
     useCase = SignInWithGoogle(repository);
   });
 
-  final testUser = const UserEntity.empty();
+  const testUser = UserEntity.empty();
   test(
     'given SignInWithGoogle '
     'when instantiated '
@@ -26,13 +27,13 @@ void main() {
       // Arrange
       when(
         () => repository.signInWithGoogle(),
-      ).thenAnswer((_) async => Right(testUser));
+      ).thenAnswer((_) async => const Right(testUser));
 
       // Act
-      final result = useCase();
+      final result = await useCase();
 
       // Assert
-      expect(result, Right<Failure, UserEntity>(testUser));
+      expect(result, const Right<Failure, UserEntity>(testUser));
       verify(() => repository.signInWithGoogle()).called(1);
       verifyNoMoreInteractions(repository);
     },
@@ -53,7 +54,7 @@ void main() {
       ).thenAnswer((_) async => Left(testFailure));
 
       // Act
-      final result = useCase();
+      final result = await useCase();
 
       // Assert
       expect(result, Left<Failure, UserEntity>(testFailure));

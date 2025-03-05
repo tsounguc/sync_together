@@ -78,3 +78,15 @@ class SignOutFailure extends AuthFailure {
           statusCode: exception.statusCode,
         );
 }
+
+/// **Failure that occurs when get-current-user.**
+class GetCurrentUserFailure extends AuthFailure {
+  GetCurrentUserFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SignOutException] into a [SignOutFailure].
+  GetCurrentUserFailure.fromException(GetCurrentUserException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
