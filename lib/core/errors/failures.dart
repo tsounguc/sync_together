@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:sync_together/core/errors/exceptions.dart';
 
 /// Base class for handling failures across the app.
 ///
@@ -26,4 +27,54 @@ abstract class Failure extends Equatable {
 
   @override
   List<Object?> get props => [message, statusCode];
+}
+
+/// **Base class for all authentication failures.**
+///
+/// This allows us to have specific failure types (e.g., `SignUpFailure`).
+abstract class AuthFailure extends Failure {
+  AuthFailure({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Failure that occurs during sign-up.**
+class SignUpFailure extends AuthFailure {
+  SignUpFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SignUpException] into a [SignUpFailure].
+  SignUpFailure.fromException(
+    SignUpException exception,
+  ) : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs during sign-in.**
+class SignInFailure extends AuthFailure {
+  SignInFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [SignInException] into a [SignInFailure].
+  SignInFailure.fromException(SignInException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs during sign-out.**
+class SignOutFailure extends AuthFailure {
+  SignOutFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SignOutException] into a [SignOutFailure].
+  SignOutFailure.fromException(SignOutException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
 }
