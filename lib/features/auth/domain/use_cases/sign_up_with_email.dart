@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
@@ -11,22 +12,32 @@ class SignUpWithEmail extends UseCaseWithParams<UserEntity, SignUpParams> {
   final AuthRepository repository;
 
   @override
-  ResultFuture<UserEntity> call(SignUpParams params) {
-    return repository.signUpWithEmail(params.email, params.password);
-  }
+  ResultFuture<UserEntity> call(SignUpParams params) => repository.signUpWithEmail(
+        params.name,
+        params.email,
+        params.password,
+      );
 }
 
 /// **Parameters for Signing Up**
 ///
 /// Includes an email and password.
-class SignUpParams {
-  const SignUpParams({required this.email, required this.password});
+class SignUpParams extends Equatable {
+  const SignUpParams({
+    required this.name,
+    required this.email,
+    required this.password,
+  });
 
   /// Empty constructor for testing purposes.
   const SignUpParams.empty()
-      : email = '',
+      : name = '',
+        email = '',
         password = '';
-
+  final String name;
   final String email;
   final String password;
+
+  @override
+  List<Object?> get props => [name, email, password];
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "706635927111",
+    "project_id": "synctogether-cf969",
+    "storage_bucket": "synctogether-cf969.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706635927111:android:52156116a90056789eab62",
+        "android_client_info": {
+          "package_name": "com.example.sync_together"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "706635927111-qc8ukgs73tsqg8j1s9tpg8e6j3u4o5gk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlGN7zwXEvSFZDXhxE_x1tXGQezYQ9QOI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "706635927111-qc8ukgs73tsqg8j1s9tpg8e6j3u4o5gk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

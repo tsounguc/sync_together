@@ -49,6 +49,18 @@ final class SignedOut extends AuthState {
   const SignedOut();
 }
 
+final class ForgotPasswordSent extends AuthState {
+  const ForgotPasswordSent();
+}
+
+final class UserUpdated extends AuthState {
+  const UserUpdated();
+}
+
+final class AccountDeleted extends AuthState {
+  const AccountDeleted();
+}
+
 final class Authenticated extends AuthState {
   const Authenticated({required this.user});
 

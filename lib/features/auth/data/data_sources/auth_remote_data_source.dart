@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/features/auth/data/models/user_model.dart';
@@ -11,7 +12,7 @@ abstract class AuthRemoteDataSource {
   ///
   /// - **Success:** Returns a [UserModel].
   /// - **Failure:** Throws a [SignUpException].
-  Future<UserModel> signUpWithEmail(String email, String password);
+  Future<UserModel> signUpWithEmail(String name, String email, String password);
 
   /// Signs in a user with **email and password**.
   ///
@@ -42,6 +43,12 @@ abstract class AuthRemoteDataSource {
   /// - **Success:** Returns a [UserModel], or `null` if no user is logged in.
   /// - **Failure:** Throws an [AuthException].
   Future<UserModel?> getCurrentUser();
+
+  /// Send email to user to resent password.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws an [AuthException].
+  Future<void> forgotPassword({required String email});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -123,7 +130,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
-        throw SignInException(
+        throw const SignInException(
           message: 'Google sign-in aborted',
           statusCode: 'SIGN_IN_ABORTED',
         );
@@ -173,19 +180,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signUpWithEmail(String email, String password) async {
+  Future<UserModel> signUpWithEmail(String name, String email, String password) async {
     try {
       final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
       final user = userCredential.user;
+
       if (user == null) {
         throw const SignUpException(
           message: 'User creation failed',
           statusCode: 'USER_NULL',
         );
       }
+
+      await user.updateDisplayName(name);
+
       return UserModel(
         uid: user.uid,
         email: user.email,
@@ -197,6 +208,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw SignUpException(
         message: e.message ?? 'Sign-up failed',
         statusCode: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> forgotPassword({required String email}) async {
+    try {
+      await firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw ForgotPasswordException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw ForgotPasswordException(
+        message: e.toString(),
+        statusCode: '505',
       );
     }
   }

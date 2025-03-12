@@ -27,7 +27,7 @@ void main() {
     () async {
       // Arrange
       when(
-        () => repository.signUpWithEmail(any(), any()),
+        () => repository.signUpWithEmail(any(), any(), any()),
       ).thenAnswer((_) async => const Right(testUser));
 
       // Act
@@ -36,7 +36,11 @@ void main() {
       // Assert
       expect(result, const Right<Failure, UserEntity>(testUser));
       verify(
-        () => repository.signUpWithEmail(testParams.email, testParams.password),
+        () => repository.signUpWithEmail(
+          testParams.name,
+          testParams.email,
+          testParams.password,
+        ),
       ).called(1);
       verifyNoMoreInteractions(repository);
     },
@@ -54,7 +58,11 @@ void main() {
         statusCode: 'SIGN_UP_ERROR',
       );
       when(
-        () => repository.signUpWithEmail(any(), any()),
+        () => repository.signUpWithEmail(
+          any(),
+          any(),
+          any(),
+        ),
       ).thenAnswer((_) async => Left(testFailure));
 
       // Act
@@ -63,7 +71,7 @@ void main() {
       // Assert
       expect(result, Left<Failure, UserEntity>(testFailure));
       verify(
-        () => repository.signUpWithEmail(testParams.email, testParams.password),
+        () => repository.signUpWithEmail(testParams.name, testParams.email, testParams.password),
       ).called(1);
       verifyNoMoreInteractions(repository);
     },

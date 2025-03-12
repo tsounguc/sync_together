@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
+import 'package:sync_together/features/auth/domain/use_cases/forgot_password.dart';
 import 'package:sync_together/features/auth/domain/use_cases/get_current_user.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_anonymously.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.dart';
@@ -24,6 +25,8 @@ class MockSignOut extends Mock implements SignOut {}
 
 class MockGetCurrentUser extends Mock implements GetCurrentUser {}
 
+class MockForgotPassword extends Mock implements ForgotPassword {}
+
 void main() {
   late SignInWithEmail signInWithEmail;
   late SignInWithGoogle signInWithGoogle;
@@ -31,6 +34,7 @@ void main() {
   late SignUpWithEmail signUpWithEmail;
   late SignOut signOut;
   late GetCurrentUser getCurrentUser;
+  late ForgotPassword forgotPassword;
 
   late AuthBloc bloc;
 
@@ -40,6 +44,7 @@ void main() {
   late SignInFailure testSignInFailure;
   late SignUpFailure testSignUpFailure;
   late SignOutFailure testSignOutFailure;
+  late ForgotPasswordFailure testForgotPasswordFailure;
   late GetCurrentUserFailure testGetCurrentUserFailure;
 
   setUp(() {
@@ -49,6 +54,7 @@ void main() {
     signUpWithEmail = MockSignUpWithEmail();
     signOut = MockSignOut();
     getCurrentUser = MockGetCurrentUser();
+    forgotPassword = MockForgotPassword();
 
     bloc = AuthBloc(
       signInWithEmail: signInWithEmail,
@@ -56,6 +62,7 @@ void main() {
       signInAnonymously: signInAnonymously,
       signUpWithEmail: signUpWithEmail,
       signOut: signOut,
+      forgotPassword: forgotPassword,
       getCurrentUser: getCurrentUser,
     );
     testSignInFailure = SignInFailure(
@@ -73,6 +80,11 @@ void main() {
     );
 
     testSignOutFailure = SignOutFailure(
+      message: 'message',
+      statusCode: 500,
+    );
+
+    testForgotPasswordFailure = ForgotPasswordFailure(
       message: 'message',
       statusCode: 500,
     );
@@ -214,6 +226,7 @@ void main() {
       },
       act: (bloc) => bloc.add(
         SignUpWithEmailEvent(
+          name: testSignUpParams.name,
           email: testSignUpParams.email,
           password: testSignUpParams.password,
         ),
@@ -238,6 +251,7 @@ void main() {
       },
       act: (bloc) => bloc.add(
         SignUpWithEmailEvent(
+          name: testSignUpParams.name,
           email: testSignUpParams.email,
           password: testSignUpParams.password,
         ),
@@ -287,6 +301,53 @@ void main() {
       ],
       verify: (_) {
         verify(() => signOut()).called(1);
+      },
+    );
+  });
+
+  group('ForgotPassword - ', () {
+    final tForgotPasswordFailure = ForgotPasswordFailure(
+      message: 'message',
+      statusCode: 500,
+    );
+    blocTest<AuthBloc, AuthState>(
+      'given AuthBloc '
+      'when [ForgotPassword] is called '
+      'then emit [AuthLoading, ForgotPasswordSent]',
+      build: () {
+        when(
+          () => forgotPassword(any()),
+        ).thenAnswer((_) async => const Right(null));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(ForgotPasswordEvent(email: testUser.email!)),
+      expect: () => [const AuthLoading(), const ForgotPasswordSent()],
+      verify: (bloc) {
+        verify(
+          () => forgotPassword(testUser.email!),
+        ).called(1);
+        verifyNoMoreInteractions(forgotPassword);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'given AuthBloc '
+      'when [ForgotPassword] call is unsuccessful '
+      'then emit [AuthLoading, AuthError] ',
+      build: () {
+        when(
+          () => forgotPassword(any()),
+        ).thenAnswer((_) async => Left(tForgotPasswordFailure));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(ForgotPasswordEvent(email: testUser.email!)),
+      expect: () => [
+        const AuthLoading(),
+        AuthError(message: tForgotPasswordFailure.message),
+      ],
+      verify: (bloc) {
+        verify(() => forgotPassword(testUser.email!)).called(1);
+        verifyNoMoreInteractions(forgotPassword);
       },
     );
   });

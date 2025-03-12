@@ -8,6 +8,7 @@ Future<void> setUpServices() async {
 
 Future<void> _initAuth() async {
   serviceLocator
+    // App Logic
     ..registerFactory(
       () => AuthBloc(
         signInWithEmail: serviceLocator(),
@@ -16,27 +17,31 @@ Future<void> _initAuth() async {
         signUpWithEmail: serviceLocator(),
         signOut: serviceLocator(),
         getCurrentUser: serviceLocator(),
+        forgotPassword: serviceLocator(),
       ),
     )
+    // Use cases
     ..registerLazySingleton(() => SignInWithEmail(serviceLocator()))
     ..registerLazySingleton(() => SignInWithGoogle(serviceLocator()))
     ..registerLazySingleton(() => SignInAnonymously(serviceLocator()))
     ..registerLazySingleton(() => SignUpWithEmail(serviceLocator()))
     ..registerLazySingleton(() => GetCurrentUser(serviceLocator()))
     ..registerLazySingleton(() => SignOut(serviceLocator()))
+    ..registerLazySingleton(() => ForgotPassword(serviceLocator()))
+
+    // Repositories
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(serviceLocator()),
     )
+
+    // Data Source
     ..registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(
         serviceLocator(),
         serviceLocator(),
       ),
     )
-    ..registerLazySingleton(
-      () => FirebaseAuth.instance,
-    )
-    ..registerLazySingleton(
-      () => GoogleSignIn.new,
-    );
+    // External dependencies
+    ..registerLazySingleton(() => FirebaseAuth.instance)
+    ..registerLazySingleton(GoogleSignIn.new);
 }

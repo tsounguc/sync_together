@@ -45,3 +45,11 @@ class GetCurrentUserException extends AuthException {
     required super.statusCode,
   });
 }
+
+/// **Exception thrown during password reset errors.**
+class ForgotPasswordException extends AuthException {
+  const ForgotPasswordException({
+    required super.message,
+    required super.statusCode,
+  });
+}

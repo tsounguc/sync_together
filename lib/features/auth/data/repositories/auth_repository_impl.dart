@@ -64,17 +64,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   ResultFuture<UserEntity> signUpWithEmail(
+    String name,
     String email,
     String password,
   ) async {
     try {
       final user = await remoteDataSource.signUpWithEmail(
+        name,
         email,
         password,
       );
       return Right(user);
     } on SignUpException catch (e) {
       return Left(SignUpFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid forgotPassword(String email) async {
+    try {
+      final result = await remoteDataSource.forgotPassword(
+        email: email,
+      );
+      return Right(result);
+    } on ForgotPasswordException catch (e) {
+      return Left(
+        ForgotPasswordFailure.fromException(
+          e,
+        ),
+      );
     }
   }
 }

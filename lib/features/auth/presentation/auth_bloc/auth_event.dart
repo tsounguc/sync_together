@@ -29,17 +29,30 @@ final class SignInAnonymouslyEvent extends AuthEvent {
 
 final class SignUpWithEmailEvent extends AuthEvent {
   const SignUpWithEmailEvent({
+    required this.name,
     required this.email,
     required this.password,
   });
 
+  final String name;
   final String email;
   final String password;
 
   @override
-  List<Object?> get props => [email, password];
+  List<Object?> get props => [name, email, password];
 }
 
 final class SignOutEvent extends AuthEvent {
   const SignOutEvent();
+}
+
+final class ForgotPasswordEvent extends AuthEvent {
+  const ForgotPasswordEvent({
+    required this.email,
+  });
+
+  final String email;
+
+  @override
+  List<Object> get props => [email];
 }

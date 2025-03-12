@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
+import 'package:sync_together/features/auth/domain/use_cases/forgot_password.dart';
 import 'package:sync_together/features/auth/domain/use_cases/get_current_user.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_anonymously.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.dart';
@@ -19,19 +20,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SignUpWithEmail signUpWithEmail,
     required SignOut signOut,
     required GetCurrentUser getCurrentUser,
+    required ForgotPassword forgotPassword,
   })  : _signInWithEmail = signInWithEmail,
         _signInWithGoogle = signInWithGoogle,
         _signInAnonymously = signInAnonymously,
         _signUpWithEmail = signUpWithEmail,
+        _forgotPassword = forgotPassword,
         _signOut = signOut,
         _getCurrentUser = getCurrentUser,
-        super(AuthInitial()) {
+        super(const AuthInitial()) {
     on<SignInWithEmailEvent>(_signInWithEmailHandler);
     on<SignInWithGoogleEvent>(_signInWithGoogleHandler);
     on<SignInAnonymouslyEvent>(_signInAnonymouslyHandler);
     on<SignUpWithEmailEvent>(_signUpWithEmailHandler);
     on<SignOutEvent>(_signOutHandler);
     on<GetCurrentUserEvent>(_getCurrentUserHandler);
+    on<ForgotPasswordEvent>(_forgotPasswordHandler);
   }
 
   final SignInWithEmail _signInWithEmail;
@@ -40,6 +44,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignUpWithEmail _signUpWithEmail;
   final SignOut _signOut;
   final GetCurrentUser _getCurrentUser;
+  final ForgotPassword _forgotPassword;
 
   Future<void> _signInWithEmailHandler(
     SignInWithEmailEvent event,
@@ -88,7 +93,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     final result = await _signUpWithEmail(
-      SignUpParams(email: event.email, password: event.password),
+      SignUpParams(
+        name: event.name,
+        email: event.email,
+        password: event.password,
+      ),
     );
 
     result.fold(
@@ -119,6 +128,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
       (user) => user != null ? emit(Authenticated(user: user)) : emit(const Unauthenticated()),
+    );
+  }
+
+  Future<void> _forgotPasswordHandler(
+    ForgotPasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    final result = await _forgotPassword(event.email);
+
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (success) => emit(const ForgotPasswordSent()),
     );
   }
 }

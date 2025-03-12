@@ -13,7 +13,11 @@ abstract class AuthRepository {
   ///
   /// - **Success:** Returns a [UserEntity] containing user details.
   /// - **Failure:** Returns an `AuthFailure` with an error message.
-  ResultFuture<UserEntity> signUpWithEmail(String email, String password);
+  ResultFuture<UserEntity> signUpWithEmail(
+    String name,
+    String email,
+    String password,
+  );
 
   /// Signs in a user with **email and password**.
   ///
@@ -44,4 +48,10 @@ abstract class AuthRepository {
   /// - **Success:** Returns a [UserEntity], or `null` if no user is logged in.
   /// - **Failure:** Returns an `AuthFailure`
   ResultFuture<UserEntity?> getCurrentUser();
+
+  /// Sends password reset email to email address
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns an `AuthFailure`.
+  ResultVoid forgotPassword(String email);
 }

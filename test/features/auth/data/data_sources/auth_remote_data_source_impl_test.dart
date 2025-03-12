@@ -78,6 +78,7 @@ void main() {
     when(() => userCredential.user).thenReturn(user);
   });
 
+  const name = 'name';
   const email = 'test@example.com';
   const password = 'password123';
 
@@ -98,7 +99,11 @@ void main() {
         when(() => userCredential.user).thenReturn(user);
 
         // Act
-        final result = await remoteDataSourceImpl.signUpWithEmail(email, password);
+        final result = await remoteDataSourceImpl.signUpWithEmail(
+          name,
+          email,
+          password,
+        );
 
         // Assert
         expect(result, isA<UserModel>());
@@ -135,7 +140,7 @@ void main() {
 
         // Assert
         expect(
-          () => methodCall(email, password),
+          () => methodCall(name, email, password),
           throwsA(isA<SignUpException>()),
         );
       },

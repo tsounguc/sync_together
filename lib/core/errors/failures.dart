@@ -79,11 +79,23 @@ class SignOutFailure extends AuthFailure {
         );
 }
 
+/// **Failure that occurs during password reset.**
+class ForgotPasswordFailure extends AuthFailure {
+  ForgotPasswordFailure({required super.message, required super.statusCode});
+
+  /// Converts a [ForgotPasswordException] into a [ForgotPasswordFailure].
+  ForgotPasswordFailure.fromException(ForgotPasswordException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
 /// **Failure that occurs when get-current-user.**
 class GetCurrentUserFailure extends AuthFailure {
   GetCurrentUserFailure({required super.message, required super.statusCode});
 
-  /// Converts a [SignOutException] into a [SignOutFailure].
+  /// Converts a [GetCurrentUserException] into a [GetCurrentUserFailure].
   GetCurrentUserFailure.fromException(GetCurrentUserException exception)
       : this(
           message: exception.message,

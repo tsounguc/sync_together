@@ -20,6 +20,7 @@ void main() {
     repositoryImpl = AuthRepositoryImpl(remoteDataSource);
   });
 
+  const name = 'test name';
   const email = 'test@example.com';
   const password = 'password123';
   final testUserModel = const UserModel.empty().copyWith(email: email);
@@ -44,16 +45,24 @@ void main() {
       () async {
         // Arrange
         when(
-          () => remoteDataSource.signUpWithEmail(any(), any()),
+          () => remoteDataSource.signUpWithEmail(any(), any(), any()),
         ).thenAnswer((_) async => testUserModel);
 
         // Act
-        final result = await repositoryImpl.signUpWithEmail(email, password);
+        final result = await repositoryImpl.signUpWithEmail(
+          name,
+          email,
+          password,
+        );
 
         // Assert
         expect(result, Right<Failure, UserEntity>(testUserModel));
         verify(
-          () => remoteDataSource.signUpWithEmail(email, password),
+          () => remoteDataSource.signUpWithEmail(
+            name,
+            email,
+            password,
+          ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
       },
@@ -69,11 +78,15 @@ void main() {
           statusCode: 'SIGN_UP_ERROR',
         );
         when(
-          () => remoteDataSource.signUpWithEmail(any(), any()),
+          () => remoteDataSource.signUpWithEmail(any(), any(), any()),
         ).thenThrow(testException);
 
         // Act
-        final result = await repositoryImpl.signUpWithEmail(email, password);
+        final result = await repositoryImpl.signUpWithEmail(
+          name,
+          email,
+          password,
+        );
 
         // Assert
         expect(
@@ -81,7 +94,11 @@ void main() {
           Left<Failure, UserEntity>(SignUpFailure.fromException(testException)),
         );
         verify(
-          () => remoteDataSource.signUpWithEmail(email, password),
+          () => remoteDataSource.signUpWithEmail(
+            name,
+            email,
+            password,
+          ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
       },
