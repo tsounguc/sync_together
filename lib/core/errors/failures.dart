@@ -113,4 +113,15 @@ class UpdateUserFailure extends AuthFailure {
     message: exception.message,
     statusCode: exception.statusCode,
   );
+
+}
+
+/// **Base class for all Friends system failures.**
+///
+/// This allows us to have specific failure types.
+abstract class FriendsFailure extends Failure {
+  FriendsFailure({
+    required super.message,
+    required super.statusCode,
+  });
 }
