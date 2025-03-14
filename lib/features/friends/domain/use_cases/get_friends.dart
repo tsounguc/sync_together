@@ -9,7 +9,8 @@ class GetFriends extends UseCaseWithParams<List<Friend>, String> {
   final FriendRepository repository;
 
   @override
-  ResultFuture<List<Friend>> call(String params) => repository.getFriends(
-        params,
-      );
+  ResultFuture<List<Friend>> call(
+    String params,
+  ) =>
+      repository.getFriends(params);
 }
