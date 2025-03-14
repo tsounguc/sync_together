@@ -12,5 +12,5 @@ class GetFriendRequests extends UseCaseWithParams<List<FriendRequest>, String> {
   ResultFuture<List<FriendRequest>> call(
     String params,
   ) =>
-      repository.getFriendsRequests(params);
+      repository.getFriendRequests(params);
 }

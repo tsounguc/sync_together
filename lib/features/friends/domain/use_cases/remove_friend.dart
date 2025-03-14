@@ -11,7 +11,7 @@ class RemoveFriendRequest extends UseCaseWithParams<void, RemoveFriendRequestPar
   @override
   ResultFuture<void> call(RemoveFriendRequestParams params) => repository.removeFriend(
         senderId: params.senderId,
-        receivedId: params.receiverId,
+        receiverId: params.receiverId,
       );
 }
 

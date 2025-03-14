@@ -3,31 +3,14 @@ import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/friends/domain/repositories/friend_repository.dart';
 
-class RejectFriendRequest extends UseCaseWithParams<void, RejectFriendRequestParams> {
+class RejectFriendRequest extends UseCaseWithParams<void, String> {
   const RejectFriendRequest(this.repository);
 
   final FriendRepository repository;
 
   @override
-  ResultFuture<void> call(RejectFriendRequestParams params) => repository.rejectFriendRequest(
-        senderId: params.senderId,
-        receivedId: params.receiverId,
-      );
-}
-
-class RejectFriendRequestParams extends Equatable {
-  const RejectFriendRequestParams({
-    required this.senderId,
-    required this.receiverId,
-  });
-
-  const RejectFriendRequestParams.empty()
-      : senderId = '',
-        receiverId = '';
-
-  final String senderId;
-  final String receiverId;
-
-  @override
-  List<Object?> get props => [senderId, receiverId];
+  ResultFuture<void> call(
+    String params,
+  ) =>
+      repository.rejectFriendRequest(requestId: params);
 }

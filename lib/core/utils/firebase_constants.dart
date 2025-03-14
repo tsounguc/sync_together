@@ -1,4 +1,5 @@
 class FirebaseConstants {
   static const usersCollection = 'users';
-  static const entriesCollection = 'entries';
+  static const friendRequestsCollection = 'friend_requests';
+  static const friendsCollection = 'friends';
 }

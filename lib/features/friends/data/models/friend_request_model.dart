@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
-import '../../domain/entities/friend_request.dart';
+import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
 
 /// **Model for FriendRequest Entity**
 ///

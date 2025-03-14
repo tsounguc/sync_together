@@ -14,7 +14,7 @@ abstract class FriendRepository {
   ///
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
-  ResultVoid sentFriendRequest({
+  ResultVoid sendFriendRequest({
     required String senderId,
     required String receivedId,
   });
@@ -24,8 +24,7 @@ abstract class FriendRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultVoid acceptFriendRequest({
-    required String senderId,
-    required String receivedId,
+    required String requestId,
   });
 
   /// Rejects a friend request.
@@ -33,8 +32,7 @@ abstract class FriendRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultVoid rejectFriendRequest({
-    required String senderId,
-    required String receivedId,
+    required String requestId,
   });
 
   /// Removes a friend.
@@ -43,7 +41,7 @@ abstract class FriendRepository {
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultVoid removeFriend({
     required String senderId,
-    required String receivedId,
+    required String receiverId,
   });
 
   /// Retrieves the list of friends.
@@ -56,5 +54,5 @@ abstract class FriendRepository {
   ///
   /// - **Success:** Returns a list of [FriendRequest].
   /// - **Failure:** Returns an `FriendsFailure`.
-  ResultFuture<List<FriendRequest>> getFriendsRequests(String userId);
+  ResultFuture<List<FriendRequest>> getFriendRequests(String userId);
 }

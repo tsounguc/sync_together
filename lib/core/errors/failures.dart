@@ -110,18 +110,89 @@ class UpdateUserFailure extends AuthFailure {
   /// Converts a [UpdateUserException] into a [UpdateUserFailure].
   UpdateUserFailure.fromException(UpdateUserException exception)
       : this(
-    message: exception.message,
-    statusCode: exception.statusCode,
-  );
-
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
 }
 
 /// **Base class for all Friends system failures.**
 ///
 /// This allows us to have specific failure types.
-abstract class FriendsFailure extends Failure {
-  FriendsFailure({
+abstract class FriendFailure extends Failure {
+  FriendFailure({
     required super.message,
     required super.statusCode,
   });
+}
+
+/// **Failure that occurs when user sends a friend request.**
+class SendRequestFailure extends FriendFailure {
+  SendRequestFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SendRequestException] into a [SendRequestFailure].
+  SendRequestFailure.fromException(SendRequestException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when user accepts a friend request.**
+class AcceptRequestFailure extends FriendFailure {
+  AcceptRequestFailure({required super.message, required super.statusCode});
+
+  /// Converts a [AcceptRequestException] into a [AcceptRequestFailure].
+  AcceptRequestFailure.fromException(AcceptRequestException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when user rejects a friend request.**
+class RejectRequestFailure extends FriendFailure {
+  RejectRequestFailure({required super.message, required super.statusCode});
+
+  /// Converts a [RejectRequestException] into a [RejectRequestFailure].
+  RejectRequestFailure.fromException(RejectRequestException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when user removes a friend.**
+class RemoveFriendFailure extends FriendFailure {
+  RemoveFriendFailure({required super.message, required super.statusCode});
+
+  /// Converts a [RemoveFriendException] into a [RemoveFriendFailure].
+  RemoveFriendFailure.fromException(RemoveFriendException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when getting list of friends.**
+class GetFriendsFailure extends FriendFailure {
+  GetFriendsFailure({required super.message, required super.statusCode});
+
+  /// Converts a [GetFriendsException] into a [GetFriendsFailure].
+  GetFriendsFailure.fromException(GetFriendsException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when getting list of friend requests.**
+class GetFriendRequestsFailure extends FriendFailure {
+  GetFriendRequestsFailure({required super.message, required super.statusCode});
+
+  /// Converts a [GetFriendRequestsException] into a [GetFriendRequestsFailure].
+  GetFriendRequestsFailure.fromException(GetFriendRequestsException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
 }
