@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
@@ -93,6 +94,20 @@ class AuthRepositoryImpl implements AuthRepository {
           e,
         ),
       );
+    }
+  }
+
+  @override
+  ResultVoid updateUserProfile({
+    required UpdateUserAction action,
+    required dynamic userData,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateUserProfile(action: action, userData: userData);
+
+      return Right(result);
+    } on UpdateUserException catch (e) {
+      return Left(UpdateUserFailure.fromException(e));
     }
   }
 }

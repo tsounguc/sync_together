@@ -53,3 +53,11 @@ class ForgotPasswordException extends AuthException {
     required super.statusCode,
   });
 }
+
+/// **Exception thrown during user profile update errors.**
+class UpdateUserException extends AuthException {
+  const UpdateUserException({
+    required super.message,
+    required super.statusCode,
+  });
+}

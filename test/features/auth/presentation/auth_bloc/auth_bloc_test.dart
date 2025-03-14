@@ -11,6 +11,7 @@ import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_google.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_out.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_up_with_email.dart';
+import 'package:sync_together/features/auth/domain/use_cases/update_users_profile.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 
 class MockSignInWithEmail extends Mock implements SignInWithEmail {}
@@ -27,6 +28,8 @@ class MockGetCurrentUser extends Mock implements GetCurrentUser {}
 
 class MockForgotPassword extends Mock implements ForgotPassword {}
 
+class MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
 void main() {
   late SignInWithEmail signInWithEmail;
   late SignInWithGoogle signInWithGoogle;
@@ -35,6 +38,7 @@ void main() {
   late SignOut signOut;
   late GetCurrentUser getCurrentUser;
   late ForgotPassword forgotPassword;
+  late UpdateUserProfile updateUser;
 
   late AuthBloc bloc;
 
@@ -55,6 +59,7 @@ void main() {
     signOut = MockSignOut();
     getCurrentUser = MockGetCurrentUser();
     forgotPassword = MockForgotPassword();
+    updateUser = MockUpdateUserProfile();
 
     bloc = AuthBloc(
       signInWithEmail: signInWithEmail,
@@ -64,6 +69,7 @@ void main() {
       signOut: signOut,
       forgotPassword: forgotPassword,
       getCurrentUser: getCurrentUser,
+      updateUser: updateUser,
     );
     testSignInFailure = SignInFailure(
       message: 'message',

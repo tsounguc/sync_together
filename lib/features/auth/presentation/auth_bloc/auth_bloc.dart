@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/auth/domain/use_cases/forgot_password.dart';
 import 'package:sync_together/features/auth/domain/use_cases/get_current_user.dart';
@@ -8,6 +11,7 @@ import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_google.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_out.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_up_with_email.dart';
+import 'package:sync_together/features/auth/domain/use_cases/update_users_profile.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -21,11 +25,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SignOut signOut,
     required GetCurrentUser getCurrentUser,
     required ForgotPassword forgotPassword,
+    required UpdateUserProfile updateUser,
   })  : _signInWithEmail = signInWithEmail,
         _signInWithGoogle = signInWithGoogle,
         _signInAnonymously = signInAnonymously,
         _signUpWithEmail = signUpWithEmail,
         _forgotPassword = forgotPassword,
+        _updateUser = updateUser,
         _signOut = signOut,
         _getCurrentUser = getCurrentUser,
         super(const AuthInitial()) {
@@ -36,6 +42,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignOutEvent>(_signOutHandler);
     on<GetCurrentUserEvent>(_getCurrentUserHandler);
     on<ForgotPasswordEvent>(_forgotPasswordHandler);
+    on<UpdateUserProfileEvent>(_updateUserHandler);
   }
 
   final SignInWithEmail _signInWithEmail;
@@ -45,6 +52,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignOut _signOut;
   final GetCurrentUser _getCurrentUser;
   final ForgotPassword _forgotPassword;
+  final UpdateUserProfile _updateUser;
 
   Future<void> _signInWithEmailHandler(
     SignInWithEmailEvent event,
@@ -141,6 +149,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
       (success) => emit(const ForgotPasswordSent()),
+    );
+  }
+
+  Future<void> _updateUserHandler(
+    UpdateUserProfileEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    final result = await _updateUser(
+      UpdateUserProfileParams(
+        action: event.action,
+        userData: event.userData,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (success) => emit(const UserProfileUpdated()),
     );
   }
 }

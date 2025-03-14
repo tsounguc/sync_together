@@ -102,3 +102,15 @@ class GetCurrentUserFailure extends AuthFailure {
           statusCode: exception.statusCode,
         );
 }
+
+/// **Failure that occurs when user update profile.**
+class UpdateUserFailure extends AuthFailure {
+  UpdateUserFailure({required super.message, required super.statusCode});
+
+  /// Converts a [UpdateUserException] into a [UpdateUserFailure].
+  UpdateUserFailure.fromException(UpdateUserException exception)
+      : this(
+    message: exception.message,
+    statusCode: exception.statusCode,
+  );
+}

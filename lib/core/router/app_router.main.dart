@@ -11,10 +11,12 @@ class AppRouter {
             serviceLocator<FirebaseAuth>().currentUser?.reload();
             if (serviceLocator<FirebaseAuth>().currentUser != null) {
               final user = serviceLocator<FirebaseAuth>().currentUser!;
+
               final localUser = const UserModel.empty().copyWith(
                 uid: user.uid,
                 displayName: user.displayName,
                 email: user.email,
+                photoUrl: user.photoURL,
                 isAnonymous: user.isAnonymous,
               );
 
@@ -25,6 +27,8 @@ class AppRouter {
           },
           settings: settings,
         );
+      case ProfileScreen.id:
+        return _pageBuilder((_) => const ProfileScreen(), settings: settings);
       case LoginScreen.id:
         return _pageBuilder(
           (_) => const LoginScreen(),

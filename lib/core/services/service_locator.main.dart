@@ -18,6 +18,7 @@ Future<void> _initAuth() async {
         signOut: serviceLocator(),
         getCurrentUser: serviceLocator(),
         forgotPassword: serviceLocator(),
+        updateUser: serviceLocator(),
       ),
     )
     // Use cases
@@ -28,6 +29,7 @@ Future<void> _initAuth() async {
     ..registerLazySingleton(() => GetCurrentUser(serviceLocator()))
     ..registerLazySingleton(() => SignOut(serviceLocator()))
     ..registerLazySingleton(() => ForgotPassword(serviceLocator()))
+    ..registerLazySingleton(() => UpdateUserProfile(serviceLocator()))
 
     // Repositories
     ..registerLazySingleton<AuthRepository>(
@@ -39,9 +41,13 @@ Future<void> _initAuth() async {
       () => AuthRemoteDataSourceImpl(
         serviceLocator(),
         serviceLocator(),
+        serviceLocator(),
+        serviceLocator(),
       ),
     )
     // External dependencies
     ..registerLazySingleton(() => FirebaseAuth.instance)
+    ..registerLazySingleton(() => FirebaseFirestore.instance)
+    ..registerLazySingleton(() => FirebaseStorage.instance)
     ..registerLazySingleton(GoogleSignIn.new);
 }

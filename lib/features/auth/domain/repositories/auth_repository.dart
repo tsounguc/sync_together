@@ -1,3 +1,4 @@
+import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 
@@ -54,4 +55,9 @@ abstract class AuthRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `AuthFailure`.
   ResultVoid forgotPassword(String email);
+
+  ResultVoid updateUserProfile({
+    required UpdateUserAction action,
+    required dynamic userData,
+  });
 }

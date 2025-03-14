@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage_mocks/firebase_storage_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
@@ -39,7 +42,8 @@ class MockUser extends Mock implements User {
 
 void main() {
   late FirebaseAuth firebaseAuth;
-  // late FirebaseFirestore cloudStoreClient;
+  late FirebaseFirestore firestore;
+  late MockFirebaseStorage storage;
   late AuthRemoteDataSourceImpl remoteDataSourceImpl;
   late GoogleSignIn googleSignIn;
   late GoogleSignInAccount googleSignInAccount;
@@ -49,13 +53,20 @@ void main() {
 
   setUpAll(() {
     firebaseAuth = MockFirebaseAuth();
+    firestore = FakeFirebaseFirestore();
+    storage = MockFirebaseStorage();
     googleSignIn = MockGoogleSignIn();
     googleSignInAccount = MockGoogleSignInAccount();
     googleSignInAuthentication = MockGoogleSignInAuthentication();
     userCredential = MockUserCredential();
     user = MockUser();
 
-    remoteDataSourceImpl = AuthRemoteDataSourceImpl(firebaseAuth, googleSignIn);
+    remoteDataSourceImpl = AuthRemoteDataSourceImpl(
+      firebaseAuth,
+      firestore,
+      storage,
+      googleSignIn,
+    );
 
     registerFallbackValue(MockAuthCredential());
     registerFallbackValue(MockAuthProvider());

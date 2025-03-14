@@ -53,10 +53,6 @@ final class ForgotPasswordSent extends AuthState {
   const ForgotPasswordSent();
 }
 
-final class UserUpdated extends AuthState {
-  const UserUpdated();
-}
-
 final class AccountDeleted extends AuthState {
   const AccountDeleted();
 }
@@ -72,4 +68,8 @@ final class Authenticated extends AuthState {
 
 final class Unauthenticated extends AuthState {
   const Unauthenticated();
+}
+
+class UserProfileUpdated extends AuthState {
+  const UserProfileUpdated();
 }

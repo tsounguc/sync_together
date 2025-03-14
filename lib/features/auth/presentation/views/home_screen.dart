@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
+import 'package:sync_together/features/auth/presentation/views/profile_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/splash_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -33,6 +34,13 @@ class HomeScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Home'),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.person),
+                tooltip: 'Profile Settings',
+                onPressed: () {
+                  Navigator.pushNamed(context, ProfileScreen.id);
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () {

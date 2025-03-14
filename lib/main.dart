@@ -31,8 +31,8 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Flutter Demo',
-          theme: ThemeData.light(),
-          // theme: ThemeData.dark(),
+          // theme: ThemeData.light(),
+          theme: ThemeData.dark(),
           // initialRoute: SplashScreen.id,
           onGenerateRoute: AppRouter.onGenerateRoute,
         ),

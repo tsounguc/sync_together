@@ -8,6 +8,7 @@ import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dar
 import 'package:sync_together/features/auth/presentation/views/forgot_password_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/home_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/login_screen.dart';
+import 'package:sync_together/features/auth/presentation/views/profile_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/sign_up_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/splash_screen.dart';
 

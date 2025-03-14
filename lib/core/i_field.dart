@@ -10,6 +10,7 @@ class IField extends StatelessWidget {
     this.validator,
     this.fillColor,
     this.focusColor,
+    this.borderColor,
     this.contentPadding,
     this.prefixIcon,
     this.prefix,
@@ -37,6 +38,7 @@ class IField extends StatelessWidget {
   final bool filled;
   final Color? fillColor;
   final Color? focusColor;
+  final Color? borderColor;
   final bool obscureText;
   final EdgeInsetsGeometry? contentPadding;
   final TextInputAction? textInputAction;
@@ -84,11 +86,11 @@ class IField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       decoration: InputDecoration(
         border: OutlineInputBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(15),
-        ),
+            borderRadius: borderRadius ?? BorderRadius.circular(15),
+            borderSide: BorderSide(color: borderColor ?? Colors.grey)),
         enabledBorder: OutlineInputBorder(
           borderRadius: borderRadius ?? BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.grey),
+          borderSide: BorderSide(color: borderColor ?? Colors.grey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: borderRadius ?? BorderRadius.circular(15),
