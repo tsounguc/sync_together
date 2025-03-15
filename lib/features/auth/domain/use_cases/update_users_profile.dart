@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
-import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/auth/domain/repositories/auth_repository.dart';
 
 class UpdateUserProfile extends UseCaseWithParams<void, UpdateUserProfileParams> {
@@ -10,7 +9,10 @@ class UpdateUserProfile extends UseCaseWithParams<void, UpdateUserProfileParams>
   final AuthRepository repository;
 
   @override
-  ResultVoid call(UpdateUserProfileParams params) => repository.updateUserProfile(
+  ResultVoid call(
+    UpdateUserProfileParams params,
+  ) =>
+      repository.updateUserProfile(
         action: params.action,
         userData: params.userData,
       );

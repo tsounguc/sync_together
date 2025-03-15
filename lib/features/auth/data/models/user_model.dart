@@ -34,11 +34,12 @@ class UserModel extends UserEntity {
   /// Creates a [UserModel] from a key-value map.
   UserModel.fromMap(DataMap dataMap)
       : this(
-            uid: dataMap['uid'] as String,
-            email: dataMap['email'] as String?,
-            displayName: dataMap['displayName'] as String?,
-            photoUrl: dataMap['photoUrl'] as String?,
-            isAnonymous: dataMap['isAnonymous'] as bool? ?? false);
+          uid: dataMap['uid'] as String,
+          email: dataMap['email'] as String?,
+          displayName: dataMap['displayName'] as String?,
+          photoUrl: dataMap['photoUrl'] as String?,
+          isAnonymous: dataMap['isAnonymous'] as bool? ?? false,
+        );
 
   /// Converts a [UserModel] instance to a JSON string.
   String toJson() => jsonEncode(toMap());

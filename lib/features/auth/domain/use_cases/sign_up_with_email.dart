@@ -12,7 +12,10 @@ class SignUpWithEmail extends UseCaseWithParams<UserEntity, SignUpParams> {
   final AuthRepository repository;
 
   @override
-  ResultFuture<UserEntity> call(SignUpParams params) => repository.signUpWithEmail(
+  ResultFuture<UserEntity> call(
+    SignUpParams params,
+  ) =>
+      repository.signUpWithEmail(
         params.name,
         params.email,
         params.password,

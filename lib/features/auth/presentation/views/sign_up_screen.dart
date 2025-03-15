@@ -74,7 +74,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       : Column(
                           children: [
                             ElevatedButton(
-                              onPressed: state is AuthLoading ? null : () => _signUp(context),
+                              onPressed: state is AuthLoading
+                                  ? null
+                                  : () => _signUp(
+                                        context,
+                                      ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blueAccent,
                                 shape: RoundedRectangleBorder(
@@ -82,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
-                                  horizontal: 20,
+                                  horizontal: 25,
                                 ),
                                 textStyle: const TextStyle(
                                   fontSize: 18,

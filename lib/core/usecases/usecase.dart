@@ -20,7 +20,8 @@ abstract class UseCase<T> {
 ///
 /// - `Params`: Type of the input parameter.
 /// - `T`: Type of the return value.
-/// - Used when a method **needs additional data** to execute (e.g., login credentials).
+/// - Used when a method **needs additional data**
+/// to execute (e.g., login credentials).
 abstract class UseCaseWithParams<T, Params> {
   /// Constructor for the [UseCaseWithParams] class.
   const UseCaseWithParams();

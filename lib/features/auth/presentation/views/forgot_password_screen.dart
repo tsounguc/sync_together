@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/i_field.dart';
 import 'package:sync_together/core/resources/strings.dart';
 import 'package:sync_together/core/utils/core_utils.dart';

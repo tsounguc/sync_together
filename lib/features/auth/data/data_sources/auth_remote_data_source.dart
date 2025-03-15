@@ -20,13 +20,20 @@ abstract class AuthRemoteDataSource {
   ///
   /// - **Success:** Returns a [UserModel].
   /// - **Failure:** Throws a [SignUpException].
-  Future<UserModel> signUpWithEmail(String name, String email, String password);
+  Future<UserModel> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  });
 
   /// Signs in a user with **email and password**.
   ///
   /// - **Success:** Returns a [UserModel].
   /// - **Failure:** Throws a [SignInException].
-  Future<UserModel> signInWithEmail(String email, String password);
+  Future<UserModel> signInWithEmail({
+    required String email,
+    required String password,
+  });
 
   /// Signs in a user using **Google authentication**.
   ///
@@ -62,7 +69,10 @@ abstract class AuthRemoteDataSource {
   ///
   /// - **Success:** Completes without returning a value.
   /// - **Failure:** Throws an [AuthException].
-  Future<void> updateUserProfile({required UpdateUserAction action, required dynamic userData});
+  Future<void> updateUserProfile({
+    required UpdateUserAction action,
+    required dynamic userData,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -118,7 +128,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signInWithEmail(String email, String password) async {
+  Future<UserModel> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
     try {
       final userCredential = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -169,7 +182,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         idToken: googleAuth.idToken,
       );
 
-      final userCredential = await firebaseAuth.signInWithCredential(credential);
+      final userCredential = await firebaseAuth.signInWithCredential(
+        credential,
+      );
       final user = userCredential.user;
 
       if (user == null) {
@@ -207,7 +222,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signUpWithEmail(String name, String email, String password) async {
+  Future<UserModel> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     try {
       final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
         email: email,

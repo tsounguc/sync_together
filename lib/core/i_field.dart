@@ -86,8 +86,11 @@ class IField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       decoration: InputDecoration(
         border: OutlineInputBorder(
-            borderRadius: borderRadius ?? BorderRadius.circular(15),
-            borderSide: BorderSide(color: borderColor ?? Colors.grey)),
+          borderRadius: borderRadius ?? BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: borderColor ?? Colors.grey,
+          ),
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: borderRadius ?? BorderRadius.circular(15),
           borderSide: BorderSide(color: borderColor ?? Colors.grey),

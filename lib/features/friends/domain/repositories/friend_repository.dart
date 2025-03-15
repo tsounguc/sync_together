@@ -5,7 +5,8 @@ import 'package:sync_together/features/friends/domain/entities/friend_request.da
 /// **Repository contract for handling friends and invitations**.
 ///
 /// Defines the contract for Friend System & Invitations operations.
-/// This allows the app to remain **independent of Firebase** or any other backend.
+/// This allows the app to remain **independent of Firebase**
+/// or any other backend.
 ///
 /// Each method **returns an Either type** (`ResultFuture<T>`),
 /// ensuring that failures are handled explicitly instead of using exceptions.

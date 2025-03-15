@@ -12,7 +12,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        print('SplashScreen Current state: $state');
+        debugPrint('SplashScreen Current state: $state');
         if (state is Authenticated) {
           debugPrint('User is authenticated: Navigating to HomeScreen');
           Navigator.pushReplacementNamed(context, HomeScreen.id);

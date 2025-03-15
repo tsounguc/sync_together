@@ -36,7 +36,10 @@ class AuthRepositoryImpl implements AuthRepository {
     String password,
   ) async {
     try {
-      final user = await remoteDataSource.signInWithEmail(email, password);
+      final user = await remoteDataSource.signInWithEmail(
+        email: email,
+        password: password,
+      );
       return Right(user);
     } on SignInException catch (e) {
       return Left(SignInFailure.fromException(e));
@@ -71,9 +74,9 @@ class AuthRepositoryImpl implements AuthRepository {
   ) async {
     try {
       final user = await remoteDataSource.signUpWithEmail(
-        name,
-        email,
-        password,
+        name: name,
+        email: email,
+        password: password,
       );
       return Right(user);
     } on SignUpException catch (e) {
@@ -103,7 +106,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required dynamic userData,
   }) async {
     try {
-      final result = await remoteDataSource.updateUserProfile(action: action, userData: userData);
+      final result = await remoteDataSource.updateUserProfile(
+        action: action,
+        userData: userData,
+      );
 
       return Right(result);
     } on UpdateUserException catch (e) {

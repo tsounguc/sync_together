@@ -27,7 +27,10 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: BlocProvider(
-        create: (_) => serviceLocator<AuthBloc>()..add(const GetCurrentUserEvent()),
+        create: (_) => serviceLocator<AuthBloc>()
+          ..add(
+            const GetCurrentUserEvent(),
+          ),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Flutter Demo',

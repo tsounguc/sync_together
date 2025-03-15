@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/friends/domain/repositories/friend_repository.dart';

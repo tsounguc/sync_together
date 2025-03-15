@@ -72,10 +72,18 @@ void main() {
     registerFallbackValue(MockAuthProvider());
 
     // Mock Google Sign-In Flow
-    when(() => googleSignIn.signIn()).thenAnswer((_) async => googleSignInAccount);
-    when(() => googleSignInAccount.authentication).thenAnswer((_) async => googleSignInAuthentication);
-    when(() => googleSignInAuthentication.accessToken).thenReturn('mock_access_token');
-    when(() => googleSignInAuthentication.idToken).thenReturn('mock_id_token');
+    when(
+      () => googleSignIn.signIn(),
+    ).thenAnswer((_) async => googleSignInAccount);
+    when(
+      () => googleSignInAccount.authentication,
+    ).thenAnswer((_) async => googleSignInAuthentication);
+    when(
+      () => googleSignInAuthentication.accessToken,
+    ).thenReturn('mock_access_token');
+    when(
+      () => googleSignInAuthentication.idToken,
+    ).thenReturn('mock_id_token');
 
     // Mock Firebase Authentication with Google Credentials
     when(
@@ -86,7 +94,9 @@ void main() {
       () => firebaseAuth.signInWithPopup(any()),
     ).thenAnswer((_) async => userCredential);
 
-    when(() => userCredential.user).thenReturn(user);
+    when(
+      () => userCredential.user,
+    ).thenReturn(user);
   });
 
   const name = 'name';
@@ -111,9 +121,9 @@ void main() {
 
         // Act
         final result = await remoteDataSourceImpl.signUpWithEmail(
-          name,
-          email,
-          password,
+          name: name,
+          email: email,
+          password: password,
         );
 
         // Assert
@@ -151,7 +161,11 @@ void main() {
 
         // Assert
         expect(
-          () => methodCall(name, email, password),
+          () => methodCall(
+            name: name,
+            email: email,
+            password: password,
+          ),
           throwsA(isA<SignUpException>()),
         );
       },
@@ -165,15 +179,20 @@ void main() {
       'then return [UserModel]',
       () async {
         // Arrange
-        when(() => firebaseAuth.signInWithEmailAndPassword(
-              email: any(named: 'email'),
-              password: any(named: 'password'),
-            )).thenAnswer((_) async => userCredential);
+        when(
+          () => firebaseAuth.signInWithEmailAndPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => userCredential);
 
         when(() => userCredential.user).thenReturn(user);
 
         // Act
-        final result = await remoteDataSourceImpl.signInWithEmail(email, password);
+        final result = await remoteDataSourceImpl.signInWithEmail(
+          email: email,
+          password: password,
+        );
 
         // Assert
         expect(result, isA<UserModel>());
@@ -210,7 +229,7 @@ void main() {
 
         // Assert
         expect(
-          () => methodCall(email, password),
+          () => methodCall(email: email, password: password),
           throwsA(isA<SignInException>()),
         );
       },

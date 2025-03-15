@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconly/iconly.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
-import 'package:sync_together/core/resources/media_resources.dart';
 import 'package:sync_together/core/resources/strings.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/forgot_password_screen.dart';
-import 'package:sync_together/features/auth/presentation/views/home_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/sign_up_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/splash_screen.dart';
 import 'package:sync_together/features/auth/presentation/widgets/login_form.dart';
@@ -16,7 +13,7 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 
   static const String id = '/login';
 }
@@ -35,6 +32,16 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
     }
+  }
+
+  void _signInWithGoogle(BuildContext context) {
+    context.read<AuthBloc>().add(const SignInWithGoogleEvent());
+  }
+
+  void _signInAnonymously(BuildContext context) {
+    context.read<AuthBloc>().add(
+          const SignInAnonymouslyEvent(),
+        );
   }
 
   @override
@@ -62,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
-                  print('LoginScreen Current state: $state');
+                  debugPrint('LoginScreen Current state: $state');
                   if (state is Authenticated) {
                     Navigator.pushReplacementNamed(context, SplashScreen.id);
                   }
@@ -91,9 +98,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   Strings.forgotPasswordTextButtonText,
                                   style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: context.theme.textTheme.bodyMedium?.color),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.theme.textTheme.bodyMedium?.color,
+                                  ),
                                 ),
                               ),
                             ),
@@ -101,7 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 50,
                             ),
                             ElevatedButton(
-                              onPressed: state is AuthLoading ? null : () => _signIn(context),
+                              onPressed: state is AuthLoading
+                                  ? null
+                                  : () => _signIn(
+                                        context,
+                                      ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blueAccent,
                                 shape: RoundedRectangleBorder(
@@ -109,9 +121,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
-                                  horizontal: 20,
+                                  horizontal: 25,
                                 ),
-                                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               child: const Text(
                                 'Sign In',
@@ -119,34 +134,32 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 30),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                context.read<AuthBloc>().add(const SignInWithGoogleEvent());
-                              },
-                              icon: Image.asset(
-                                MediaResources.googleSignIn,
-                                height: 40,
-                                width: 40,
-                              ),
-                              label: Text(
-                                'Sign in with Google',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: context.theme.textTheme.bodyMedium?.color,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                // backgroundColor: Colors.white,
-                                // foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 16,
-                                ),
-                              ),
-                            ),
+                            // ElevatedButton.icon(
+                            //   onPressed: () => _signInWithGoogle(context),
+                            //   icon: Image.asset(
+                            //     MediaResources.googleSignIn,
+                            //     height: 40,
+                            //     width: 40,
+                            //   ),
+                            //   label: Text(
+                            //     'Sign in with Google',
+                            //     style: TextStyle(
+                            //       fontSize: 16,
+                            //       color: context.theme.textTheme.bodyMedium?.color,
+                            //     ),
+                            //   ),
+                            //   style: ElevatedButton.styleFrom(
+                            //     // backgroundColor: Colors.white,
+                            //     // foregroundColor: Colors.white,
+                            //     shape: RoundedRectangleBorder(
+                            //       borderRadius: BorderRadius.circular(8),
+                            //     ),
+                            //     padding: const EdgeInsets.symmetric(
+                            //       vertical: 12,
+                            //       horizontal: 16,
+                            //     ),
+                            //   ),
+                            // ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pushReplacementNamed(
@@ -177,12 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 12),
                             TextButton(
-                              onPressed: () {
-                                context.read<AuthBloc>().add(
-                                      const SignInAnonymouslyEvent(),
-                                    );
-                              },
-                              child: const Text('Continue as Guest'),
+                              onPressed: () => _signInAnonymously(context),
+                              child: const Text(
+                                'Continue as Guest',
+                                style: TextStyle(color: Colors.grey),
+                              ),
                             ),
                           ],
                         );

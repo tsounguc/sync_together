@@ -16,7 +16,7 @@ class ProfileScreen extends StatefulWidget {
   static const String id = '/profile';
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -33,8 +33,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool get nothingChanged => !nameChanged && !emailChanged && !imageChanged;
 
-  void _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -42,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _updateProfile() async {
+  Future<void> _updateProfile() async {
     final bloc = context.read<AuthBloc>();
     if (nothingChanged) Navigator.pop(context);
     String? password;
@@ -93,9 +95,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Profile Settings")),
+      appBar: AppBar(title: const Text('Profile Settings')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             GestureDetector(
@@ -130,8 +132,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   context.userProvider.user = state.user as UserModel?;
                 }
                 if (state is UserProfileUpdated) {
-                  CoreUtils.showSnackBar(context, 'Profile Updated Successfully');
-                  context.read<AuthBloc>().add(GetCurrentUserEvent());
+                  CoreUtils.showSnackBar(
+                    context,
+                    'Profile Updated Successfully',
+                  );
+                  context.read<AuthBloc>().add(const GetCurrentUserEvent());
                 } else if (state is AuthError) {
                   CoreUtils.showSnackBar(context, state.message);
                 }
@@ -141,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
                         onPressed: _updateProfile,
-                        child: const Text("Save Changes"),
+                        child: const Text('Save Changes'),
                       );
               },
             ),
@@ -153,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<String?> _promptForPassword() async {
     final passwordController = TextEditingController();
-    return await showDialog<String>(
+    return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Re-authenticate'),
@@ -166,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, null),
+            onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           TextButton(

@@ -5,7 +5,8 @@ import 'package:sync_together/features/auth/domain/entities/user.dart';
 /// **Authentication Repository Interface**
 ///
 /// Defines the contract for authentication-related operations.
-/// This allows the app to remain **independent of Firebase** or any other backend.
+/// This allows the app to remain **independent of Firebase**
+/// or any other backend.
 ///
 /// Each method **returns an Either type** (`ResultFuture<T>`),
 /// ensuring that failures are handled explicitly instead of using exceptions.

@@ -45,7 +45,11 @@ void main() {
       () async {
         // Arrange
         when(
-          () => remoteDataSource.signUpWithEmail(any(), any(), any()),
+          () => remoteDataSource.signUpWithEmail(
+            name: any(named: 'name'),
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
         ).thenAnswer((_) async => testUserModel);
 
         // Act
@@ -59,9 +63,9 @@ void main() {
         expect(result, Right<Failure, UserEntity>(testUserModel));
         verify(
           () => remoteDataSource.signUpWithEmail(
-            name,
-            email,
-            password,
+            name: name,
+            email: email,
+            password: password,
           ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
@@ -78,7 +82,11 @@ void main() {
           statusCode: 'SIGN_UP_ERROR',
         );
         when(
-          () => remoteDataSource.signUpWithEmail(any(), any(), any()),
+          () => remoteDataSource.signUpWithEmail(
+            name: any(named: 'name'),
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
         ).thenThrow(testException);
 
         // Act
@@ -95,9 +103,9 @@ void main() {
         );
         verify(
           () => remoteDataSource.signUpWithEmail(
-            name,
-            email,
-            password,
+            name: name,
+            email: email,
+            password: password,
           ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
@@ -113,7 +121,10 @@ void main() {
       () async {
         // Arrange
         when(
-          () => remoteDataSource.signInWithEmail(any(), any()),
+          () => remoteDataSource.signInWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
         ).thenAnswer((_) async => testUserModel);
 
         // Act
@@ -122,7 +133,10 @@ void main() {
         // Assert
         expect(result, Right<Failure, UserEntity>(testUserModel));
         verify(
-          () => remoteDataSource.signInWithEmail(email, password),
+          () => remoteDataSource.signInWithEmail(
+            email: email,
+            password: password,
+          ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
       },
@@ -139,7 +153,10 @@ void main() {
           statusCode: 'SIGN_IN_ERROR',
         );
         when(
-          () => remoteDataSource.signInWithEmail(any(), any()),
+          () => remoteDataSource.signInWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
         ).thenThrow(testException);
 
         // Act
@@ -151,7 +168,10 @@ void main() {
           Left<Failure, UserEntity>(SignInFailure.fromException(testException)),
         );
         verify(
-          () => remoteDataSource.signInWithEmail(email, password),
+          () => remoteDataSource.signInWithEmail(
+            email: email,
+            password: password,
+          ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
       },
@@ -316,7 +336,9 @@ void main() {
         // Assert
         expect(
           result,
-          Left<Failure, UserEntity>(SignOutFailure.fromException(testException)),
+          Left<Failure, UserEntity>(
+            SignOutFailure.fromException(testException),
+          ),
         );
         verify(
           () => remoteDataSource.signOut(),

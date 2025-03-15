@@ -8,7 +8,8 @@ class Strings {
   static const passwordRequiredText = 'Password is required';
   static const fieldRequiredText = 'This field is required';
   static const enterValidEmailText = 'Enter a valid email';
-  static const enterValidPasswordText = 'Password must be at least 6 characters';
+  static const enterValidPasswordText = 'Password must be at least 6 '
+      'characters';
 
   // Sign in screen
   static const loginText = 'Login';

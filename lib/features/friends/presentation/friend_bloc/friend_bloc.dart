@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/features/friends/domain/entities/friend.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
 import 'package:sync_together/features/friends/domain/use_cases/accept_friend_request.dart';

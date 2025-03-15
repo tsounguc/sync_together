@@ -9,7 +9,10 @@ class SendFriendRequest extends UseCaseWithParams<void, SendFriendRequestParams>
   final FriendRepository repository;
 
   @override
-  ResultFuture<void> call(SendFriendRequestParams params) => repository.sendFriendRequest(
+  ResultFuture<void> call(
+    SendFriendRequestParams params,
+  ) =>
+      repository.sendFriendRequest(
         senderId: params.senderId,
         receivedId: params.receiverId,
       );

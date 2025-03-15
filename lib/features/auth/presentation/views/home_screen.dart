@@ -15,12 +15,12 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        print('HomeScreen Current state: $state');
+        debugPrint('HomeScreen Current state: $state');
         if (state is AuthError) {
           CoreUtils.showSnackBar(context, state.message);
         }
         if (state is Unauthenticated) {
-          print('Navigating back to login');
+          debugPrint('Navigating back to login');
           context.userProvider.user = null;
           Navigator.of(context).pushNamedAndRemoveUntil(
             SplashScreen.id,
@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
                 if (true == user?.isAnonymous)
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: Implement linking account
+                      // TODO(HomeScreen): Implement linking account
                     },
                     child: const Text('Link Account'),
                   ),

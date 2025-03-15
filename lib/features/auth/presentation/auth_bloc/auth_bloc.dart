@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/auth/domain/use_cases/forgot_password.dart';
@@ -135,7 +135,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _getCurrentUser();
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (user) => user != null ? emit(Authenticated(user: user)) : emit(const Unauthenticated()),
+      (user) => user != null
+          ? emit(
+              Authenticated(user: user),
+            )
+          : emit(
+              const Unauthenticated(),
+            ),
     );
   }
 

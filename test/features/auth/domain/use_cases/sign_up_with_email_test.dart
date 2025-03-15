@@ -71,7 +71,11 @@ void main() {
       // Assert
       expect(result, Left<Failure, UserEntity>(testFailure));
       verify(
-        () => repository.signUpWithEmail(testParams.name, testParams.email, testParams.password),
+        () => repository.signUpWithEmail(
+          testParams.name,
+          testParams.email,
+          testParams.password,
+        ),
       ).called(1);
       verifyNoMoreInteractions(repository);
     },

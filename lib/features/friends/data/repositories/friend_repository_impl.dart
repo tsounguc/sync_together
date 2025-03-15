@@ -16,7 +16,9 @@ class FriendRepositoryImpl implements FriendRepository {
   @override
   ResultVoid acceptFriendRequest({required String requestId}) async {
     try {
-      final result = await remoteDataSource.acceptFriendRequest(requestId: requestId);
+      final result = await remoteDataSource.acceptFriendRequest(
+        requestId: requestId,
+      );
       return Right(result);
     } on AcceptRequestException catch (e, s) {
       debugPrintStack(label: e.message, stackTrace: s);
@@ -49,7 +51,9 @@ class FriendRepositoryImpl implements FriendRepository {
   @override
   ResultVoid rejectFriendRequest({required String requestId}) async {
     try {
-      final result = await remoteDataSource.rejectFriendRequest(requestId: requestId);
+      final result = await remoteDataSource.rejectFriendRequest(
+        requestId: requestId,
+      );
       return Right(result);
     } on RejectRequestException catch (e, s) {
       debugPrintStack(label: e.message, stackTrace: s);

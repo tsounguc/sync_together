@@ -7,6 +7,5 @@ class MediaResources {
   static const _baseLottie = 'assets/lottie';
 
   // Images
-static const googleSignIn = '$_baseImage/google_sign_in.png';
-
+  static const googleSignIn = '$_baseImage/google_sign_in.png';
 }

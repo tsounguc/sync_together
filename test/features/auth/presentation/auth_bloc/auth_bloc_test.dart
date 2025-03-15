@@ -199,10 +199,14 @@ void main() {
       'when [AuthBloc.signInWithEmail] is called unsuccessful '
       'then emit [AuthLoading, AuthError]',
       build: () {
-        when(() => signInWithGoogle()).thenAnswer((_) async => Left(SignInFailure(
+        when(() => signInWithGoogle()).thenAnswer(
+          (_) async => Left(
+            SignInFailure(
               message: 'Google sign-in failed',
               statusCode: 'GOOGLE_SIGN_IN_ERROR',
-            )));
+            ),
+          ),
+        );
         return bloc;
       },
       act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
@@ -365,7 +369,9 @@ void main() {
       'and completed successfully '
       'then emit [AuthLoading, Authenticated]',
       build: () {
-        when(() => getCurrentUser()).thenAnswer((_) async => const Right(testUser));
+        when(
+          () => getCurrentUser(),
+        ).thenAnswer((_) async => const Right(testUser));
         return bloc;
       },
       act: (bloc) => bloc.add(const GetCurrentUserEvent()),
@@ -402,7 +408,9 @@ void main() {
       'when [AuthBloc.getCurrentUser] is called unsuccessfully '
       'then emit [AuthLoading, AuthError]',
       build: () {
-        when(() => getCurrentUser()).thenAnswer((_) async => Left(testGetCurrentUserFailure));
+        when(
+          () => getCurrentUser(),
+        ).thenAnswer((_) async => Left(testGetCurrentUserFailure));
         return bloc;
       },
       act: (bloc) => bloc.add(const GetCurrentUserEvent()),

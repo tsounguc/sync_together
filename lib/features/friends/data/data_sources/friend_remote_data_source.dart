@@ -13,7 +13,10 @@ abstract class FriendRemoteDataSource {
   ///
   /// - **Success:** Completes without returning a value.
   /// - **Failure:** Throws an [FriendSystemException].
-  Future<void> sendFriendRequest({required String senderId, required String receiverId});
+  Future<void> sendFriendRequest({
+    required String senderId,
+    required String receiverId,
+  });
 
   /// Accepts a friend request.
   ///
@@ -31,7 +34,10 @@ abstract class FriendRemoteDataSource {
   ///
   /// - **Success:** Completes without returning a value.
   /// - **Failure:** Throws an [FriendSystemException].
-  Future<void> removeFriend({required String senderId, required String receiverId});
+  Future<void> removeFriend({
+    required String senderId,
+    required String receiverId,
+  });
 
   /// Retrieves a list of friends for a given user.
   ///
@@ -69,7 +75,13 @@ class FriendRemoteDataSourceImpl implements FriendRemoteDataSource {
 
   @override
   Future<List<FriendRequestModel>> getFriendRequests(String userId) async {
-    final friendRequestsList = await _friendRequests.where('receiverId', isEqualTo: userId).get().then(
+    final friendRequestsList = await _friendRequests
+        .where(
+          'receiverId',
+          isEqualTo: userId,
+        )
+        .get()
+        .then(
           (value) => value.docs
               .map(
                 (doc) => FriendRequestModel.fromMap(doc.data()),
@@ -82,7 +94,13 @@ class FriendRemoteDataSourceImpl implements FriendRemoteDataSource {
 
   @override
   Future<List<FriendModel>> getFriends(String userId) async {
-    final friendsList = await _friends.where('user1Id', isEqualTo: userId).get().then(
+    final friendsList = await _friends
+        .where(
+          'user1Id',
+          isEqualTo: userId,
+        )
+        .get()
+        .then(
           (value) => value.docs
               .map(
                 (doc) => FriendModel.fromMap(doc.data()),
@@ -103,8 +121,13 @@ class FriendRemoteDataSourceImpl implements FriendRemoteDataSource {
     required String senderId,
     required String receiverId,
   }) async {
-    final querySnapshot =
-        await _friends.where('user1Id', isEqualTo: senderId).where('user2Id', isEqualTo: receiverId).get();
+    final querySnapshot = await _friends
+        .where('user1Id', isEqualTo: senderId)
+        .where(
+          'user2Id',
+          isEqualTo: receiverId,
+        )
+        .get();
 
     for (final doc in querySnapshot.docs) {
       await doc.reference.delete();

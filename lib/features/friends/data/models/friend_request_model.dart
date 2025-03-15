@@ -27,7 +27,10 @@ class FriendRequestModel extends FriendRequest {
         );
 
   /// Creates a [FriendRequestModel] from a JSON string.
-  factory FriendRequestModel.fromJson(String source) => FriendRequestModel.fromMap(
+  factory FriendRequestModel.fromJson(
+    String source,
+  ) =>
+      FriendRequestModel.fromMap(
         jsonDecode(source) as DataMap,
       );
 
