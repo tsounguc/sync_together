@@ -58,6 +58,13 @@ final class FriendRequestsLoaded extends FriendState {
   List<Object> get props => [requests];
 }
 
+/// State when users are fetched
+final class UsersLoaded extends FriendState {
+  const UsersLoaded(this.users);
+
+  final List<UserEntity> users;
+}
+
 /// Error state.
 final class FriendError extends FriendState {
   const FriendError(this.message);

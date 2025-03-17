@@ -10,36 +10,32 @@ sealed class FriendEvent extends Equatable {
 
 /// Event to send a friend request.
 final class SendFriendRequestEvent extends FriendEvent {
-  const SendFriendRequestEvent({
-    required this.senderId,
-    required this.receiverId,
-  });
+  const SendFriendRequestEvent(this.request);
 
-  final String senderId;
-  final String receiverId;
+  final FriendRequest request;
 
   @override
-  List<Object> get props => [senderId, receiverId];
+  List<Object> get props => [request];
 }
 
 /// Event to accept a friend request.
 final class AcceptFriendRequestEvent extends FriendEvent {
-  const AcceptFriendRequestEvent({required this.requestId});
+  const AcceptFriendRequestEvent({required this.request});
 
-  final String requestId;
+  final FriendRequest request;
 
   @override
-  List<Object> get props => [requestId];
+  List<Object> get props => [request];
 }
 
 /// Event to reject a friend request.
 final class RejectFriendRequestEvent extends FriendEvent {
-  const RejectFriendRequestEvent({required this.requestId});
+  const RejectFriendRequestEvent({required this.request});
 
-  final String requestId;
+  final FriendRequest request;
 
   @override
-  List<Object> get props => [requestId];
+  List<Object> get props => [request];
 }
 
 /// Event to remove a friend.
@@ -74,4 +70,13 @@ final class GetFriendRequestsEvent extends FriendEvent {
 
   @override
   List<Object> get props => [userId];
+}
+
+/// Event to fetch users
+class SearchUsersEvent extends FriendEvent {
+  const SearchUsersEvent({required this.query});
+  final String query;
+
+  @override
+  List<Object> get props => [query];
 }

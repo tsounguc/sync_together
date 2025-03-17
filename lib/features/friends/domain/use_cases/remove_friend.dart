@@ -3,8 +3,8 @@ import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/friends/domain/repositories/friend_repository.dart';
 
-class RemoveFriendRequest extends UseCaseWithParams<void, RemoveFriendRequestParams> {
-  const RemoveFriendRequest(this.repository);
+class RemoveFriend extends UseCaseWithParams<void, RemoveFriendRequestParams> {
+  const RemoveFriend(this.repository);
 
   final FriendRepository repository;
 

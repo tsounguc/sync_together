@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
@@ -11,7 +10,9 @@ class FriendRequestModel extends FriendRequest {
   const FriendRequestModel({
     required super.id,
     required super.senderId,
+    required super.senderName,
     required super.receiverId,
+    required super.receiverName,
     required super.sentAt,
   });
 
@@ -22,7 +23,9 @@ class FriendRequestModel extends FriendRequest {
       : this(
           id: '',
           senderId: '',
+          senderName: '',
           receiverId: '',
+          receiverName: '',
           sentAt: DateTime.now(),
         );
 
@@ -39,7 +42,9 @@ class FriendRequestModel extends FriendRequest {
       : this(
           id: dataMap['id'] as String,
           senderId: dataMap['senderId'] as String,
+          senderName: dataMap['senderName'] as String,
           receiverId: dataMap['receiverId'] as String,
+          receiverName: dataMap['receiverName'] as String,
           sentAt: (dataMap['sentAt'] as Timestamp).toDate(),
         );
 
@@ -50,7 +55,9 @@ class FriendRequestModel extends FriendRequest {
   DataMap toMap() => {
         'id': id,
         'senderId': senderId,
+        'senderName': senderName,
         'receiverId': receiverId,
+        'receiverName': receiverName,
         'sentAt': Timestamp.fromDate(sentAt),
       };
 
@@ -58,13 +65,17 @@ class FriendRequestModel extends FriendRequest {
   FriendRequestModel copyWith({
     String? id,
     String? senderId,
+    String? senderName,
     String? receiverId,
+    String? receiverName,
     DateTime? sentAt,
   }) {
     return FriendRequestModel(
       id: id ?? this.id,
       senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
       receiverId: receiverId ?? this.receiverId,
+      receiverName: receiverName ?? this.receiverName,
       sentAt: sentAt ?? this.sentAt,
     );
   }

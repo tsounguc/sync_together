@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/friends/domain/entities/friend.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
 import 'package:sync_together/features/friends/domain/use_cases/accept_friend_request.dart';
@@ -7,6 +8,7 @@ import 'package:sync_together/features/friends/domain/use_cases/get_friend_reque
 import 'package:sync_together/features/friends/domain/use_cases/get_friends.dart';
 import 'package:sync_together/features/friends/domain/use_cases/reject_friend_request.dart';
 import 'package:sync_together/features/friends/domain/use_cases/remove_friend.dart';
+import 'package:sync_together/features/friends/domain/use_cases/search_users.dart';
 import 'package:sync_together/features/friends/domain/use_cases/send_friend_request.dart';
 
 part 'friend_event.dart';
@@ -20,6 +22,7 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
     required this.acceptFriendRequest,
     required this.rejectFriendRequest,
     required this.removeFriend,
+    required this.searchUsers,
   }) : super(const FriendInitial()) {
     on<GetFriendsEvent>(_onGetFriends);
     on<GetFriendRequestsEvent>(_onGetFriendRequests);
@@ -27,6 +30,7 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
     on<AcceptFriendRequestEvent>(_onAcceptFriendRequest);
     on<RejectFriendRequestEvent>(_onRejectFriendRequest);
     on<RemoveFriendEvent>(_onRemoveFriend);
+    on<SearchUsersEvent>(_onSearchUsers);
   }
 
   final GetFriends getFriends;
@@ -34,7 +38,8 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
   final SendFriendRequest sendFriendRequest;
   final AcceptFriendRequest acceptFriendRequest;
   final RejectFriendRequest rejectFriendRequest;
-  final RemoveFriendRequest removeFriend;
+  final RemoveFriend removeFriend;
+  final SearchUsers searchUsers;
 
   Future<void> _onGetFriends(
     GetFriendsEvent event,
@@ -65,12 +70,7 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
     Emitter<FriendState> emit,
   ) async {
     emit(const FriendLoading());
-    final result = await sendFriendRequest(
-      SendFriendRequestParams(
-        senderId: event.senderId,
-        receiverId: event.receiverId,
-      ),
-    );
+    final result = await sendFriendRequest(event.request);
     result.fold(
       (failure) => emit(FriendError(failure.message)),
       (_) => emit(const FriendRequestSent()),
@@ -82,7 +82,7 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
     Emitter<FriendState> emit,
   ) async {
     emit(const FriendLoading());
-    final result = await acceptFriendRequest(event.requestId);
+    final result = await acceptFriendRequest(event.request);
     result.fold(
       (failure) => emit(FriendError(failure.message)),
       (_) => emit(const FriendRequestAccepted()),
@@ -94,7 +94,7 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
     Emitter<FriendState> emit,
   ) async {
     emit(const FriendLoading());
-    final result = await rejectFriendRequest(event.requestId);
+    final result = await rejectFriendRequest(event.request);
     result.fold(
       (failure) => emit(FriendError(failure.message)),
       (_) => emit(const FriendRequestRejected()),
@@ -115,6 +115,15 @@ class FriendBloc extends Bloc<FriendEvent, FriendState> {
     result.fold(
       (failure) => emit(FriendError(failure.message)),
       (_) => emit(const FriendRemoved()),
+    );
+  }
+
+  Future<void> _onSearchUsers(SearchUsersEvent event, Emitter<FriendState> emit) async {
+    emit(const FriendLoading());
+    final result = await searchUsers(event.query);
+    result.fold(
+      (failure) => emit(FriendError(failure.message)),
+      (users) => emit(UsersLoaded(users)),
     );
   }
 }

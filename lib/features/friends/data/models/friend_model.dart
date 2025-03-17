@@ -12,7 +12,10 @@ class FriendModel extends Friend {
   const FriendModel({
     required super.id,
     required super.user1Id,
+    required super.user1Name,
     required super.user2Id,
+    required super.user2Name,
+    required super.friendship,
     required super.createdAt,
   });
 
@@ -23,7 +26,10 @@ class FriendModel extends Friend {
       : this(
           id: '',
           user1Id: '',
+          user1Name: '',
           user2Id: '',
+          user2Name: '',
+          friendship: [],
           createdAt: DateTime.now(),
         );
 
@@ -37,7 +43,14 @@ class FriendModel extends Friend {
       : this(
           id: dataMap['id'] as String,
           user1Id: dataMap['user1Id'] as String,
+          user1Name: dataMap['user1Name'] as String,
           user2Id: dataMap['user2Id'] as String,
+          user2Name: dataMap['user2Name'] as String,
+          friendship: dataMap['friendship'] != null
+              ? List<String>.from(
+                  dataMap['friendship'] as List,
+                )
+              : [],
           createdAt: (dataMap['createdAt'] as Timestamp).toDate(),
         );
 
@@ -48,7 +61,10 @@ class FriendModel extends Friend {
   DataMap toMap() => {
         'id': id,
         'user1Id': user1Id,
+        'user1Name': user1Name,
         'user2Id': user2Id,
+        'user2Name': user2Name,
+        'friendship': friendship,
         'createAt': Timestamp.fromDate(createdAt),
       };
 
@@ -56,13 +72,19 @@ class FriendModel extends Friend {
   FriendModel copyWith({
     String? id,
     String? user1Id,
+    String? user1Name,
     String? user2Id,
+    String? user2Name,
+    List<String>? friendship,
     DateTime? createdAt,
   }) {
     return FriendModel(
       id: id ?? this.id,
       user1Id: user1Id ?? this.user1Id,
+      user1Name: user1Name ?? this.user1Name,
       user2Id: user2Id ?? this.user2Id,
+      user2Name: user2Name ?? this.user2Name,
+      friendship: friendship ?? this.friendship,
       createdAt: createdAt ?? this.createdAt,
     );
   }

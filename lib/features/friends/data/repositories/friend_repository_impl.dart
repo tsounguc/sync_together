@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/friends/data/data_sources/friend_remote_data_source.dart';
 import 'package:sync_together/features/friends/domain/entities/friend.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
@@ -14,15 +15,40 @@ class FriendRepositoryImpl implements FriendRepository {
   final FriendRemoteDataSource remoteDataSource;
 
   @override
-  ResultVoid acceptFriendRequest({required String requestId}) async {
+  ResultVoid sendFriendRequest({required FriendRequest request}) async {
+    try {
+      final result = await remoteDataSource.sendFriendRequest(request: request);
+
+      return Right(result);
+    } on SendRequestException catch (e, s) {
+      debugPrintStack(label: e.message, stackTrace: s);
+      return Left(SendRequestFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid acceptFriendRequest({required FriendRequest request}) async {
     try {
       final result = await remoteDataSource.acceptFriendRequest(
-        requestId: requestId,
+        request: request,
       );
       return Right(result);
     } on AcceptRequestException catch (e, s) {
       debugPrintStack(label: e.message, stackTrace: s);
       return Left(AcceptRequestFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid rejectFriendRequest({required FriendRequest request}) async {
+    try {
+      final result = await remoteDataSource.rejectFriendRequest(
+        request: request,
+      );
+      return Right(result);
+    } on RejectRequestException catch (e, s) {
+      debugPrintStack(label: e.message, stackTrace: s);
+      return Left(RejectRequestFailure.fromException(e));
     }
   }
 
@@ -49,19 +75,6 @@ class FriendRepositoryImpl implements FriendRepository {
   }
 
   @override
-  ResultVoid rejectFriendRequest({required String requestId}) async {
-    try {
-      final result = await remoteDataSource.rejectFriendRequest(
-        requestId: requestId,
-      );
-      return Right(result);
-    } on RejectRequestException catch (e, s) {
-      debugPrintStack(label: e.message, stackTrace: s);
-      return Left(RejectRequestFailure.fromException(e));
-    }
-  }
-
-  @override
   ResultVoid removeFriend({
     required String senderId,
     required String receiverId,
@@ -79,20 +92,13 @@ class FriendRepositoryImpl implements FriendRepository {
   }
 
   @override
-  ResultVoid sendFriendRequest({
-    required String senderId,
-    required String receivedId,
-  }) async {
+  ResultFuture<List<UserEntity>> searchUsers(String query) async {
     try {
-      final result = await remoteDataSource.sendFriendRequest(
-        senderId: senderId,
-        receiverId: receivedId,
-      );
-
+      final result = await remoteDataSource.searchUsers(query);
       return Right(result);
-    } on SendRequestException catch (e, s) {
+    } on SearchUsersException catch (e, s) {
       debugPrintStack(label: e.message, stackTrace: s);
-      return Left(SendRequestFailure.fromException(e));
+      return Left(SearchUsersFailure.fromException(e));
     }
   }
 }

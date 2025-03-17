@@ -6,7 +6,9 @@ class FriendRequest extends Equatable {
   const FriendRequest({
     required this.id,
     required this.senderId,
+    required this.senderName,
     required this.receiverId,
+    required this.receiverName,
     required this.sentAt,
   });
 
@@ -16,12 +18,24 @@ class FriendRequest extends Equatable {
   /// The user ID of the sender.
   final String senderId;
 
+  /// The user Name of the sender.
+  final String senderName;
+
   /// The user ID of the receiver.
   final String receiverId;
+
+  /// The user Name of the receiver.
+  final String receiverName;
 
   /// The timestamp when the friend request was sent.
   final DateTime sentAt;
 
   @override
-  List<Object?> get props => [senderId, receiverId, sentAt];
+  List<Object?> get props => [
+        senderId,
+        senderName,
+        receiverId,
+        receiverName,
+        sentAt,
+      ];
 }

@@ -13,7 +13,18 @@ import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_google.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_out.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_up_with_email.dart';
-import 'package:sync_together/features/auth/domain/use_cases/update_users_profile.dart';
+import 'package:sync_together/features/auth/domain/use_cases/update_user_profile.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
+import 'package:sync_together/features/friends/data/data_sources/friend_remote_data_source.dart';
+import 'package:sync_together/features/friends/data/repositories/friend_repository_impl.dart';
+import 'package:sync_together/features/friends/domain/repositories/friend_repository.dart';
+import 'package:sync_together/features/friends/domain/use_cases/accept_friend_request.dart';
+import 'package:sync_together/features/friends/domain/use_cases/get_friend_requests.dart';
+import 'package:sync_together/features/friends/domain/use_cases/get_friends.dart';
+import 'package:sync_together/features/friends/domain/use_cases/reject_friend_request.dart';
+import 'package:sync_together/features/friends/domain/use_cases/remove_friend.dart';
+import 'package:sync_together/features/friends/domain/use_cases/search_users.dart';
+import 'package:sync_together/features/friends/domain/use_cases/send_friend_request.dart';
+import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
 
 part 'service_locator.main.dart';

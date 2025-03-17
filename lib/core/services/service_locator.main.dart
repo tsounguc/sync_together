@@ -4,6 +4,39 @@ final serviceLocator = GetIt.instance;
 
 Future<void> setUpServices() async {
   await _initAuth();
+  await _initFriend();
+}
+
+Future<void> _initFriend() async {
+  serviceLocator
+    // App Logic
+    ..registerFactory(
+      () => FriendBloc(
+        sendFriendRequest: serviceLocator(),
+        acceptFriendRequest: serviceLocator(),
+        rejectFriendRequest: serviceLocator(),
+        removeFriend: serviceLocator(),
+        getFriends: serviceLocator(),
+        getFriendRequests: serviceLocator(),
+        searchUsers: serviceLocator(),
+      ),
+    )
+    // Use cases
+    ..registerLazySingleton(() => SendFriendRequest(serviceLocator()))
+    ..registerLazySingleton(() => AcceptFriendRequest(serviceLocator()))
+    ..registerLazySingleton(() => RejectFriendRequest(serviceLocator()))
+    ..registerLazySingleton(() => RemoveFriend(serviceLocator()))
+    ..registerLazySingleton(() => GetFriends(serviceLocator()))
+    ..registerLazySingleton(() => GetFriendRequests(serviceLocator()))
+    ..registerLazySingleton(() => SearchUsers(serviceLocator()))
+    // Repositories
+    ..registerLazySingleton<FriendRepository>(
+      () => FriendRepositoryImpl(serviceLocator()),
+    )
+    // Data sources
+    ..registerLazySingleton<FriendRemoteDataSource>(
+      () => FriendRemoteDataSourceImpl(serviceLocator()),
+    );
 }
 
 Future<void> _initAuth() async {

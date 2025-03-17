@@ -1,4 +1,5 @@
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/friends/domain/entities/friend.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
 
@@ -16,8 +17,7 @@ abstract class FriendRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultVoid sendFriendRequest({
-    required String senderId,
-    required String receivedId,
+    required FriendRequest request
   });
 
   /// Accepts a friend request.
@@ -25,7 +25,7 @@ abstract class FriendRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultVoid acceptFriendRequest({
-    required String requestId,
+    required FriendRequest request,
   });
 
   /// Rejects a friend request.
@@ -33,7 +33,7 @@ abstract class FriendRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultVoid rejectFriendRequest({
-    required String requestId,
+    required FriendRequest request,
   });
 
   /// Removes a friend.
@@ -56,4 +56,10 @@ abstract class FriendRepository {
   /// - **Success:** Returns a list of [FriendRequest].
   /// - **Failure:** Returns an `FriendsFailure`.
   ResultFuture<List<FriendRequest>> getFriendRequests(String userId);
+
+  /// Searches for users by display name or email.
+  ///
+  /// - **Success:** Returns a list of [UserEntity].
+  /// - **Failure:** Returns a 'SearchUsersFailure'.
+  ResultFuture<List<UserEntity>> searchUsers(String query);
 }
