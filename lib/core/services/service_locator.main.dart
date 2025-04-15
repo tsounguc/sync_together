@@ -5,6 +5,59 @@ final serviceLocator = GetIt.instance;
 Future<void> setUpServices() async {
   await _initAuth();
   await _initFriend();
+  await _initWatchParty();
+  await _initPlatforms();
+}
+
+Future<void> _initPlatforms() async {
+  serviceLocator
+    // App Logic
+    ..registerFactory(() => PlatformsCubit(serviceLocator()))
+    // Use cases
+    ..registerLazySingleton(() => LoadPlatforms(serviceLocator()))
+    // Repositories
+    ..registerLazySingleton<PlatformsRepository>(
+      () => PlatformsRepositoryImpl(
+        dataSource: serviceLocator(),
+      ),
+    )
+    // Data sources
+    ..registerLazySingleton<PlatformsDataSource>(
+      () => PlatformsDataSourceImpl(),
+    );
+  //External Dependencies
+}
+
+Future<void> _initWatchParty() async {
+  serviceLocator
+    // App Logic
+    ..registerFactory(
+      () => WatchPartyBloc(
+        createWatchParty: serviceLocator(),
+        getWatchParty: serviceLocator(),
+        joinWatchParty: serviceLocator(),
+        syncPlayback: serviceLocator(),
+        getSyncedData: serviceLocator(),
+      ),
+    )
+    // Use cases
+    ..registerLazySingleton(() => CreateWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => GetWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => JoinWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => SyncPlayback(serviceLocator()))
+    ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
+    // Repositories
+    ..registerLazySingleton<WatchPartyRepository>(
+      () => WatchPartyRepositoryImpl(serviceLocator()),
+    )
+    ..registerLazySingleton<SyncPlaybackService>(
+      () => WebRTCPlaybackSync(serviceLocator()),
+    )
+    // Data sources
+    ..registerLazySingleton<WatchPartyRemoteDataSource>(
+      () => WatchPartyRemoteDataSourceImpl(serviceLocator()),
+    );
+  //External Dependencies
 }
 
 Future<void> _initFriend() async {

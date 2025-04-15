@@ -34,6 +34,15 @@ abstract class UseCaseWithParams<T, Params> {
   ResultFuture<T> call(Params params);
 }
 
+/// **Base class for stream-based use cases with no parameters.**
+///
+/// - Returns `ResultFuture<T>`, ensuring a **failure or success** result.
+/// - Used when a method does not require any input parameters.
+abstract class StreamUseCase<T> {
+  const StreamUseCase();
+  ResultStream<T> call();
+}
+
 /// **Base class for stream-based use cases that require parameters.**
 ///
 /// - `Params`: Type of the input parameter.

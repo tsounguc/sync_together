@@ -14,8 +14,6 @@ abstract class AuthException extends Equatable implements Exception {
   List<Object?> get props => [message, statusCode];
 }
 
-
-
 /// **Exception thrown during sign-up errors.**
 class SignUpException extends AuthException {
   const SignUpException({
@@ -77,6 +75,7 @@ abstract class FriendSystemException extends Equatable implements Exception {
   @override
   List<Object?> get props => [message, statusCode];
 }
+
 /// **Exception thrown during send friend request errors.**
 class SendRequestException extends FriendSystemException {
   const SendRequestException({
@@ -101,7 +100,7 @@ class RejectRequestException extends FriendSystemException {
   });
 }
 
-/// **Exception thrown during remove friend request errors.**
+/// **Exception thrown during remove a friend errors.**
 class RemoveFriendException extends FriendSystemException {
   const RemoveFriendException({
     required super.message,
@@ -109,7 +108,7 @@ class RemoveFriendException extends FriendSystemException {
   });
 }
 
-/// **Exception thrown during remove friend request errors.**
+/// **Exception thrown when getting list of friends.**
 class GetFriendsException extends FriendSystemException {
   const GetFriendsException({
     required super.message,
@@ -117,9 +116,85 @@ class GetFriendsException extends FriendSystemException {
   });
 }
 
-/// **Exception thrown during remove friend request errors.**
+/// **Exception thrown when getting list of friend request.**
 class GetFriendRequestsException extends FriendSystemException {
   const GetFriendRequestsException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when searching users.**
+class SearchUsersException extends FriendSystemException {
+  const SearchUsersException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Base class for all watch party exceptions.**
+abstract class WatchPartyException extends Equatable implements Exception {
+  const WatchPartyException({
+    required this.message,
+    required this.statusCode,
+  });
+
+  final String message;
+  final String statusCode;
+
+  @override
+  List<Object?> get props => [message, statusCode];
+}
+
+/// **Exception thrown when creating a watch party.**
+class CreateWatchPartyException extends WatchPartyException {
+  const CreateWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when getting a watch party.**
+class GetWatchPartyException extends WatchPartyException {
+  const GetWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when joining a watch party.**
+class JoinWatchPartyException extends WatchPartyException {
+  const JoinWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when syncing a watch party.**
+class SyncWatchPartyException extends WatchPartyException {
+  const SyncWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Base class for all streaming platforms exceptions.**
+abstract class StreamingPlatformsException extends Equatable implements Exception {
+  const StreamingPlatformsException({
+    required this.message,
+    required this.statusCode,
+  });
+
+  final String message;
+  final String statusCode;
+
+  @override
+  List<Object?> get props => [message, statusCode];
+}
+
+/// **Exception thrown when loading platforms.**
+class LoadPlatformsException extends StreamingPlatformsException {
+  const LoadPlatformsException({
     required super.message,
     required super.statusCode,
   });

@@ -200,3 +200,97 @@ class GetFriendRequestsFailure extends FriendFailure {
           statusCode: exception.statusCode,
         );
 }
+
+/// **Failure that occurs when getting list of friend requests.**
+class SearchUsersFailure extends FriendFailure {
+  SearchUsersFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SearchUsersException] into a [SearchUsersFailure].
+  SearchUsersFailure.fromException(SearchUsersException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Base class for all watch party failures.**
+///
+/// This allows us to have specific failure types.
+abstract class WatchPartyFailure extends Failure {
+  WatchPartyFailure({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Failure that occurs when creating a watch party.**
+class CreateWatchPartyFailure extends WatchPartyFailure {
+  CreateWatchPartyFailure({required super.message, required super.statusCode});
+
+  /// Converts a [CreateWatchPartyException] into a [CreateWatchPartyFailure].
+  CreateWatchPartyFailure.fromException(CreateWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when joining a watch party.**
+class JoinWatchPartyFailure extends WatchPartyFailure {
+  JoinWatchPartyFailure({required super.message, required super.statusCode});
+
+  /// Converts a [JoinWatchPartyException] into a [JoinWatchPartyFailure].
+  JoinWatchPartyFailure.fromException(JoinWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when creating a watch party.**
+class GetWatchPartyFailure extends WatchPartyFailure {
+  GetWatchPartyFailure({required super.message, required super.statusCode});
+
+  /// Converts a [GetWatchPartyException] into a [GetWatchPartyFailure].
+  GetWatchPartyFailure.fromException(GetWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when creating a watch party.**
+class SyncWatchPartyFailure extends WatchPartyFailure {
+  SyncWatchPartyFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SyncWatchPartyException] into a [SyncWatchPartyFailure].
+  SyncWatchPartyFailure.fromException(SyncWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Base class for all streaming platforms failures.**
+///
+/// This allows us to have specific failure types.
+abstract class StreamingPlatformsFailure  extends Failure {
+  StreamingPlatformsFailure({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+
+/// **Failure that occurs when loading streaming platforms.**
+class LoadPlatformsFailure extends StreamingPlatformsFailure {
+  LoadPlatformsFailure({required super.message,
+    required super.statusCode,});
+
+  /// Converts a [LoadPlatformsException] into a [LoadPlatformsFailure].
+  LoadPlatformsFailure.fromException(LoadPlatformsException exception)
+      : this(
+    message: exception.message,
+    statusCode: exception.statusCode,
+  );
+}

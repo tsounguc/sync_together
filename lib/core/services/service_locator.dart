@@ -26,5 +26,21 @@ import 'package:sync_together/features/friends/domain/use_cases/remove_friend.da
 import 'package:sync_together/features/friends/domain/use_cases/search_users.dart';
 import 'package:sync_together/features/friends/domain/use_cases/send_friend_request.dart';
 import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/platforms/data/data_sources/platforms_data_source.dart';
+import 'package:sync_together/features/platforms/data/repositories/platforms_repository_impl.dart';
+import 'package:sync_together/features/platforms/domain/repositories/platforms_repository.dart';
+import 'package:sync_together/features/platforms/domain/use_cases/load_platforms.dart';
+import 'package:sync_together/features/platforms/presentation/platforms_cubit/platforms_cubit.dart';
+import 'package:sync_together/features/watch_party/data/data_sources/watch_party_remote_data_source.dart';
+import 'package:sync_together/features/watch_party/data/repositories/watch_party_repository_impl.dart';
+import 'package:sync_together/features/watch_party/data/repositories/webrtc_playback_sync.dart';
+import 'package:sync_together/features/watch_party/domain/repositories/sync_playback_service.dart';
+import 'package:sync_together/features/watch_party/domain/repositories/watch_party_repository.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/create_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
 
 part 'service_locator.main.dart';

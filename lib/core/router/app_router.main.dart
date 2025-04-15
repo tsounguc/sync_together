@@ -21,7 +21,10 @@ class AppRouter {
               );
 
               context.userProvider.initUser(localUser);
-              return const HomeScreen();
+              return BlocProvider(
+                create: (context) => serviceLocator<PlatformsCubit>(),
+                child: const PlatformSelectionScreen(),
+              );
             }
             return const LoginScreen();
           },
@@ -47,6 +50,18 @@ class AppRouter {
       case HomeScreen.id:
         return _pageBuilder(
           (_) => const HomeScreen(),
+          settings: settings,
+        );
+      case WatchPartyScreen.id:
+        final args = settings.arguments! as WatchPartyScreenArguments;
+        return _pageBuilder(
+          (_) => BlocProvider(
+            create: (context) => serviceLocator<WatchPartyBloc>(),
+            child: WatchPartyScreen(
+              watchParty: args.watchParty,
+              platform: args.platform,
+            ),
+          ),
           settings: settings,
         );
       case FriendsScreen.id:
@@ -98,4 +113,10 @@ PageRouteBuilder<dynamic> _pageBuilder(
     ),
     pageBuilder: (context, _, __) => page(context),
   );
+}
+
+class WatchPartyScreenArguments {
+  const WatchPartyScreenArguments(this.watchParty, this.platform);
+  final WatchParty watchParty;
+  final StreamingPlatform platform;
 }

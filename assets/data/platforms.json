@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Netflix",
+    "logoPath": "assets/logos/netflix_logo.png",
+    "isDRMProtected": true,
+    "defaultUrl": "https://www.netflix.com",
+    "packageName": "com.netflix.ninja",
+    "deepLinkUrl": "nflx://www.netflix.com",
+    "appstoreUrl": "https://apps.apple.com/us/app/netflix/id363590051",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.netflix.mediaclient"
+  },
+  {
+    "name": "Hulu",
+    "logoPath": "assets/logos/hulu_green_logo.png",
+    "isDRMProtected": true,
+    "defaultUrl": "https://www.hulu.com",
+    "packageName": "com.hulu.plus",
+    "deepLinkUrl": "nflx://www.hulu.com",
+    "appstoreUrl": "https://apps.apple.com/us/app/hulu-stream-tv-shows-movies/id376510438",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.hulu.plus"
+  },
+  {
+    "name": "YouTube",
+    "logoPath": "assets/logos/yt_logo_dark.png",
+    "isDRMProtected": false,
+    "defaultUrl": "https://www.youtube.com",
+    "packageName": "com.google.android.youtube",
+    "deepLinkUrl": "vnd.youtube://",
+    "appstoreUrl": "",
+    "playStoreUrl": ""
+
+
+  }
+]
