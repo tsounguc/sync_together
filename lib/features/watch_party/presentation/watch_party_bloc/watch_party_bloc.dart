@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:sync_together/core/errors/exceptions.dart';
+import 'package:sync_together/core/errors/failures.dart';
+import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/create_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
@@ -11,38 +17,41 @@ part 'watch_party_event.dart';
 part 'watch_party_state.dart';
 
 class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
-  WatchPartyBloc(
-      {required this.createWatchParty,
-      required this.getWatchParty,
-      required this.joinWatchParty,
-      required this.syncPlayback})
-      : super(WatchPartyInitial()) {
+  WatchPartyBloc({
+    required this.createWatchParty,
+    required this.getWatchParty,
+    required this.joinWatchParty,
+    required this.syncPlayback,
+    required this.getSyncedData,
+  }) : super(const WatchPartyInitial()) {
     on<CreateWatchPartyEvent>(_onCreateWatchParty);
     on<GetWatchPartyEvent>(_onGetWatchParty);
     on<JoinWatchPartyEvent>(_onJoinWatchParty);
     on<SyncPlaybackEvent>(_onSyncPlayback);
+    on<GetSyncedDataEvent>(_onGetSyncedData);
   }
 
   final CreateWatchParty createWatchParty;
   final GetWatchParty getWatchParty;
   final JoinWatchParty joinWatchParty;
   final SyncPlayback syncPlayback;
+  final GetSyncedData getSyncedData;
 
   Future<void> _onCreateWatchParty(
     CreateWatchPartyEvent event,
     Emitter<WatchPartyState> emit,
   ) async {
-    final result = await createWatchParty(
-      CreateWatchPartyParams(
-        title: event.title,
-        videoUrl: event.videoUrl,
-        hostId: event.hostId,
-      ),
-    );
+    final result = await createWatchParty(event.party);
 
     result.fold(
-      (failure) => emit(WatchPartyError(failure.message)),
-      (watchParty) => emit(WatchPartyCreated(watchParty)),
+      (failure) {
+        emit(WatchPartyError(failure.message));
+        event.onFailure?.call(failure.message);
+      },
+      (createdParty) {
+        emit(WatchPartyCreated(createdParty));
+        event.onSuccess?.call(createdParty);
+      },
     );
   }
 
@@ -90,7 +99,38 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
 
     result.fold(
       (failure) => emit(WatchPartyError(failure.message)),
-      (_) => emit(SyncUpdated(event.playbackPosition)),
+      (_) => emit(const SyncDataSent()),
     );
+  }
+
+  StreamSubscription<Either<Failure, DataMap>>? subscription;
+
+  void _onGetSyncedData(GetSyncedDataEvent event, Emitter<WatchPartyState> emit) {
+    subscription?.cancel();
+    subscription = getSyncedData(event.watchPartyId).listen(
+      /*onData:*/
+      (result) {
+        result.fold(
+          (failure) {
+            emit(WatchPartyError(failure.message));
+            subscription?.cancel();
+          },
+          (data) => emit(SyncUpdated(data['playBackPosition'] as double)),
+        );
+      },
+      onError: (dynamic error) {
+        emit(WatchPartyError(error.toString()));
+        subscription?.cancel();
+      },
+      onDone: () {
+        subscription?.cancel();
+      },
+    );
+  }
+
+  @override
+  Future<void> close() {
+    subscription?.cancel();
+    return super.close();
   }
 }

@@ -3,9 +3,7 @@ import 'package:sync_together/features/platforms/domain/entities/streaming_platf
 
 class PlatformCard extends StatelessWidget {
   const PlatformCard({
-    super.key,
-    required this.platform,
-    required this.onTap,
+    required this.platform, required this.onTap, super.key,
   });
 
   final StreamingPlatform platform;
@@ -16,7 +14,7 @@ class PlatformCard extends StatelessWidget {
     return Card(
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: InkWell(
           onTap: onTap,
           child: Column(
@@ -25,6 +23,15 @@ class PlatformCard extends StatelessWidget {
               Image.asset(
                 platform.logoPath,
                 height: 50,
+                color: platform.logoPath.contains(
+                          'disney',
+                        ) &&
+                        Theme.of(
+                              context,
+                            ).brightness ==
+                            Brightness.dark
+                    ? Colors.white
+                    : null,
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 8),

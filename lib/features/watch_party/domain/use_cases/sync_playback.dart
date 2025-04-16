@@ -1,17 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
-import 'package:sync_together/features/watch_party/domain/repositories/watch_party_repository.dart';
+import 'package:sync_together/features/watch_party/domain/repositories/sync_playback_service.dart';
 
 /// Syncs video playback across participants in a watch party.
 class SyncPlayback extends UseCaseWithParams<void, SyncPlaybackParams> {
-  const SyncPlayback(this.repository);
+  const SyncPlayback(this.service);
 
-  final WatchPartyRepository repository;
+  final SyncPlaybackService service;
 
   @override
-  ResultFuture<void> call(SyncPlaybackParams params) => repository.syncPlayback(
-        partyId: params.partyId,
+  ResultVoid call(SyncPlaybackParams params) => service.sendSyncData(
+        roomId: params.partyId,
         playbackPosition: params.playbackPosition,
       );
 }

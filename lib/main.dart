@@ -64,12 +64,16 @@ class OverlayEntryPoint extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: SafeArea(
-        child: WatchPartyOverlay(
-          watchPartyId: 'sample-party-id',
-          onClose: FlutterOverlayWindow.closeOverlay,
-          onPlay: () {},
-          onPause: () {},
-          onSync: () {},
+        child: Stack(
+          children: [
+            WatchPartyOverlay(
+              watchPartyId: 'sample-party-id',
+              onClose: FlutterOverlayWindow.closeOverlay,
+              onPlay: () {},
+              onPause: () {},
+              onSync: () {},
+            ),
+          ],
         ),
       ),
     );

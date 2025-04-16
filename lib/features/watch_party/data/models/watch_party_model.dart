@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/platforms/data/models/streaming_platform_model.dart';
+import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Model for WatchParty Entity**
@@ -10,12 +12,16 @@ import 'package:sync_together/features/watch_party/domain/entities/watch_party.d
 class WatchPartyModel extends WatchParty {
   const WatchPartyModel({
     required super.id,
-    required super.hostId,
-    required super.videoUrl,
     required super.title,
-    required super.participantIds,
+    required super.videoUrl,
+    required super.platform,
     required super.createdAt,
+    required super.isPrivate,
+    required super.hostId,
+    required super.participantIds,
     required super.lastSyncedTime,
+    required super.isPlaying,
+    required super.playbackPosition,
   });
 
   /// Represents an empty [WatchPartyModel] instance.
@@ -24,12 +30,16 @@ class WatchPartyModel extends WatchParty {
   WatchPartyModel.empty()
       : this(
           id: '',
-          hostId: '',
-          videoUrl: '',
           title: '',
-          participantIds: [],
+          videoUrl: '',
+          platform: const StreamingPlatformModel.empty(),
           createdAt: DateTime.now(),
+          isPrivate: false,
+          hostId: '',
+          participantIds: [],
           lastSyncedTime: DateTime(0, 0, 0),
+          isPlaying: false,
+          playbackPosition: 0,
         );
 
   /// Creates a [WatchPartyModel] from a JSON string.
@@ -41,16 +51,22 @@ class WatchPartyModel extends WatchParty {
   WatchPartyModel.fromMap(DataMap dataMap)
       : this(
           id: dataMap['id'] as String,
-          hostId: dataMap['hostId'] as String,
-          videoUrl: dataMap['videoUrl'] as String,
           title: dataMap['title'] as String,
+          videoUrl: dataMap['videoUrl'] as String,
+          platform: dataMap['platform'] == null
+              ? const StreamingPlatformModel.empty()
+              : StreamingPlatformModel.fromMap(dataMap['platforms'] as DataMap),
+          createdAt: (dataMap['createdAt'] as Timestamp).toDate(),
+          isPrivate: dataMap['isPrivate'] as bool,
+          hostId: dataMap['hostId'] as String,
           participantIds: dataMap['participantIds'] == null
               ? List<String>.from(
                   dataMap['participantIds'] as List,
                 )
               : [],
-          createdAt: (dataMap['createdAt'] as Timestamp).toDate(),
           lastSyncedTime: (dataMap['lastSyncedTime'] as Timestamp).toDate(),
+          isPlaying: dataMap['isPlaying'] as bool,
+          playbackPosition: dataMap['playbackPosition'] as double,
         );
 
   /// Converts a [WatchPartyModel] instance to a JSON string.
@@ -59,32 +75,44 @@ class WatchPartyModel extends WatchParty {
   /// Converts a [WatchPartyModel] instance to a key-value map.
   DataMap toMap() => {
         'id': id,
-        'hostId': hostId,
-        'videoUrl': videoUrl,
         'title': title,
-        'participantIds': participantIds,
+        'videoUrl': videoUrl,
+        'platform': (platform as StreamingPlatformModel).toMap(),
         'createdAt': Timestamp.fromDate(createdAt),
+        'isPrivate': isPrivate,
+        'hostId': hostId,
+        'participantIds': participantIds,
         'lastSyncedTime': Timestamp.fromDate(lastSyncedTime),
+        'isPlaying': isPlaying,
+        'playbackPosition': playbackPosition,
       };
 
   /// Creates a copy of the current [WatchPartyModel] with optional updates.
   WatchPartyModel copyWith({
     String? id,
-    String? hostId,
-    String? videoUrl,
     String? title,
-    List<String>? participantIds,
+    String? videoUrl,
+    StreamingPlatform? platform,
     DateTime? createdAt,
+    bool? isPrivate,
+    String? hostId,
+    List<String>? participantIds,
     DateTime? lastSyncedTime,
+    bool? isPlaying,
+    double? playbackPosition,
   }) {
     return WatchPartyModel(
       id: id ?? this.id,
-      hostId: hostId ?? this.hostId,
-      videoUrl: videoUrl ?? this.videoUrl,
       title: title ?? this.title,
-      participantIds: participantIds ?? this.participantIds,
+      videoUrl: videoUrl ?? this.videoUrl,
+      platform: platform ?? this.platform,
       createdAt: createdAt ?? this.createdAt,
+      isPrivate: isPrivate ?? this.isPrivate,
+      hostId: hostId ?? this.hostId,
+      participantIds: participantIds ?? this.participantIds,
       lastSyncedTime: lastSyncedTime ?? this.lastSyncedTime,
+      isPlaying: isPlaying ?? this.isPlaying,
+      playbackPosition: playbackPosition ?? this.playbackPosition,
     );
   }
 }

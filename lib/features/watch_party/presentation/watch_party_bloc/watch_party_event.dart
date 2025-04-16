@@ -10,17 +10,17 @@ sealed class WatchPartyEvent extends Equatable {
 /// Event to create a new watch party.
 final class CreateWatchPartyEvent extends WatchPartyEvent {
   const CreateWatchPartyEvent({
-    required this.title,
-    required this.videoUrl,
-    required this.hostId,
+    required this.party,
+    this.onSuccess,
+    this.onFailure,
   });
 
-  final String title;
-  final String videoUrl;
-  final String hostId;
+  final WatchPartyModel party;
+  final void Function(WatchParty)? onSuccess;
+  final void Function(String)? onFailure;
 
   @override
-  List<Object?> get props => [title, videoUrl, hostId];
+  List<Object?> get props => [party, onSuccess, onFailure];
 }
 
 /// Event to join an existing Watch Party
@@ -48,6 +48,17 @@ class SyncPlaybackEvent extends WatchPartyEvent {
 
   @override
   List<Object?> get props => [watchPartyId, playbackPosition];
+}
+
+/// Event to get synced playback position across users
+class GetSyncedDataEvent extends WatchPartyEvent {
+  const GetSyncedDataEvent({
+    required this.watchPartyId,
+  });
+  final String watchPartyId;
+
+  @override
+  List<Object?> get props => [watchPartyId];
 }
 
 /// Event to update watch party state

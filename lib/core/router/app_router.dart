@@ -17,6 +17,7 @@ import 'package:sync_together/features/platforms/domain/entities/streaming_platf
 import 'package:sync_together/features/platforms/presentation/platforms_cubit/platforms_cubit.dart';
 import 'package:sync_together/features/platforms/presentation/views/platform_selection_screen.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
+import 'package:sync_together/features/watch_party/presentation/views/create_room_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
 

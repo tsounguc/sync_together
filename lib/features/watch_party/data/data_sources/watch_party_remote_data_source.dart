@@ -5,6 +5,7 @@ import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/utils/firebase_constants.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
+import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Remote Data Source for Watch Parties**
 ///
@@ -14,11 +15,7 @@ abstract class WatchPartyRemoteDataSource {
   ///
   /// - **Success:** Returns a [WatchPartyModel].
   /// - **Failure:** Throws an [WatchPartyException].
-  Future<WatchPartyModel> createWatchParty({
-    required String hostId,
-    required String videoUrl,
-    required String title,
-  });
+  Future<WatchPartyModel> createWatchParty({required WatchPartyModel party});
 
   /// Joins an existing watch party session.
   ///
@@ -35,14 +32,20 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Failure:** Throws an [WatchPartyException].
   Future<WatchPartyModel> getWatchParty(String partyId);
 
-  /// Synchronizes playback time across users.
+  /// Send playback time to database.
   ///
   /// - **Success:** Completes without returning a value.
   /// - **Failure:** Throws an [WatchPartyException].
-  Future<void> syncPlayback({
+  Future<void> sendSyncData({
     required String partyId,
     required double playbackPosition,
   });
+
+  /// Get updated playback time.
+  ///
+  /// - **Success:** Returns Map.
+  /// - **Failure:** Throws an [WatchPartyException].
+  Stream<DataMap> getSyncedData({required String partyId});
 }
 
 class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
@@ -50,22 +53,12 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
 
   final FirebaseFirestore firestore;
   @override
-  Future<WatchPartyModel> createWatchParty({
-    required String hostId,
-    required String videoUrl,
-    required String title,
-  }) async {
+  Future<WatchPartyModel> createWatchParty({required WatchPartyModel party}) async {
     try {
       final docRef = _watchParties.doc();
 
-      final watchParty = WatchPartyModel(
+      final watchParty = party.copyWith(
         id: docRef.id,
-        hostId: hostId,
-        videoUrl: videoUrl,
-        title: title,
-        participantIds: [hostId],
-        createdAt: DateTime.now(),
-        lastSyncedTime: DateTime.now(),
       );
 
       await docRef.set(watchParty.toMap());
@@ -153,15 +146,15 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   }
 
   @override
-  Future<void> syncPlayback({
+  Future<void> sendSyncData({
     required String partyId,
     required double playbackPosition,
   }) async {
     try {
-      await _watchParties.doc(partyId).update({
+      await _watchParties.doc(partyId).set({
         'playbackPosition': playbackPosition,
         'lastSyncedTime': Timestamp.now(),
-      });
+      }, SetOptions(merge: true));
     } on FirebaseAuthException catch (e) {
       throw SyncWatchPartyException(
         message: e.message ?? 'Error Occurred',
@@ -174,6 +167,30 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
         statusCode: '505',
       );
     }
+  }
+
+  @override
+  Stream<DataMap> getSyncedData({required String partyId}) {
+    final dataStream = _watchParties
+        .doc(partyId)
+        .collection('sync')
+        .doc('playback')
+        .snapshots()
+        .map((snapshot) => snapshot.data() ?? {});
+    return dataStream.handleError(
+      (dynamic error) {
+        if (error is FirebaseException) {
+          throw SyncWatchPartyException(
+            message: error.message ?? 'Unknown error occurred',
+            statusCode: error.code,
+          );
+        }
+        throw SyncWatchPartyException(
+          message: error.toString(),
+          statusCode: '505',
+        );
+      },
+    );
   }
 
   CollectionReference<DataMap> get _watchParties => firestore.collection(

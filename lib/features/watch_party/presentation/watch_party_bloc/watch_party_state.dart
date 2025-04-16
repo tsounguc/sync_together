@@ -47,6 +47,11 @@ class WatchPartyFetched extends WatchPartyState {
 }
 
 /// Success state for syncing playback
+class SyncDataSent extends WatchPartyState {
+  const SyncDataSent();
+}
+
+/// Success state for syncing playback
 class SyncUpdated extends WatchPartyState {
   const SyncUpdated(this.playbackPosition);
 

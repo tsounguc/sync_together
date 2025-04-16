@@ -20,6 +20,16 @@
     "playStoreUrl": "https://play.google.com/store/apps/details?id=com.hulu.plus"
   },
   {
+    "name": "Disney+",
+    "logoPath": "assets/logos/disney_logo_black.png",
+    "isDRMProtected": true,
+    "defaultUrl": "https://www.disneyplus.com/",
+    "packageName": "com.disney.disneyplus",
+    "deepLinkUrl": "nflx://www.disneyplus.com",
+    "appstoreUrl": "https://apps.apple.com/us/app/disney/id1446075923",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.disney.disneyplus"
+  },
+  {
     "name": "YouTube",
     "logoPath": "assets/logos/yt_logo_dark.png",
     "isDRMProtected": false,

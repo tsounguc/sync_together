@@ -1,4 +1,5 @@
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Repository contract for handling Watch Party operations**.
@@ -8,9 +9,7 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns the `WatchParty` entity.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<WatchParty> createWatchParty({
-    required String hostId,
-    required String videoUrl,
-    required String title,
+    required WatchPartyModel party,
   });
 
   /// Joins an existing watch party.
@@ -27,13 +26,4 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns a `WatchParty` entity.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<WatchParty> getWatchParty(String partyId);
-
-  /// Syncs the video playback position across participants.
-  ///
-  /// - **Success:** Returns `void`.
-  /// - **Failure:** Returns a `WatchPartyFailure`.
-  ResultVoid syncPlayback({
-    required String partyId,
-    required double playbackPosition,
-  });
 }

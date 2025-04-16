@@ -52,6 +52,23 @@ class AppRouter {
           (_) => const HomeScreen(),
           settings: settings,
         );
+      case PlatformSelectionScreen.id:
+        return _pageBuilder(
+          (_) => BlocProvider(
+            create: (context) => serviceLocator<PlatformsCubit>(),
+            child: const PlatformSelectionScreen(),
+          ),
+          settings: settings,
+        );
+      case CreateRoomScreen.id:
+        final args = settings.arguments! as StreamingPlatform;
+        return _pageBuilder(
+          (_) => BlocProvider(
+            create: (context) => serviceLocator<WatchPartyBloc>(),
+            child: CreateRoomScreen(selectedPlatform: args),
+          ),
+          settings: settings,
+        );
       case WatchPartyScreen.id:
         final args = settings.arguments! as WatchPartyScreenArguments;
         return _pageBuilder(

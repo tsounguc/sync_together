@@ -4,11 +4,12 @@ import 'package:sync_together/core/router/app_router.dart';
 import 'package:sync_together/features/platforms/presentation/platforms_cubit/platforms_cubit.dart';
 import 'package:sync_together/features/platforms/presentation/widgets/platform_card.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
-import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
+import 'package:sync_together/features/watch_party/presentation/views/create_room_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 
 class PlatformSelectionScreen extends StatefulWidget {
   const PlatformSelectionScreen({super.key});
+  static const String id = '/platform-selection-screen';
 
   @override
   State<PlatformSelectionScreen> createState() => _PlatformSelectionScreenState();
@@ -51,19 +52,10 @@ class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
               return PlatformCard(
                   platform: platform,
                   onTap: () {
-                    final watchParty = WatchPartyModel.empty().copyWith(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      title: '${platform.name} Watch Party',
-                      videoUrl: platform.defaultUrl,
-                    );
-
                     Navigator.pushNamed(
                       context,
-                      WatchPartyScreen.id,
-                      arguments: WatchPartyScreenArguments(
-                        watchParty,
-                        platform,
-                      ),
+                      CreateRoomScreen.id,
+                      arguments: platform,
                     );
                   });
             },
