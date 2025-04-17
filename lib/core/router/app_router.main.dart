@@ -69,6 +69,21 @@ class AppRouter {
           ),
           settings: settings,
         );
+      case JoinRoomScreen.id:
+        return _pageBuilder(
+          (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => serviceLocator<WatchPartyBloc>(),
+              ),
+              BlocProvider(
+                create: (context) => serviceLocator<WatchPartyListCubit>(),
+              ),
+            ],
+            child: const JoinRoomScreen(),
+          ),
+          settings: settings,
+        );
       case WatchPartyScreen.id:
         final args = settings.arguments! as WatchPartyScreenArguments;
         return _pageBuilder(

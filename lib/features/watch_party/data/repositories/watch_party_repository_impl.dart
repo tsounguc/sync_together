@@ -52,19 +52,13 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
     }
   }
 
-  // @override
-  // ResultVoid syncPlayback({
-  //   required String partyId,
-  //   required double playbackPosition,
-  // }) async {
-  //   try {
-  //     final result = await remoteDataSource.syncPlayback(
-  //       partyId: partyId,
-  //       playbackPosition: playbackPosition,
-  //     );
-  //     return Right(result);
-  //   } on SyncWatchPartyException catch (e) {
-  //     return Left(SyncWatchPartyFailure.fromException(e));
-  //   }
-  // }
+  @override
+  ResultFuture<List<WatchParty>> getPublicWatchParties() async {
+    try {
+      final result = await remoteDataSource.getPublicWatchParties();
+      return Right(result);
+    } on GetPublicWatchPartiesException catch (e) {
+      return Left(GetPublicWatchPartiesFailure.fromException(e));
+    }
+  }
 }

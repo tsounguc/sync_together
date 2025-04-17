@@ -11,7 +11,7 @@ import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_email.
 import 'package:sync_together/features/auth/domain/use_cases/sign_in_with_google.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_out.dart';
 import 'package:sync_together/features/auth/domain/use_cases/sign_up_with_email.dart';
-import 'package:sync_together/features/auth/domain/use_cases/update_users_profile.dart';
+import 'package:sync_together/features/auth/domain/use_cases/update_user_profile.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';

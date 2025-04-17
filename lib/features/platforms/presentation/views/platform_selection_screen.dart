@@ -40,25 +40,28 @@ class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
         } else if (state is PlatformsLoaded) {
           final platforms = state.platforms;
 
-          return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+          return Padding(
+            padding: const EdgeInsets.all(8),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: platforms.length,
+              itemBuilder: (context, index) {
+                final platform = platforms[index];
+                return PlatformCard(
+                    platform: platform,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        CreateRoomScreen.id,
+                        arguments: platform,
+                      );
+                    });
+              },
             ),
-            itemCount: platforms.length,
-            itemBuilder: (context, index) {
-              final platform = platforms[index];
-              return PlatformCard(
-                  platform: platform,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      CreateRoomScreen.id,
-                      arguments: platform,
-                    );
-                  });
-            },
           );
         }
         return const SizedBox.shrink();

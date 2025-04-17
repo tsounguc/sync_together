@@ -40,12 +40,16 @@ Future<void> _initWatchParty() async {
         getSyncedData: serviceLocator(),
       ),
     )
+    ..registerFactory(
+      () => WatchPartyListCubit(serviceLocator()),
+    )
     // Use cases
     ..registerLazySingleton(() => CreateWatchParty(serviceLocator()))
     ..registerLazySingleton(() => GetWatchParty(serviceLocator()))
     ..registerLazySingleton(() => JoinWatchParty(serviceLocator()))
     ..registerLazySingleton(() => SyncPlayback(serviceLocator()))
     ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
+    ..registerLazySingleton(() => GetPublicWatchParties(serviceLocator()))
     // Repositories
     ..registerLazySingleton<WatchPartyRepository>(
       () => WatchPartyRepositoryImpl(serviceLocator()),

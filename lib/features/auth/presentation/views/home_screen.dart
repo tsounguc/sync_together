@@ -5,6 +5,7 @@ import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/profile_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/splash_screen.dart';
+import 'package:sync_together/features/friends/presentation/views/friends_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -68,6 +69,12 @@ class HomeScreen extends StatelessWidget {
                     },
                     child: const Text('Link Account'),
                   ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, FriendsScreen.id);
+                  },
+                  child: const Text('Go to Friends'),
+                ),
               ],
             ),
           ),

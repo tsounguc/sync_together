@@ -21,6 +21,12 @@ abstract class WatchPartyRepository {
     required String userId,
   });
 
+  /// Returns a list of public watch party sessions.
+  ///
+  /// - **Success:** Returns a list of `WatchParty` entities.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultFuture<List<WatchParty>> getPublicWatchParties();
+
   /// Retrieves an active watch party by its ID.
   ///
   /// - **Success:** Returns a `WatchParty` entity.

@@ -19,12 +19,18 @@ abstract class WatchPartyRemoteDataSource {
 
   /// Joins an existing watch party session.
   ///
-  /// - **Success:** Returns a list of [WatchPartyModel].
+  /// - **Success:** Returns a [WatchPartyModel].
   /// - **Failure:** Throws an [WatchPartyException].
   Future<WatchPartyModel> joinWatchParty({
     required String partyId,
     required String userId,
   });
+
+  /// Get a list of public watch parties.
+  ///
+  /// - **Success:** Returns a list of [WatchPartyModel].
+  /// - **Failure:** Throws an [WatchPartyException].
+  Future<List<WatchPartyModel>> getPublicWatchParties();
 
   /// Retrieves a watch party by ID.
   ///
@@ -139,6 +145,35 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
       throw JoinWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Future<List<WatchPartyModel>> getPublicWatchParties() async {
+    try {
+      final watchParties = await _watchParties
+          .where('isPrivate', isEqualTo: false)
+          .orderBy('createdAt', descending: true)
+          .get()
+          .then(
+            (value) => value.docs
+                .map(
+                  (doc) => WatchPartyModel.fromMap(doc.data()),
+                )
+                .toList(),
+          );
+      return watchParties;
+    } on FirebaseAuthException catch (e) {
+      throw SyncWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw SyncWatchPartyException(
         message: e.toString(),
         statusCode: '505',
       );

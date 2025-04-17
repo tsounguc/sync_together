@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/resources/strings.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/features/auth/data/models/user_model.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/home_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/login_screen.dart';
@@ -63,6 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
                   if (state is Authenticated) {
+                    context.userProvider.user = state.user as UserModel?;
                     Navigator.pushReplacementNamed(context, HomeScreen.id);
                   } else if (state is AuthError) {
                     CoreUtils.showSnackBar(context, state.message);

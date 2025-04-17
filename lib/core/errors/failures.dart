@@ -247,6 +247,21 @@ class JoinWatchPartyFailure extends WatchPartyFailure {
         );
 }
 
+/// **Failure that occurs when getting list of public watch parties.**
+class GetPublicWatchPartiesFailure extends WatchPartyFailure {
+  GetPublicWatchPartiesFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [GetPublicWatchPartiesException] into a [GetPublicWatchPartiesFailure].
+  GetPublicWatchPartiesFailure.fromException(GetPublicWatchPartiesException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
 /// **Failure that occurs when creating a watch party.**
 class GetWatchPartyFailure extends WatchPartyFailure {
   GetWatchPartyFailure({required super.message, required super.statusCode});
@@ -274,23 +289,24 @@ class SyncWatchPartyFailure extends WatchPartyFailure {
 /// **Base class for all streaming platforms failures.**
 ///
 /// This allows us to have specific failure types.
-abstract class StreamingPlatformsFailure  extends Failure {
+abstract class StreamingPlatformsFailure extends Failure {
   StreamingPlatformsFailure({
     required super.message,
     required super.statusCode,
   });
 }
 
-
 /// **Failure that occurs when loading streaming platforms.**
 class LoadPlatformsFailure extends StreamingPlatformsFailure {
-  LoadPlatformsFailure({required super.message,
-    required super.statusCode,});
+  LoadPlatformsFailure({
+    required super.message,
+    required super.statusCode,
+  });
 
   /// Converts a [LoadPlatformsException] into a [LoadPlatformsFailure].
   LoadPlatformsFailure.fromException(LoadPlatformsException exception)
       : this(
-    message: exception.message,
-    statusCode: exception.statusCode,
-  );
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
 }

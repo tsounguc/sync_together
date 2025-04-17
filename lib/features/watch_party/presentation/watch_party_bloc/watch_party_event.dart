@@ -26,15 +26,15 @@ final class CreateWatchPartyEvent extends WatchPartyEvent {
 /// Event to join an existing Watch Party
 class JoinWatchPartyEvent extends WatchPartyEvent {
   const JoinWatchPartyEvent({
-    required this.watchPartyId,
+    required this.partyId,
     required this.userId,
   });
 
-  final String watchPartyId;
+  final String partyId;
   final String userId;
 
   @override
-  List<Object?> get props => [watchPartyId, userId];
+  List<Object?> get props => [partyId, userId];
 }
 
 /// Event to sync playback position across users

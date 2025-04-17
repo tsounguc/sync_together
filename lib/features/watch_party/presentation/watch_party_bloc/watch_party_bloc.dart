@@ -75,7 +75,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
   ) async {
     final result = await joinWatchParty(
       JoinWatchPartyParams(
-        partyId: event.watchPartyId,
+        partyId: event.partyId,
         userId: event.userId,
       ),
     );
