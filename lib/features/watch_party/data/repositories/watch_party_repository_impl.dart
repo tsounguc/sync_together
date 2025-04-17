@@ -37,7 +37,7 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
   }
 
   @override
-  ResultVoid joinWatchParty({
+  ResultFuture<WatchParty> joinWatchParty({
     required String partyId,
     required String userId,
   }) async {
@@ -59,6 +59,16 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
       return Right(result);
     } on GetPublicWatchPartiesException catch (e) {
       return Left(GetPublicWatchPartiesFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid startParty({required String partyId}) async {
+    try {
+      final result = await remoteDataSource.startParty(partyId: partyId);
+      return Right(result);
+    } on StartWatchPartyException catch (e) {
+      return Left(StartWatchPartyFailure.fromException(e));
     }
   }
 }

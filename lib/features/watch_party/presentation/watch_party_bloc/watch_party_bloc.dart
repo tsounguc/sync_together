@@ -11,6 +11,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/create_watch
 import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
 
 part 'watch_party_event.dart';
@@ -19,12 +20,14 @@ part 'watch_party_state.dart';
 class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
   WatchPartyBloc({
     required this.createWatchParty,
+    required this.startParty,
     required this.getWatchParty,
     required this.joinWatchParty,
     required this.syncPlayback,
     required this.getSyncedData,
   }) : super(const WatchPartyInitial()) {
     on<CreateWatchPartyEvent>(_onCreateWatchParty);
+    on<StartPartyEvent>(_onStartWatchParty);
     on<GetWatchPartyEvent>(_onGetWatchParty);
     on<JoinWatchPartyEvent>(_onJoinWatchParty);
     on<SyncPlaybackEvent>(_onSyncPlayback);
@@ -32,6 +35,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
   }
 
   final CreateWatchParty createWatchParty;
+  final StartWatchParty startParty;
   final GetWatchParty getWatchParty;
   final JoinWatchParty joinWatchParty;
   final SyncPlayback syncPlayback;
@@ -41,6 +45,8 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
     CreateWatchPartyEvent event,
     Emitter<WatchPartyState> emit,
   ) async {
+    emit(WatchPartyLoading());
+
     final result = await createWatchParty(event.party);
 
     result.fold(
@@ -52,6 +58,18 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
         emit(WatchPartyCreated(createdParty));
         event.onSuccess?.call(createdParty);
       },
+    );
+  }
+
+  Future<void> _onStartWatchParty(
+    StartPartyEvent event,
+    Emitter<WatchPartyState> emit,
+  ) async {
+    emit(WatchPartyLoading());
+    final result = await startParty(event.partyId);
+    result.fold(
+      (failure) => emit(WatchPartyError(failure.message)),
+      (_) => emit(WatchPartyStarted()),
     );
   }
 
@@ -82,7 +100,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
 
     result.fold(
       (failure) => emit(WatchPartyError(failure.message)),
-      (success) => emit(const WatchPartyJoined()),
+      (watchParty) => emit(WatchPartyJoined(watchParty)),
     );
   }
 

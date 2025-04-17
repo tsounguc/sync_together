@@ -86,3 +86,13 @@ class GetWatchPartyEvent extends WatchPartyEvent {
   @override
   List<Object?> get props => [watchPartyId];
 }
+
+/// Event to start watch party
+class StartPartyEvent extends WatchPartyEvent {
+  const StartPartyEvent(this.partyId);
+
+  final String partyId;
+
+  @override
+  List<Object?> get props => [partyId];
+}

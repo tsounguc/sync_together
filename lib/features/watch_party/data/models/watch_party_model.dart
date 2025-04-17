@@ -21,6 +21,7 @@ class WatchPartyModel extends WatchParty {
     required super.participantIds,
     required super.lastSyncedTime,
     required super.isPlaying,
+    required super.hasStarted,
     required super.playbackPosition,
   });
 
@@ -39,6 +40,7 @@ class WatchPartyModel extends WatchParty {
           participantIds: [],
           lastSyncedTime: DateTime(0, 0, 0),
           isPlaying: false,
+          hasStarted: false,
           playbackPosition: 0,
         );
 
@@ -55,17 +57,18 @@ class WatchPartyModel extends WatchParty {
           videoUrl: dataMap['videoUrl'] as String,
           platform: dataMap['platform'] == null
               ? const StreamingPlatformModel.empty()
-              : StreamingPlatformModel.fromMap(dataMap['platforms'] as DataMap),
+              : StreamingPlatformModel.fromMap(dataMap['platform'] as DataMap),
           createdAt: (dataMap['createdAt'] as Timestamp).toDate(),
           isPrivate: dataMap['isPrivate'] as bool,
           hostId: dataMap['hostId'] as String,
           participantIds: dataMap['participantIds'] == null
-              ? List<String>.from(
+              ? []
+              : List<String>.from(
                   dataMap['participantIds'] as List,
-                )
-              : [],
+                ),
           lastSyncedTime: (dataMap['lastSyncedTime'] as Timestamp).toDate(),
           isPlaying: dataMap['isPlaying'] as bool,
+          hasStarted: dataMap['hasStarted'] as bool,
           playbackPosition: dataMap['playbackPosition'] as double,
         );
 
@@ -84,6 +87,7 @@ class WatchPartyModel extends WatchParty {
         'participantIds': participantIds,
         'lastSyncedTime': Timestamp.fromDate(lastSyncedTime),
         'isPlaying': isPlaying,
+        'hasStarted': hasStarted,
         'playbackPosition': playbackPosition,
       };
 
@@ -99,6 +103,7 @@ class WatchPartyModel extends WatchParty {
     List<String>? participantIds,
     DateTime? lastSyncedTime,
     bool? isPlaying,
+    bool? hasStarted,
     double? playbackPosition,
   }) {
     return WatchPartyModel(
@@ -112,6 +117,7 @@ class WatchPartyModel extends WatchParty {
       participantIds: participantIds ?? this.participantIds,
       lastSyncedTime: lastSyncedTime ?? this.lastSyncedTime,
       isPlaying: isPlaying ?? this.isPlaying,
+      hasStarted: hasStarted ?? this.hasStarted,
       playbackPosition: playbackPosition ?? this.playbackPosition,
     );
   }

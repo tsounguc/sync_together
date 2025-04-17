@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
+import 'package:sync_together/features/watch_party/presentation/views/room_lobby_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_list_cubit/watch_party_list_cubit.dart';
@@ -43,9 +44,14 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
       listener: (context, state) {
         if (state is WatchPartyJoined) {
           if (_selectedParty != null) {
-            Navigator.pushNamed(
+            // Navigator.pushNamed(
+            //   context,
+            //   WatchPartyScreen.id,
+            //   arguments: _selectedParty,
+            // );
+            Navigator.pushReplacementNamed(
               context,
-              WatchPartyScreen.id,
+              RoomLobbyScreen.id,
               arguments: _selectedParty,
             );
           }

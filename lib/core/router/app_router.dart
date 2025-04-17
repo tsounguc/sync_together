@@ -19,6 +19,7 @@ import 'package:sync_together/features/platforms/presentation/views/platform_sel
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/views/create_room_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/join_room_screen.dart';
+import 'package:sync_together/features/watch_party/presentation/views/room_lobby_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_list_cubit/watch_party_list_cubit.dart';

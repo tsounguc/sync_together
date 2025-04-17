@@ -178,6 +178,13 @@ class SyncWatchPartyException extends WatchPartyException {
   });
 }
 
+class StartWatchPartyException extends WatchPartyException {
+  const StartWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
 /// **Exception thrown when getting list of public watch parties.**
 class GetPublicWatchPartiesException extends WatchPartyException {
   const GetPublicWatchPartiesException({

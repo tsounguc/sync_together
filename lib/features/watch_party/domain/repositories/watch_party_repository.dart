@@ -6,7 +6,7 @@ import 'package:sync_together/features/watch_party/domain/entities/watch_party.d
 abstract class WatchPartyRepository {
   /// Creates a new watch party session.
   ///
-  /// - **Success:** Returns the `WatchParty` entity.
+  /// - **Success:** Returns `WatchParty`.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<WatchParty> createWatchParty({
     required WatchPartyModel party,
@@ -14,9 +14,9 @@ abstract class WatchPartyRepository {
 
   /// Joins an existing watch party.
   ///
-  /// - **Success:** Returns `void`.
+  /// - **Success:** Returns `WatchParty`.
   /// - **Failure:** Returns a `WatchPartyFailure`.
-  ResultVoid joinWatchParty({
+  ResultFuture<WatchParty> joinWatchParty({
     required String partyId,
     required String userId,
   });
@@ -32,4 +32,10 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns a `WatchParty` entity.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<WatchParty> getWatchParty(String partyId);
+
+  /// Starts watch party.
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultVoid startParty({required String partyId});
 }

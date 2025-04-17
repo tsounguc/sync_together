@@ -52,6 +52,12 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Success:** Returns Map.
   /// - **Failure:** Throws an [WatchPartyException].
   Stream<DataMap> getSyncedData({required String partyId});
+
+  /// Start watch party.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws an [WatchPartyException].
+  Future<void> startParty({required String partyId});
 }
 
 class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
@@ -165,6 +171,7 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
                 )
                 .toList(),
           );
+      print(watchParties);
       return watchParties;
     } on FirebaseAuthException catch (e) {
       throw SyncWatchPartyException(
@@ -226,6 +233,26 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
         );
       },
     );
+  }
+
+  @override
+  Future<void> startParty({required String partyId}) async {
+    try {
+      await _watchParties.doc(partyId).update({
+        'hasStarted': true,
+      });
+    } on FirebaseAuthException catch (e) {
+      throw StartWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw StartWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
   }
 
   CollectionReference<DataMap> get _watchParties => firestore.collection(

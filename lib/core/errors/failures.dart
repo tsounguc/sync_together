@@ -262,7 +262,7 @@ class GetPublicWatchPartiesFailure extends WatchPartyFailure {
         );
 }
 
-/// **Failure that occurs when creating a watch party.**
+/// **Failure that occurs when getting a watch party.**
 class GetWatchPartyFailure extends WatchPartyFailure {
   GetWatchPartyFailure({required super.message, required super.statusCode});
 
@@ -274,7 +274,19 @@ class GetWatchPartyFailure extends WatchPartyFailure {
         );
 }
 
-/// **Failure that occurs when creating a watch party.**
+/// **Failure that occurs when starting a watch party.**
+class StartWatchPartyFailure extends WatchPartyFailure {
+  StartWatchPartyFailure({required super.message, required super.statusCode});
+
+  /// Converts a [StartWatchPartyException] into a [StartWatchPartyFailure].
+  StartWatchPartyFailure.fromException(StartWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when syncing a watch party.**
 class SyncWatchPartyFailure extends WatchPartyFailure {
   SyncWatchPartyFailure({required super.message, required super.statusCode});
 

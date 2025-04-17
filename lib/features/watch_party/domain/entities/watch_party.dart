@@ -15,6 +15,7 @@ class WatchParty extends Equatable {
     required this.participantIds,
     required this.lastSyncedTime,
     required this.isPlaying,
+    required this.hasStarted,
     required this.playbackPosition,
   });
 
@@ -31,6 +32,7 @@ class WatchParty extends Equatable {
           participantIds: ['1'],
           lastSyncedTime: DateTime.now(),
           isPlaying: false,
+          hasStarted: false,
           playbackPosition: 0,
         );
 
@@ -67,6 +69,9 @@ class WatchParty extends Equatable {
   /// Flag to indicate if video currently playing
   final bool isPlaying;
 
+  /// Flag to indicate if party has officially started
+  final bool hasStarted;
+
   @override
   List<Object?> get props => [
         id,
@@ -77,6 +82,7 @@ class WatchParty extends Equatable {
         createdAt,
         isPlaying,
         isPrivate,
+        hasStarted,
         playbackPosition,
       ];
 }

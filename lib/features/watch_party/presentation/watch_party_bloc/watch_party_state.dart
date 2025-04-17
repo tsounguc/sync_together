@@ -22,19 +22,26 @@ class WatchPartyError extends WatchPartyState {
   List<Object?> get props => [message];
 }
 
+/// Loading state
+class WatchPartyLoading extends WatchPartyState {}
+
 /// Success state for creating watch party
 final class WatchPartyCreated extends WatchPartyState {
-  const WatchPartyCreated(this.watchParty);
+  const WatchPartyCreated(this.party);
 
-  final WatchParty watchParty;
+  final WatchParty party;
 
   @override
-  List<Object?> get props => [watchParty];
+  List<Object?> get props => [party];
 }
 
 /// Success state for joining watch party
 class WatchPartyJoined extends WatchPartyState {
-  const WatchPartyJoined();
+  const WatchPartyJoined(this.party);
+  final WatchParty party;
+
+  @override
+  List<Object?> get props => [party];
 }
 
 /// Success state for getting watch party
@@ -60,3 +67,6 @@ class SyncUpdated extends WatchPartyState {
   @override
   List<Object?> get props => [playbackPosition];
 }
+
+/// Success state for starting a watch party
+class WatchPartyStarted extends WatchPartyState {}
