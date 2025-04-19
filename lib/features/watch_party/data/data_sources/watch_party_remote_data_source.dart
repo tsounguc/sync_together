@@ -5,7 +5,6 @@ import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/utils/firebase_constants.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
-import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Remote Data Source for Watch Parties**
 ///
@@ -14,13 +13,13 @@ abstract class WatchPartyRemoteDataSource {
   /// Creates a new watch party session.
   ///
   /// - **Success:** Returns a [WatchPartyModel].
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Future<WatchPartyModel> createWatchParty({required WatchPartyModel party});
 
   /// Joins an existing watch party session.
   ///
   /// - **Success:** Returns a [WatchPartyModel].
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Future<WatchPartyModel> joinWatchParty({
     required String partyId,
     required String userId,
@@ -29,19 +28,19 @@ abstract class WatchPartyRemoteDataSource {
   /// Get a list of public watch parties.
   ///
   /// - **Success:** Returns a list of [WatchPartyModel].
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Future<List<WatchPartyModel>> getPublicWatchParties();
 
   /// Retrieves a watch party by ID.
   ///
   /// - **Success:** Returns a list of [WatchPartyModel].
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Future<WatchPartyModel> getWatchParty(String partyId);
 
   /// Send playback time to database.
   ///
   /// - **Success:** Completes without returning a value.
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Future<void> sendSyncData({
     required String partyId,
     required double playbackPosition,
@@ -50,14 +49,20 @@ abstract class WatchPartyRemoteDataSource {
   /// Get updated playback time.
   ///
   /// - **Success:** Returns Map.
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Stream<DataMap> getSyncedData({required String partyId});
 
   /// Start watch party.
   ///
   /// - **Success:** Completes without returning a value.
-  /// - **Failure:** Throws an [WatchPartyException].
+  /// - **Failure:** Throws a [WatchPartyException].
   Future<void> startParty({required String partyId});
+
+  /// Listen to start status of a WatchParty
+  ///
+  /// - **Success:** Returns s bool.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Stream<bool> watchStartStatus({required String partyId});
 }
 
 class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
@@ -251,6 +256,47 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
       throw StartWatchPartyException(
         message: e.toString(),
         statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Stream<bool> watchStartStatus({required String partyId}) {
+    try {
+      final statusStream = _watchParties.doc(partyId).snapshots().map((snapshot) {
+        final data = snapshot.data();
+        if (data == null) return false;
+        return data['hasStarted'] == false;
+      });
+      return statusStream.handleError((dynamic error) {
+        if (error is FirebaseException) {
+          throw StartWatchPartyException(
+            message: error.message ?? 'Unknown error occurred',
+            statusCode: error.code,
+          );
+        }
+        throw StartWatchPartyException(
+          message: error.toString(),
+          statusCode: '505',
+        );
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      debugPrintStack(stackTrace: stackTrace);
+      return Stream.error(
+        StartWatchPartyException(
+          message: e.message ?? 'Unknown error occurred',
+          statusCode: e.code,
+        ),
+      );
+    } on StartWatchPartyException catch (e) {
+      return Stream.error(e);
+    } catch (e, stackTrace) {
+      debugPrintStack(stackTrace: stackTrace);
+      return Stream.error(
+        const StartWatchPartyException(
+          message: 'Unknown error occurred',
+          statusCode: '500',
+        ),
       );
     }
   }

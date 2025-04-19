@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
+import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/views/room_lobby_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
@@ -56,8 +57,9 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
             );
           }
         } else if (state is WatchPartyError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+          CoreUtils.showSnackBar(
+            context,
+            state.message,
           );
         }
       },

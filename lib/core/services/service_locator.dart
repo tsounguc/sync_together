@@ -43,6 +43,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_pa
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/watch_start_status.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_list_cubit/watch_party_list_cubit.dart';
 

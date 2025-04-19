@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
+import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/utils/native_launcher.dart';
@@ -66,11 +67,11 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
             if (!isGranted) {
               final granted = await FlutterOverlayWindow.requestPermission() ?? false;
               if (!granted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Overlay permission not granted.'),
-                  ),
+                CoreUtils.showSnackBar(
+                  context,
+                  'Overlay permission not granted.',
                 );
+
                 return;
               }
             }

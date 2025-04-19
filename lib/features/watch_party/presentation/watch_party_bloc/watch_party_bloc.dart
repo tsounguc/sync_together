@@ -13,6 +13,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_pa
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/watch_start_status.dart';
 
 part 'watch_party_event.dart';
 part 'watch_party_state.dart';
@@ -25,6 +26,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
     required this.joinWatchParty,
     required this.syncPlayback,
     required this.getSyncedData,
+    required this.watchStartStatus,
   }) : super(const WatchPartyInitial()) {
     on<CreateWatchPartyEvent>(_onCreateWatchParty);
     on<StartPartyEvent>(_onStartWatchParty);
@@ -32,6 +34,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
     on<JoinWatchPartyEvent>(_onJoinWatchParty);
     on<SyncPlaybackEvent>(_onSyncPlayback);
     on<GetSyncedDataEvent>(_onGetSyncedData);
+    on<ListenToStartPartyEvent>(_onListenToStartParty);
   }
 
   final CreateWatchParty createWatchParty;
@@ -40,6 +43,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
   final JoinWatchParty joinWatchParty;
   final SyncPlayback syncPlayback;
   final GetSyncedData getSyncedData;
+  final WatchStartStatus watchStartStatus;
 
   Future<void> _onCreateWatchParty(
     CreateWatchPartyEvent event,
@@ -123,9 +127,12 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
 
   StreamSubscription<Either<Failure, DataMap>>? subscription;
 
-  void _onGetSyncedData(GetSyncedDataEvent event, Emitter<WatchPartyState> emit) {
+  void _onGetSyncedData(
+    GetSyncedDataEvent event,
+    Emitter<WatchPartyState> emit,
+  ) {
     subscription?.cancel();
-    subscription = getSyncedData(event.watchPartyId).listen(
+    subscription = getSyncedData(event.partyId).listen(
       /*onData:*/
       (result) {
         result.fold(
@@ -146,9 +153,29 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
     );
   }
 
+  StreamSubscription<Either<Failure, bool>>? startPartySubscription;
+  void _onListenToStartParty(
+    ListenToStartPartyEvent event,
+    Emitter<WatchPartyState> emit,
+  ) {
+    startPartySubscription?.cancel();
+    startPartySubscription = watchStartStatus(event.partyId).listen(/*onData*/ (result) {
+      result.fold((failure) {
+        emit(WatchPartyError(failure.message));
+        startPartySubscription?.cancel();
+      }, (hasStarted) {
+        if (hasStarted) {
+          emit(const PartyStartedRealtime());
+          startPartySubscription?.cancel(); // Stop listening after party started
+        }
+      });
+    });
+  }
+
   @override
   Future<void> close() {
     subscription?.cancel();
+    startPartySubscription?.cancel();
     return super.close();
   }
 }

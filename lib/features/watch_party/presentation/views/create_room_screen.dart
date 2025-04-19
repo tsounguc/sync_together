@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/i_field.dart';
 import 'package:sync_together/core/router/app_router.dart';
+import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
@@ -33,9 +34,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     final url = _urlController.text.trim();
 
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title and video URL')),
+      CoreUtils.showSnackBar(
+        context,
+        'Please enter a title and video URL',
       );
+
       return;
     }
 
@@ -133,8 +136,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   );
                 }
                 if (state is WatchPartyError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
+                  CoreUtils.showSnackBar(
+                    context,
+                    state.message,
                   );
                 }
               },

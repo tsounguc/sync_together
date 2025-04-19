@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
@@ -70,5 +73,31 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
     } on StartWatchPartyException catch (e) {
       return Left(StartWatchPartyFailure.fromException(e));
     }
+  }
+
+  @override
+  ResultStream<bool> watchStartStatus({required String partyId}) {
+    return remoteDataSource.watchStartStatus(partyId: partyId).transform(
+          StreamTransformer<bool, Either<Failure, bool>>.fromHandlers(
+            handleData: (status, sink) {
+              sink.add(Right(status));
+            },
+            handleError: (error, stackTrace, sink) {
+              debugPrint(stackTrace.toString());
+              if (error is StartWatchPartyException) {
+                sink.add(Left(StartWatchPartyFailure.fromException(error)));
+              } else {
+                sink.add(
+                  Left(
+                    StartWatchPartyFailure(
+                      message: error.toString(),
+                      statusCode: 505,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        );
   }
 }

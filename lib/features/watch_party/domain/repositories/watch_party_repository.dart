@@ -38,4 +38,10 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultVoid startParty({required String partyId});
+
+  /// Gets watch party start status
+  ///
+  /// - **Success:** Returns bool.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultStream<bool> watchStartStatus({required String partyId});
 }

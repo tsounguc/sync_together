@@ -53,12 +53,12 @@ class SyncPlaybackEvent extends WatchPartyEvent {
 /// Event to get synced playback position across users
 class GetSyncedDataEvent extends WatchPartyEvent {
   const GetSyncedDataEvent({
-    required this.watchPartyId,
+    required this.partyId,
   });
-  final String watchPartyId;
+  final String partyId;
 
   @override
-  List<Object?> get props => [watchPartyId];
+  List<Object?> get props => [partyId];
 }
 
 /// Event to update watch party state
@@ -90,6 +90,16 @@ class GetWatchPartyEvent extends WatchPartyEvent {
 /// Event to start watch party
 class StartPartyEvent extends WatchPartyEvent {
   const StartPartyEvent(this.partyId);
+
+  final String partyId;
+
+  @override
+  List<Object?> get props => [partyId];
+}
+
+/// Event to listen for party starting
+class ListenToStartPartyEvent extends WatchPartyEvent {
+  const ListenToStartPartyEvent(this.partyId);
 
   final String partyId;
 

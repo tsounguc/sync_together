@@ -70,3 +70,8 @@ class SyncUpdated extends WatchPartyState {
 
 /// Success state for starting a watch party
 class WatchPartyStarted extends WatchPartyState {}
+
+/// Success state for when started real-time detected
+class PartyStartedRealtime extends WatchPartyState {
+  const PartyStartedRealtime();
+}

@@ -21,17 +21,12 @@ class PlaybackControls extends StatelessWidget {
             playbackPosition: currentPosition,
           ),
         );
+    CoreUtils.showSnackBar(context,isPlaying ? 'You are playing.' : 'You paused the video.');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isPlaying ? 'You are playing.' : 'You paused the video.'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   void _syncWithHost(BuildContext context) {
-    context.read<WatchPartyBloc>().add(GetSyncedDataEvent(watchPartyId: watchPartyId));
+    context.read<WatchPartyBloc>().add(GetSyncedDataEvent(partyId: watchPartyId));
     CoreUtils.showSnackBar(
       context,
       'Synced with host!',
@@ -69,20 +64,32 @@ class PlaybackControls extends StatelessWidget {
             const SizedBox(width: 12),
             ElevatedButton.icon(
               onPressed: () => _sendPlaybackUpdate(context, false),
-              icon: const Icon(Icons.pause,size: 15,),
-              label: const Text('I Paused',style: TextStyle(
-                fontSize: 12,
-              ),),
+              icon: const Icon(
+                Icons.pause,
+                size: 15,
+              ),
+              label: const Text(
+                'I Paused',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
           onPressed: () => _syncWithHost(context),
-          icon: const Icon(Icons.sync,size: 15,),
-          label: const Text('Sync with Host',style: TextStyle(
-            fontSize: 12,
-          ),),
+          icon: const Icon(
+            Icons.sync,
+            size: 15,
+          ),
+          label: const Text(
+            'Sync with Host',
+            style: TextStyle(
+              fontSize: 12,
+            ),
+          ),
         ),
       ],
     );
@@ -136,12 +143,9 @@ class WebPlaybackControls extends StatelessWidget {
               playbackPosition: position,
             ),
           );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Playback synchronized!'),
-          duration: Duration(seconds: 2),
-        ),
+      CoreUtils.showSnackBar(
+        context,
+          'Playback synchronized!',
       );
     }
   }

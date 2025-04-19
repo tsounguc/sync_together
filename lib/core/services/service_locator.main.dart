@@ -39,6 +39,7 @@ Future<void> _initWatchParty() async {
         syncPlayback: serviceLocator(),
         getSyncedData: serviceLocator(),
         startParty: serviceLocator(),
+        watchStartStatus: serviceLocator(),
       ),
     )
     ..registerFactory(
@@ -51,6 +52,7 @@ Future<void> _initWatchParty() async {
     ..registerLazySingleton(() => JoinWatchParty(serviceLocator()))
     ..registerLazySingleton(() => SyncPlayback(serviceLocator()))
     ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
+    ..registerLazySingleton(() => WatchStartStatus(serviceLocator()))
     ..registerLazySingleton(() => GetPublicWatchParties(serviceLocator()))
     // Repositories
     ..registerLazySingleton<WatchPartyRepository>(
