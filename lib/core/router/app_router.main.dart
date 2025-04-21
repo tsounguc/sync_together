@@ -29,8 +29,11 @@ class AppRouter {
                   BlocProvider(
                     create: (context) => serviceLocator<WatchPartyListCubit>(),
                   ),
+                  BlocProvider(
+                    create: (context) => serviceLocator<AuthBloc>(),
+                  ),
                 ],
-                child: const JoinRoomScreen(),
+                child: const HomeScreen(),
               );
             }
             return const LoginScreen();
@@ -56,7 +59,20 @@ class AppRouter {
         );
       case HomeScreen.id:
         return _pageBuilder(
-          (_) => const HomeScreen(),
+          (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => serviceLocator<WatchPartyBloc>(),
+              ),
+              BlocProvider(
+                create: (context) => serviceLocator<WatchPartyListCubit>(),
+              ),
+              BlocProvider(
+                create: (context) => serviceLocator<AuthBloc>(),
+              ),
+            ],
+            child: const HomeScreen(),
+          ),
           settings: settings,
         );
       case PlatformSelectionScreen.id:
@@ -93,7 +109,15 @@ class AppRouter {
         );
       case RoomLobbyScreen.id:
         final args = settings.arguments! as WatchParty;
-        return _pageBuilder((_)=> BlocProvider(create: (context)=> serviceLocator<WatchPartyBloc>(),child: RoomLobbyScreen(watchParty: args,), ),settings: settings,);
+        return _pageBuilder(
+          (_) => BlocProvider(
+            create: (context) => serviceLocator<WatchPartyBloc>(),
+            child: RoomLobbyScreen(
+              watchParty: args,
+            ),
+          ),
+          settings: settings,
+        );
       case WatchPartyScreen.id:
         final args = settings.arguments! as WatchPartyScreenArguments;
         return _pageBuilder(

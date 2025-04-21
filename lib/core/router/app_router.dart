@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/services/service_locator.dart';
 import 'package:sync_together/features/auth/data/models/user_model.dart';
+import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/forgot_password_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/home_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/login_screen.dart';
