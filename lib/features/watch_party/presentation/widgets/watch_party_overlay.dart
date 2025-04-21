@@ -98,27 +98,17 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                           ),
                         ),
 
-                        // Playback Controls
-                        PlaybackControls(
-                          watchPartyId: widget.watchPartyId,
-                          currentPosition: 0.0,
-                        )
+                        // Native Mode Controls
+                        NativePlaybackControls(watchPartyId: widget.watchPartyId),
                       ],
                     ),
                   ),
                 ),
               ),
               Positioned(
-                // left: _dragOffset.dx,
-                // top: _dragOffset.dy,
                 top: 10,
                 right: 50,
                 child: GestureDetector(
-                  // onPanUpdate: (details) {
-                  //   setState(() {
-                  //     _dragOffset += Offset(details.delta.dx, details.delta.dy);
-                  //   });
-                  // },
                   onTap: _handleClose,
                   child: const CircleAvatar(
                     radius: 16,
@@ -131,6 +121,61 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
           ),
         ),
       ),
+    );
+  }
+}
+
+/// This is a new widget just for floating overlay controls (Native mode).
+class NativePlaybackControls extends StatelessWidget {
+  const NativePlaybackControls({required this.watchPartyId, super.key});
+
+  final String watchPartyId;
+
+  void _sendSyncEvent(BuildContext context) {
+    context.read<WatchPartyBloc>().add(GetSyncedDataEvent(partyId: watchPartyId));
+  }
+
+  void _sendPlayingEvent(BuildContext context) {
+    context.read<WatchPartyBloc>().add(
+          SyncPlaybackEvent(
+            watchPartyId: watchPartyId,
+            playbackPosition: 0, // No way to get exact position in Native Mode
+          ),
+        );
+  }
+
+  void _sendPausedEvent(BuildContext context) {
+    context.read<WatchPartyBloc>().add(
+          SyncPlaybackEvent(
+            watchPartyId: watchPartyId,
+            playbackPosition: 0, // No way to get exact position in Native Mode
+          ),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () => _sendPlayingEvent(context),
+          icon: const Icon(Icons.play_arrow, size: 18),
+          label: const Text('I\'m Playing'),
+        ),
+        ElevatedButton.icon(
+          onPressed: () => _sendPausedEvent(context),
+          icon: const Icon(Icons.pause, size: 18),
+          label: const Text('I Paused'),
+        ),
+        ElevatedButton.icon(
+          onPressed: () => _sendSyncEvent(context),
+          icon: const Icon(Icons.sync, size: 18),
+          label: const Text('Sync with Host'),
+        ),
+      ],
     );
   }
 }
