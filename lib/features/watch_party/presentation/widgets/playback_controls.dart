@@ -21,8 +21,7 @@ class PlaybackControls extends StatelessWidget {
             playbackPosition: currentPosition,
           ),
         );
-    CoreUtils.showSnackBar(context,isPlaying ? 'You are playing.' : 'You paused the video.');
-
+    CoreUtils.showSnackBar(context, isPlaying ? 'You are playing.' : 'You paused the video.');
   }
 
   void _syncWithHost(BuildContext context) {
@@ -113,21 +112,24 @@ class WebPlaybackControls extends StatelessWidget {
   /// The ID of the watch party.
   final String watchPartyId;
 
-  /// **Injects JavaScript to play/pause the video.**
-  Future<void> _togglePlayback(BuildContext context) async {
-    const script = """
-      var video = document.querySelector('video');
-      if (video) {
-        if (video.paused) {
-          video.play();
-        } else {
-          video.pause();
-        }
-      }
-    """;
-    await controller.runJavaScript(script);
+  /// **Play the void and sync position**
+  Future<void> _playVideo(BuildContext context) async {
+    const playScript = "document.querySelector('video')?.play();";
+    await controller.runJavaScript(playScript);
 
     await _syncPlayback(context);
+
+    CoreUtils.showSnackBar(context, 'You started playing the video.');
+  }
+
+  /// **Pause the video and sync position**
+  Future<void> _pauseVideo(BuildContext context) async {
+    const pauseScript = "document.querySelector('video')?.pause();";
+    await controller.runJavaScript(pauseScript);
+
+    await _syncPlayback(context);
+
+    CoreUtils.showSnackBar(context, 'You paused the video');
   }
 
   /// **Fetches the current playback position & syncs it across users.**
@@ -145,7 +147,7 @@ class WebPlaybackControls extends StatelessWidget {
           );
       CoreUtils.showSnackBar(
         context,
-          'Playback synchronized!',
+        'Playback synchronized!',
       );
     }
   }
@@ -157,11 +159,11 @@ class WebPlaybackControls extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.play_arrow),
-          onPressed: () async => _togglePlayback(context),
+          onPressed: () async => _playVideo(context),
         ),
         IconButton(
           icon: const Icon(Icons.pause),
-          onPressed: () async => _togglePlayback(context),
+          onPressed: () async => _pauseVideo(context),
         ),
         IconButton(
           icon: const Icon(Icons.sync),
