@@ -214,3 +214,33 @@ class LoadPlatformsException extends StreamingPlatformsException {
     required super.statusCode,
   });
 }
+
+/// **Base class for all message exceptions.**
+abstract class MessageException extends Equatable implements Exception {
+  const MessageException({
+    required this.message,
+    required this.statusCode,
+  });
+
+  final String message;
+  final String statusCode;
+
+  @override
+  List<Object?> get props => [message, statusCode];
+}
+
+/// **Exception thrown when sending a message.**
+class SendMessageException extends MessageException {
+  const SendMessageException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when listening a message.**
+class ListenToMessagesException extends MessageException {
+  const ListenToMessagesException({
+    required super.message,
+    required super.statusCode,
+  });
+}

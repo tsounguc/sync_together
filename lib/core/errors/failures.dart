@@ -322,3 +322,43 @@ class LoadPlatformsFailure extends StreamingPlatformsFailure {
           statusCode: exception.statusCode,
         );
 }
+
+/// **Base class for all message failures.**
+///
+/// This allows us to have specific failure types.
+abstract class MessageFailure extends Failure {
+  MessageFailure({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Failure that occurs when sending a message.**
+class SendMessageFailure extends MessageFailure {
+  SendMessageFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [SendMessageException] into a [SendMessageFailure].
+  SendMessageFailure.fromException(SendMessageException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when listening to messages.**
+class ListenToMessagesFailure extends MessageFailure {
+  ListenToMessagesFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [ListenToMessagesException] into a [ListenToMessagesFailure].
+  ListenToMessagesFailure.fromException(ListenToMessagesException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}

@@ -29,7 +29,8 @@ class RoomLobbyScreen extends StatelessWidget {
           );
         }
         if (state is PartyStartedRealtime) {
-          Navigator.pushReplacementNamed(
+          Navigator.pop(context);
+          Navigator.pushNamed(
             context,
             WatchPartyScreen.id,
             arguments: WatchPartyScreenArguments(

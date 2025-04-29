@@ -47,9 +47,11 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
 
     // Show floating overlay window
     await FlutterOverlayWindow.showOverlay(
-      height: 450,
-      width: 800,
+      // height: 1500,
+      // width: 800,
       alignment: OverlayAlignment.centerRight,
+      enableDrag: true,
+      // enableKeyboard: true,
     );
 
     final overlayIsActive = await FlutterOverlayWindow.isActive();
@@ -64,14 +66,18 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
       if (isInstalled) {
         if (deepLink.isNotEmpty) {
           await NativeAppLauncher.launchUriScheme(deepLink, package);
+          debugPrint('launchUriScheme deepLink: $deepLink');
         } else {
           await NativeAppLauncher.openApp(package);
+          debugPrint('openApp: $package');
         }
       } else {
         // App not installed, fallback to store page
         if (storeUrl != null && storeUrl.isNotEmpty) {
           await NativeAppLauncher.launchUri(storeUrl);
+          debugPrint('launchUri: $storeUrl');
         } else {
+          debugPrint('launchUri not working: $storeUrl');
           CoreUtils.showSnackBar(context, 'Cannot open app or store.');
         }
       }

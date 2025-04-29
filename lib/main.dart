@@ -49,11 +49,26 @@ class MyApp extends StatelessWidget {
 }
 
 @pragma("vm:entry-point")
-void overlayMain() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: OverlayEntryPoint(),
-  ));
+void overlayMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setUpServices();
+  await Firebase.initializeApp();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(),
+        )
+      ],
+      child: BlocProvider(
+        create: (_) => serviceLocator<AuthBloc>(),
+        child: const MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: OverlayEntryPoint(),
+        ),
+      ),
+    ),
+  );
 }
 
 class OverlayEntryPoint extends StatelessWidget {

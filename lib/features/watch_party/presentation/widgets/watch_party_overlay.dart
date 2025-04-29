@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
+import 'package:sync_together/core/services/service_locator.dart';
+import 'package:sync_together/features/chat/presentation/cubit/chat_cubit.dart';
+import 'package:sync_together/features/chat/presentation/widgets/chat_overlay.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
 
@@ -29,6 +32,7 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
   late Animation<double> _fade;
 
   var _dragOffset = Offset.zero;
+  bool _showChat = false;
 
   @override
   void initState() {
@@ -76,30 +80,37 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   width: context.width * 0.9,
+                  height: 800,
                   constraints: const BoxConstraints(
-                    maxHeight: 400,
+                    maxHeight: 1000,
                     minHeight: 100,
                   ),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black87,
+                    color: Colors.black.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          color: Colors.black54,
-                          child: const Text(
-                            'Chat goes here...',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        const Text(
+                          'Watch Party',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
-
+                        const SizedBox(height: 8),
                         // Native Mode Controls
                         NativePlaybackControls(watchPartyId: widget.watchPartyId),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: IconButton(
+                            icon: Icon(
+                              _showChat ? Icons.chat_bubble : Icons.chat_bubble_outline,
+                              color: Colors.white,
+                            ),
+                            onPressed: () => setState(() => _showChat = !_showChat),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -117,6 +128,18 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                   ),
                 ),
               ),
+              if (_showChat)
+                Positioned(
+                  right: -20,
+                  top: 250,
+                  child: BlocProvider(
+                    create: (context) => serviceLocator<ChatCubit>(), // or use your DI locator
+                    child: ChatOverlay(
+                      roomId: widget.watchPartyId,
+                      currentUserId: context.currentUser?.uid ?? '',
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

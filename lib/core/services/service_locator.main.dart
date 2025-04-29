@@ -7,6 +7,30 @@ Future<void> setUpServices() async {
   await _initFriend();
   await _initWatchParty();
   await _initPlatforms();
+  await _initChat();
+}
+
+Future<void> _initChat() async {
+  serviceLocator
+    // App Logic
+    ..registerFactory(
+      () => ChatCubit(
+        listenToMessages: serviceLocator(),
+        sendMessage: serviceLocator(),
+      ),
+    )
+    // Use cases
+    ..registerLazySingleton(() => ListenToMessages(serviceLocator()))
+    ..registerLazySingleton(() => SendMessage(serviceLocator()))
+    // Repositories
+    ..registerLazySingleton<ChatRepository>(
+      () => ChatRepositoryImpl(serviceLocator()),
+    )
+    // Data sources
+    ..registerLazySingleton<ChatRemoteDataSource>(
+      () => ChatRemoteDataSourceImpl(serviceLocator()),
+    );
+  //External Dependencies
 }
 
 Future<void> _initPlatforms() async {

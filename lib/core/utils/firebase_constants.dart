@@ -3,4 +3,5 @@ class FirebaseConstants {
   static const friendRequestsCollection = 'friend_requests';
   static const friendsCollection = 'friends';
   static const watchPartiesCollection = 'watch_parties';
+  static const messagesCollection = 'messages';
 }

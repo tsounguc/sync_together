@@ -140,7 +140,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
             emit(WatchPartyError(failure.message));
             subscription?.cancel();
           },
-          (data) => emit(SyncUpdated(data['playBackPosition'] as double)),
+          (data) => emit(SyncUpdated(data['playbackPosition'] as double? ?? 0)),
         );
       },
       onError: (dynamic error) {
