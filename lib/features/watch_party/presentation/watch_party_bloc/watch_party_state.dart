@@ -60,13 +60,20 @@ class SyncDataSent extends WatchPartyState {
 
 /// Success state for syncing playback
 class SyncUpdated extends WatchPartyState {
-  const SyncUpdated(this.playbackPosition);
+  const SyncUpdated({
+    required this.playbackPosition,
+    required this.isPlaying,
+  });
 
   final double playbackPosition;
+  final bool isPlaying;
 
   @override
-  List<Object?> get props => [playbackPosition];
+  List<Object?> get props => [playbackPosition, isPlaying];
 }
+
+/// Success state for updateing watch party url
+class VideoUrlUpdated extends WatchPartyState {}
 
 /// Success state for starting a watch party
 class WatchPartyStarted extends WatchPartyState {}

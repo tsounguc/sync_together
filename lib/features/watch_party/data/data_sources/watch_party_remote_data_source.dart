@@ -44,6 +44,7 @@ abstract class WatchPartyRemoteDataSource {
   Future<void> sendSyncData({
     required String partyId,
     required double playbackPosition,
+    required bool isPlaying,
   });
 
   /// Get updated playback time.
@@ -63,6 +64,15 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Success:** Returns s bool.
   /// - **Failure:** Throws a [WatchPartyException].
   Stream<bool> watchStartStatus({required String partyId});
+
+  /// Update watch party video url.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Future<void> updateVideoUrl({
+    required String partyId,
+    required String newUrl,
+  });
 }
 
 class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
@@ -196,12 +206,12 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   Future<void> sendSyncData({
     required String partyId,
     required double playbackPosition,
+    required bool isPlaying,
   }) async {
     try {
-      await _watchParties.doc(partyId).set({
-        'playbackPosition': playbackPosition,
-        'lastSyncedTime': Timestamp.now(),
-      }, SetOptions(merge: true));
+      await _watchParties.doc(partyId).set(
+          {'playbackPosition': playbackPosition, 'lastSyncedTime': Timestamp.now(), 'isPlaying': isPlaying},
+          SetOptions(merge: true));
     } on FirebaseAuthException catch (e) {
       throw SyncWatchPartyException(
         message: e.message ?? 'Error Occurred',
@@ -297,6 +307,27 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
           message: 'Unknown error occurred',
           statusCode: '500',
         ),
+      );
+    }
+  }
+
+  @override
+  Future<void> updateVideoUrl({
+    required String partyId,
+    required String newUrl,
+  }) async {
+    try {
+      await _watchParties.doc(partyId).update({'videoUrl': newUrl});
+    } on FirebaseAuthException catch (e) {
+      throw SyncWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw SyncWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
       );
     }
   }

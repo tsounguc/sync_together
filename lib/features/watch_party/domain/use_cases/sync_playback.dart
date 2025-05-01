@@ -1,18 +1,19 @@
 import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
-import 'package:sync_together/features/watch_party/domain/repositories/sync_playback_service.dart';
+import 'package:sync_together/features/watch_party/domain/repositories/playback_repository.dart';
 
 /// Syncs video playback across participants in a watch party.
 class SyncPlayback extends UseCaseWithParams<void, SyncPlaybackParams> {
-  const SyncPlayback(this.service);
+  const SyncPlayback(this.repository);
 
-  final SyncPlaybackService service;
+  final PlaybackRepository repository;
 
   @override
-  ResultVoid call(SyncPlaybackParams params) => service.sendSyncData(
+  ResultVoid call(SyncPlaybackParams params) => repository.sendSyncData(
         roomId: params.partyId,
         playbackPosition: params.playbackPosition,
+        isPlaying: params.isPlaying,
       );
 }
 
@@ -21,6 +22,7 @@ class SyncPlaybackParams extends Equatable {
   const SyncPlaybackParams({
     required this.partyId,
     required this.playbackPosition,
+    required this.isPlaying,
   });
 
   /// Unique watch party ID.
@@ -29,6 +31,9 @@ class SyncPlaybackParams extends Equatable {
   /// The current playback position (in seconds).
   final double playbackPosition;
 
+  /// Flag for play or pause status
+  final bool isPlaying;
+
   @override
-  List<Object?> get props => [partyId, playbackPosition];
+  List<Object?> get props => [partyId, playbackPosition, isPlaying];
 }

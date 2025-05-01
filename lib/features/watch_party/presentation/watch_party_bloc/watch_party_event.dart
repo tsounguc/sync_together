@@ -42,12 +42,14 @@ class SyncPlaybackEvent extends WatchPartyEvent {
   const SyncPlaybackEvent({
     required this.watchPartyId,
     required this.playbackPosition,
+    required this.isPlaying,
   });
   final String watchPartyId;
   final double playbackPosition;
+  final bool isPlaying;
 
   @override
-  List<Object?> get props => [watchPartyId, playbackPosition];
+  List<Object?> get props => [watchPartyId, playbackPosition, isPlaying];
 }
 
 /// Event to get synced playback position across users
@@ -73,6 +75,20 @@ class UpdateWatchPartyEvent extends WatchPartyEvent {
 
   @override
   List<Object?> get props => [watchPartyId, playbackPosition];
+}
+
+/// Event to update watch party video url state
+class UpdateVideoUrlEvent extends WatchPartyEvent {
+  const UpdateVideoUrlEvent({
+    required this.watchPartyId,
+    required this.newUrl,
+  });
+
+  final String watchPartyId;
+  final String newUrl;
+
+  @override
+  List<Object?> get props => [watchPartyId, newUrl];
 }
 
 /// Event to update watch party state

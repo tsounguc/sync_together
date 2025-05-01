@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
@@ -13,21 +14,23 @@ import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_pa
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/update_video_url.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/watch_start_status.dart';
 
 part 'watch_party_event.dart';
 part 'watch_party_state.dart';
 
 class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
-  WatchPartyBloc({
-    required this.createWatchParty,
-    required this.startParty,
-    required this.getWatchParty,
-    required this.joinWatchParty,
-    required this.syncPlayback,
-    required this.getSyncedData,
-    required this.watchStartStatus,
-  }) : super(const WatchPartyInitial()) {
+  WatchPartyBloc(
+      {required this.createWatchParty,
+      required this.startParty,
+      required this.getWatchParty,
+      required this.joinWatchParty,
+      required this.syncPlayback,
+      required this.getSyncedData,
+      required this.watchStartStatus,
+      required this.updateVideoUrl})
+      : super(const WatchPartyInitial()) {
     on<CreateWatchPartyEvent>(_onCreateWatchParty);
     on<StartPartyEvent>(_onStartWatchParty);
     on<GetWatchPartyEvent>(_onGetWatchParty);
@@ -35,6 +38,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
     on<SyncPlaybackEvent>(_onSyncPlayback);
     on<GetSyncedDataEvent>(_onGetSyncedData);
     on<ListenToStartPartyEvent>(_onListenToStartParty);
+    on<UpdateVideoUrlEvent>(_onUpdateVideoUrl);
   }
 
   final CreateWatchParty createWatchParty;
@@ -44,6 +48,7 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
   final SyncPlayback syncPlayback;
   final GetSyncedData getSyncedData;
   final WatchStartStatus watchStartStatus;
+  final UpdateVideoUrl updateVideoUrl;
 
   Future<void> _onCreateWatchParty(
     CreateWatchPartyEvent event,
@@ -116,12 +121,30 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
       SyncPlaybackParams(
         partyId: event.watchPartyId,
         playbackPosition: event.playbackPosition,
+        isPlaying: event.isPlaying,
       ),
     );
 
     result.fold(
       (failure) => emit(WatchPartyError(failure.message)),
       (_) => emit(const SyncDataSent()),
+    );
+  }
+
+  Future<void> _onUpdateVideoUrl(
+    UpdateVideoUrlEvent event,
+    Emitter<WatchPartyState> emit,
+  ) async {
+    final result = await updateVideoUrl(
+      UpdateVideoUrlParams(
+        partyId: event.watchPartyId,
+        newUrl: event.newUrl,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(WatchPartyError(failure.message)),
+      (_) => debugPrint('Video URL updated in Firestore'),
     );
   }
 
@@ -140,7 +163,12 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
             emit(WatchPartyError(failure.message));
             subscription?.cancel();
           },
-          (data) => emit(SyncUpdated(data['playbackPosition'] as double? ?? 0)),
+          (data) => emit(
+            SyncUpdated(
+              playbackPosition: data['playbackPosition'] as double? ?? 0,
+              isPlaying: data['isPlaying'] as bool? ?? false,
+            ),
+          ),
         );
       },
       onError: (dynamic error) {
@@ -159,17 +187,22 @@ class WatchPartyBloc extends Bloc<WatchPartyEvent, WatchPartyState> {
     Emitter<WatchPartyState> emit,
   ) {
     startPartySubscription?.cancel();
-    startPartySubscription = watchStartStatus(event.partyId).listen(/*onData*/ (result) {
-      result.fold((failure) {
-        emit(WatchPartyError(failure.message));
-        startPartySubscription?.cancel();
-      }, (hasStarted) {
-        if (hasStarted) {
-          emit(const PartyStartedRealtime());
-          startPartySubscription?.cancel(); // Stop listening after party started
-        }
-      });
-    });
+    startPartySubscription = watchStartStatus(event.partyId).listen(
+      /*onData*/ (result) {
+        result.fold(
+          (failure) {
+            emit(WatchPartyError(failure.message));
+            startPartySubscription?.cancel();
+          },
+          (hasStarted) {
+            if (hasStarted) {
+              emit(const PartyStartedRealtime());
+              startPartySubscription?.cancel(); // Stop listening after party started
+            }
+          },
+        );
+      },
+    );
   }
 
   @override

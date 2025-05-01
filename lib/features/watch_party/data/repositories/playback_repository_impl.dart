@@ -6,10 +6,10 @@ import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/data/data_sources/watch_party_remote_data_source.dart';
-import 'package:sync_together/features/watch_party/domain/repositories/sync_playback_service.dart';
+import 'package:sync_together/features/watch_party/domain/repositories/playback_repository.dart';
 
-class WebRTCPlaybackSync implements SyncPlaybackService {
-  WebRTCPlaybackSync(this.remoteDataSource);
+class PlaybackRepositoryImpl implements PlaybackRepository {
+  PlaybackRepositoryImpl(this.remoteDataSource);
 
   final WatchPartyRemoteDataSource remoteDataSource;
 
@@ -43,11 +43,13 @@ class WebRTCPlaybackSync implements SyncPlaybackService {
   ResultVoid sendSyncData({
     required String roomId,
     required double playbackPosition,
+    required bool isPlaying,
   }) async {
     try {
       final result = await remoteDataSource.sendSyncData(
         partyId: roomId,
         playbackPosition: playbackPosition,
+        isPlaying: isPlaying,
       );
       return Right(result);
     } on SyncWatchPartyException catch (e) {

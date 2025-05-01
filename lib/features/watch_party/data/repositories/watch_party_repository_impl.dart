@@ -100,4 +100,22 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
           ),
         );
   }
+
+  @override
+  ResultVoid updateVideoUrl({
+    required String partyId,
+    required String newUrl,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateVideoUrl(
+        partyId: partyId,
+        newUrl: newUrl,
+      );
+      return Right(result);
+    } on SyncWatchPartyException catch (e) {
+      return Left(
+        SyncWatchPartyFailure.fromException(e),
+      );
+    }
+  }
 }

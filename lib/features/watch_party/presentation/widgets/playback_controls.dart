@@ -9,7 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// Provides UI controls for controlling video playback inside the WebView.
 /// This includes **Play, Pause, and Sync** functionality.
 class WebPlaybackControls extends StatelessWidget {
-  const WebPlaybackControls({
+  WebPlaybackControls({
     required this.controller,
     required this.watchPartyId,
     super.key,
@@ -21,12 +21,14 @@ class WebPlaybackControls extends StatelessWidget {
   /// The ID of the watch party.
   final String watchPartyId;
 
+  var _isPlaying = false;
+
   /// **Play the void and sync position**
   Future<void> _playVideo(BuildContext context) async {
     const playScript = "document.querySelector('video')?.play();";
     await controller.runJavaScript(playScript);
-
-    await _syncPlayback(context);
+    _isPlaying = true;
+    await _syncPlayback(context, true);
 
     CoreUtils.showSnackBar(context, 'You started playing the video.');
   }
@@ -35,14 +37,14 @@ class WebPlaybackControls extends StatelessWidget {
   Future<void> _pauseVideo(BuildContext context) async {
     const pauseScript = "document.querySelector('video')?.pause();";
     await controller.runJavaScript(pauseScript);
-
-    await _syncPlayback(context);
+    _isPlaying = false;
+    await _syncPlayback(context, false);
 
     CoreUtils.showSnackBar(context, 'You paused the video');
   }
 
   /// **Fetches the current playback position & syncs it across users.**
-  Future<void> _syncPlayback(BuildContext context) async {
+  Future<void> _syncPlayback(BuildContext context, bool isPlaying) async {
     const script = "document.querySelector('video')?.currentTime";
     final result = await controller.runJavaScriptReturningResult(script);
 
@@ -52,6 +54,7 @@ class WebPlaybackControls extends StatelessWidget {
             SyncPlaybackEvent(
               watchPartyId: watchPartyId,
               playbackPosition: position,
+              isPlaying: isPlaying,
             ),
           );
       CoreUtils.showSnackBar(
@@ -76,7 +79,7 @@ class WebPlaybackControls extends StatelessWidget {
         ),
         IconButton(
           icon: const Icon(Icons.sync),
-          onPressed: () => _syncPlayback(context),
+          onPressed: () => _syncPlayback(context, _isPlaying),
         ),
       ],
     );

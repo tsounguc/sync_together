@@ -57,14 +57,14 @@ Future<void> _initWatchParty() async {
     // App Logic
     ..registerFactory(
       () => WatchPartyBloc(
-        createWatchParty: serviceLocator(),
-        getWatchParty: serviceLocator(),
-        joinWatchParty: serviceLocator(),
-        syncPlayback: serviceLocator(),
-        getSyncedData: serviceLocator(),
-        startParty: serviceLocator(),
-        watchStartStatus: serviceLocator(),
-      ),
+          createWatchParty: serviceLocator(),
+          getWatchParty: serviceLocator(),
+          joinWatchParty: serviceLocator(),
+          syncPlayback: serviceLocator(),
+          getSyncedData: serviceLocator(),
+          startParty: serviceLocator(),
+          watchStartStatus: serviceLocator(),
+          updateVideoUrl: serviceLocator()),
     )
     ..registerFactory(
       () => WatchPartyListCubit(serviceLocator()),
@@ -76,14 +76,15 @@ Future<void> _initWatchParty() async {
     ..registerLazySingleton(() => JoinWatchParty(serviceLocator()))
     ..registerLazySingleton(() => SyncPlayback(serviceLocator()))
     ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
+    ..registerLazySingleton(() => UpdateVideoUrl(serviceLocator()))
     ..registerLazySingleton(() => WatchStartStatus(serviceLocator()))
     ..registerLazySingleton(() => GetPublicWatchParties(serviceLocator()))
     // Repositories
     ..registerLazySingleton<WatchPartyRepository>(
       () => WatchPartyRepositoryImpl(serviceLocator()),
     )
-    ..registerLazySingleton<SyncPlaybackService>(
-      () => WebRTCPlaybackSync(serviceLocator()),
+    ..registerLazySingleton<PlaybackRepository>(
+      () => PlaybackRepositoryImpl(serviceLocator()),
     )
     // Data sources
     ..registerLazySingleton<WatchPartyRemoteDataSource>(

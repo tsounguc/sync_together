@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -27,15 +28,28 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   late final WebViewController webViewController;
   int loadingPercentage = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-    context.read<WatchPartyBloc>().add(
-          GetSyncedDataEvent(
-            partyId: widget.watchParty.id,
-          ),
-        );
+  Timer? _playbackSyncTimer;
+
+  void _startAutoSyncLoop() {
+    _playbackSyncTimer?.cancel();
+    _playbackSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      final result = await webViewController.runJavaScriptReturningResult(
+        "document.querySelector('video')?.currentTime",
+      );
+      final position = double.tryParse(result.toString()) ?? 0;
+      context.read<WatchPartyBloc>().add(
+            SyncPlaybackEvent(
+              watchPartyId: widget.watchParty.id,
+              playbackPosition: position,
+              isPlaying: true,
+            ),
+          );
+    });
+  }
+
+  void _stopAutoSyncLoop() {
+    _playbackSyncTimer?.cancel();
+    _playbackSyncTimer = null;
   }
 
   Future<void> _initializeWebView() async {
@@ -44,6 +58,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         : widget.watchParty.videoUrl.startsWith('http')
             ? widget.watchParty.videoUrl
             : 'https://${widget.watchParty.videoUrl}';
+    debugPrint('videoUrl: ${widget.watchParty.videoUrl}');
+    debugPrint('defaultUrl: ${widget.watchParty.platform.defaultUrl}');
+    debugPrint('validUrl: $validUrl');
 
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
@@ -80,6 +97,18 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             return NavigationDecision.prevent;
           }
           return NavigationDecision.navigate;
+        },
+        onUrlChange: (UrlChange change) {
+          final newUrl = change.url ?? '';
+          if (newUrl.isNotEmpty && newUrl != widget.watchParty.videoUrl) {
+            debugPrint('URL changed. Updating Firestore: $newUrl');
+            context.read<WatchPartyBloc>().add(
+                  UpdateVideoUrlEvent(
+                    watchPartyId: widget.watchParty.id,
+                    newUrl: newUrl,
+                  ),
+                );
+          }
         },
       );
 
@@ -124,6 +153,27 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     }
   }
 
+  Future<void> _playVideo() async {
+    await webViewController.runJavaScript("document.querySelector('video')?.play();");
+    _startAutoSyncLoop();
+  }
+
+  Future<void> _pauseVideo() async {
+    await webViewController.runJavaScript("document.querySelector('video')?.pause();");
+    _stopAutoSyncLoop();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebView();
+    context.read<WatchPartyBloc>().add(
+          GetSyncedDataEvent(
+            partyId: widget.watchParty.id,
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<WatchPartyBloc, WatchPartyState>(
@@ -131,6 +181,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         if (state is SyncUpdated) {
           debugPrint('Sync update received:  position=${state.playbackPosition}');
           _seekToPosition(state.playbackPosition);
+          if (state.isPlaying) {
+            _playVideo();
+          } else {
+            _pauseVideo();
+          }
         }
       },
       child: Scaffold(
@@ -153,5 +208,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _stopAutoSyncLoop();
+    super.dispose();
   }
 }

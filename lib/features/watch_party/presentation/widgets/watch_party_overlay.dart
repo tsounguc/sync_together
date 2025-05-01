@@ -80,7 +80,7 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   width: context.width * 0.9,
-                  height: 800,
+                  height: 400,
                   constraints: const BoxConstraints(
                     maxHeight: 1000,
                     minHeight: 100,
@@ -163,6 +163,7 @@ class NativePlaybackControls extends StatelessWidget {
           SyncPlaybackEvent(
             watchPartyId: watchPartyId,
             playbackPosition: 0, // No way to get exact position in Native Mode
+            isPlaying: true,
           ),
         );
   }
@@ -172,6 +173,7 @@ class NativePlaybackControls extends StatelessWidget {
           SyncPlaybackEvent(
             watchPartyId: watchPartyId,
             playbackPosition: 0, // No way to get exact position in Native Mode
+            isPlaying: false,
           ),
         );
   }

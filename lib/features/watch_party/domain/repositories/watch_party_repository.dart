@@ -44,4 +44,13 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns bool.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultStream<bool> watchStartStatus({required String partyId});
+
+  /// Update watch party video url.
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultVoid updateVideoUrl({
+    required String partyId,
+    required String newUrl,
+  });
 }
