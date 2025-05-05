@@ -57,8 +57,8 @@ void main() {
   test(
     'given ForgotPassword '
     'when instantiated '
-    'then call [AuthRepository.forgotPassword] '
-    'and return [void]',
+    'and call [AuthRepository.forgotPassword] unsuccessfully '
+    'then return [ForgotPasswordFailure] ',
     () async {
       // Arrange
       when(

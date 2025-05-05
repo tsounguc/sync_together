@@ -35,6 +35,19 @@ class Message extends Equatable {
   final DateTime timestamp;
 
   @override
+  String toString() {
+    return '''
+    Message(
+       id: $id,
+       senderId: $senderId,
+       senderName: $senderName,
+       text: $text,
+       timestamp: $timestamp,
+    )
+    ''';
+  }
+
+  @override
   List<Object?> get props => [
         id,
         senderId,

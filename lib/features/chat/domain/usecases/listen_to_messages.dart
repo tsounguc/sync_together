@@ -3,6 +3,10 @@ import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/chat/domain/entities/message.dart';
 import 'package:sync_together/features/chat/domain/repositories/chat_repository.dart';
 
+/// **Use Case: ListenToMessages**
+///
+/// Calls the [ChatRepository] to listen to messages.
+
 class ListenToMessages extends StreamUseCaseWithParams<List<Message>, String> {
   const ListenToMessages(this.repository);
 

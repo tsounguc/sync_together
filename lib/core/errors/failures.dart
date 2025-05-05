@@ -362,3 +362,63 @@ class ListenToMessagesFailure extends MessageFailure {
           statusCode: exception.statusCode,
         );
 }
+
+/// **Failure that occurs when deleting a message.**
+class DeleteMessageFailure extends MessageFailure {
+  DeleteMessageFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [DeleteMessageException] into a [DeleteMessageFailure].
+  DeleteMessageFailure.fromException(DeleteMessageException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when clearing messages from a room.**
+class ClearRoomMessagesFailure extends MessageFailure {
+  ClearRoomMessagesFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [ClearRoomMessagesException] into a [ClearRoomMessagesFailure].
+  ClearRoomMessagesFailure.fromException(ClearRoomMessagesException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when editing a message.**
+class EditMessageFailure extends MessageFailure {
+  EditMessageFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [EditMessageException] into a [EditMessageFailure].
+  EditMessageFailure.fromException(EditMessageException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when editing a message.**
+class FetchMessagesFailure extends MessageFailure {
+  FetchMessagesFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [FetchMessagesException] into a [FetchMessagesFailure].
+  FetchMessagesFailure.fromException(FetchMessagesException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}

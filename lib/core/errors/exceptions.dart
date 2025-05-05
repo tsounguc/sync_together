@@ -244,3 +244,35 @@ class ListenToMessagesException extends MessageException {
     required super.statusCode,
   });
 }
+
+/// **Exception thrown when deleting a message.**
+class DeleteMessageException extends MessageException {
+  const DeleteMessageException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when clearing messages in a room**
+class ClearRoomMessagesException extends MessageException {
+  const ClearRoomMessagesException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when editing a message**
+class EditMessageException extends MessageException {
+  const EditMessageException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when fetching messages**
+class FetchMessagesException extends MessageException {
+  const FetchMessagesException({
+    required super.message,
+    required super.statusCode,
+  });
+}
