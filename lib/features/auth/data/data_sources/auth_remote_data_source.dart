@@ -364,7 +364,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         statusCode: e.code,
       );
     } catch (e, s) {
-      debugPrintStack(stackTrace: s);
+      debugPrintStack(label: e.toString(), stackTrace: s);
       throw UpdateUserException(
         message: e.toString(),
         statusCode: '505',

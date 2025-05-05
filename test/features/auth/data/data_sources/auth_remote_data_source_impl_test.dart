@@ -5,6 +5,7 @@ import 'package:firebase_storage_mocks/firebase_storage_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:sync_together/features/auth/data/models/user_model.dart';
@@ -20,6 +21,8 @@ class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}
 class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {}
 
 class MockAuthCredential extends Mock implements AuthCredential {}
+
+class FakeAuthCredential extends Fake implements AuthCredential {}
 
 class MockAuthProvider extends Mock implements AuthProvider {}
 
@@ -61,6 +64,8 @@ void main() {
     userCredential = MockUserCredential();
     user = MockUser();
 
+    when(() => firebaseAuth.currentUser).thenReturn(user);
+
     remoteDataSourceImpl = AuthRemoteDataSourceImpl(
       firebaseAuth,
       firestore,
@@ -70,6 +75,26 @@ void main() {
 
     registerFallbackValue(MockAuthCredential());
     registerFallbackValue(MockAuthProvider());
+    registerFallbackValue(FakeAuthCredential());
+
+    // Mock all async update methods on the user
+    when(
+      () => user.updateDisplayName(any()),
+    ).thenAnswer((_) async => Future.value());
+
+    when(
+      () => user.updatePassword(any()),
+    ).thenAnswer((_) async => Future.value());
+
+    when(
+      () => user.updatePhotoURL(any()),
+    ).thenAnswer((_) async => Future.value());
+
+    when(
+      () => user.reauthenticateWithCredential(any()),
+    ).thenAnswer((_) async => userCredential);
+
+    // when(() => user.email).thenReturn('test@example.com');
 
     // Mock Google Sign-In Flow
     when(
@@ -335,7 +360,7 @@ void main() {
     test(
       'given AuthRemoDataSourceImpl '
       'when [FirebaseAuth.signOut] is called '
-      'then return [UserModel]',
+      'then return [void]',
       () async {
         // Arrange
         when(
@@ -354,7 +379,7 @@ void main() {
       'given AuthRemoDataSourceImpl '
       'when [FirebaseAuth.signOut] is called '
       'and [FirebaseAuthException] is thrown '
-      'then throw [SignInException]',
+      'then throw [SignOutException]',
       () async {
         // Arrange
         final testException = FirebaseAuthException(
@@ -391,7 +416,7 @@ void main() {
       // Assert
       expect(result, isA<UserModel>());
       expect(result?.uid, user.uid);
-      verify(() => firebaseAuth.currentUser).called(1);
+      verify(() => firebaseAuth.currentUser).called(2);
     });
 
     test(
@@ -408,6 +433,141 @@ void main() {
         // Assert
         expect(result, isNull);
         verify(() => firebaseAuth.currentUser).called(1);
+      },
+    );
+  });
+
+  group('forgotPassword - ', () {
+    test(
+      'given AuthRemoteDataSourceImpl '
+      'when [FirebaseAuth.sendPasswordResetEmail] is called '
+      'then complete successfully',
+      () async {
+        // Arrange
+        when(
+          () => firebaseAuth.sendPasswordResetEmail(
+            email: any(named: 'email'),
+          ),
+        ).thenAnswer((_) async => Future.value());
+
+        // Act
+        await remoteDataSourceImpl.forgotPassword(email: email);
+
+        // Assert
+        verify(
+          () => firebaseAuth.sendPasswordResetEmail(
+            email: any(named: 'email'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'given AuthRemoteDataSourceImpl '
+      'when [FirebaseAuth.sendPasswordResetEmail] is called '
+      'and [FirebaseAuthException] is thrown '
+      'then throw [ForgotPasswordException]',
+      () async {
+        // Arrange
+        const testException = ForgotPasswordException(
+          message: 'message',
+          statusCode: '500',
+        );
+        when(
+          () => firebaseAuth.sendPasswordResetEmail(
+            email: any(named: 'email'),
+          ),
+        ).thenThrow(testException);
+
+        // Act
+        final methodCall = remoteDataSourceImpl.forgotPassword;
+
+        // Assert
+        expect(
+          methodCall(email: email),
+          throwsA(isA<AuthException>()),
+        );
+      },
+    );
+  });
+
+  group('updateUserProfile - ', () {
+    test(
+      'given AuthRemoDataSourceImpl '
+      'when [FirebaseAuth.currentUser.updateDisplayName] is called '
+      'then complete successfully',
+      () async {
+        // Arrange
+        when(() => firebaseAuth.currentUser).thenReturn(user);
+        when(
+          () => user.updateDisplayName(any()),
+        ).thenAnswer((_) async => Future.value());
+
+        // Act
+        await remoteDataSourceImpl.updateUserProfile(
+          action: UpdateUserAction.displayName,
+          userData: name,
+        );
+
+        // Assert
+        verify(
+          () => user.updateDisplayName(name),
+        ).called(2);
+      },
+    );
+
+    test(
+      'given AuthRemoDataSourceImpl '
+      'when [FirebaseAuth.currentUser.verifyBeforeUpdateEmail] is called '
+      'then complete successfully ',
+      () async {
+        // Arrange
+        when(() => firebaseAuth.currentUser).thenReturn(user);
+        when(
+          () => user.verifyBeforeUpdateEmail(any()),
+        ).thenAnswer((_) async => Future.value());
+
+        // Act
+        await remoteDataSourceImpl.updateUserProfile(
+          action: UpdateUserAction.email,
+          userData: {
+            'email': email,
+            'password': password,
+          },
+        );
+
+        // Assert
+        verify(
+          () => user.verifyBeforeUpdateEmail(email),
+        ).called(1);
+      },
+    );
+    test(
+      'given AuthRemoDataSourceImpl '
+      'when [FirebaseAuth.currentUser.updateDisplayName] is called '
+      'and [FirebaseAuthException] is thrown '
+      'then throw [UpdateException]',
+      () async {
+        // Arrange
+        final testException = FirebaseAuthException(
+          message: 'Update failed',
+          code: 'update-error',
+        );
+        when(
+          () => user.updateDisplayName(any()),
+        ).thenThrow(testException);
+
+        // Act
+        final methodCall = remoteDataSourceImpl.updateUserProfile;
+
+        // Assert
+        expect(
+          methodCall(
+            action: UpdateUserAction.displayName,
+            userData: name,
+          ),
+          throwsA(isA<AuthException>()),
+        );
       },
     );
   });

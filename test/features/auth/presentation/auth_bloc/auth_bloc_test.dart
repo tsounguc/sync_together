@@ -44,12 +44,14 @@ void main() {
 
   late SignInParams testSignInParams;
   late SignUpParams testSignUpParams;
+  late UpdateUserProfileParams testUpdateUserParams;
 
   late SignInFailure testSignInFailure;
   late SignUpFailure testSignUpFailure;
   late SignOutFailure testSignOutFailure;
   late ForgotPasswordFailure testForgotPasswordFailure;
   late GetCurrentUserFailure testGetCurrentUserFailure;
+  late UpdateUserFailure testUpdateUserFailure;
 
   setUp(() {
     signInWithEmail = MockSignInWithEmail();
@@ -94,13 +96,20 @@ void main() {
       message: 'message',
       statusCode: 500,
     );
+
+    testUpdateUserFailure = UpdateUserFailure(
+      message: 'message',
+      statusCode: 500,
+    );
   });
 
   setUpAll(() {
     testSignInParams = const SignInParams.empty();
     testSignUpParams = const SignUpParams.empty();
+    testUpdateUserParams = const UpdateUserProfileParams.empty();
     registerFallbackValue(testSignInParams);
     registerFallbackValue(testSignUpParams);
+    registerFallbackValue(testUpdateUserParams);
   });
 
   tearDown(() => bloc.close());
@@ -167,7 +176,9 @@ void main() {
         isA<AuthError>(),
       ],
       verify: (bloc) {
-        verify(() => signInWithEmail(any())).called(1);
+        verify(
+          () => signInWithEmail(any()),
+        ).called(1);
       },
     );
   });
@@ -220,7 +231,105 @@ void main() {
     );
   });
 
-  group('signInAnonymously - ', () {});
+  group('signInAnonymously - ', () {
+    blocTest<AuthBloc, AuthState>(
+      'given AuthBloc '
+      'when [AuthBloc.signInAnonymously] is called '
+      'and completed successfully '
+      'then emit [AuthLoading, Authenticated]',
+      build: () {
+        when(
+          () => signInAnonymously(),
+        ).thenAnswer((_) async => const Right(testUser));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const SignInAnonymouslyEvent()),
+      expect: () => [
+        const AuthLoading(),
+        const Authenticated(user: testUser),
+      ],
+      verify: (bloc) {
+        verify(
+          () => signInAnonymously(),
+        ).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'given AuthBloc '
+      'when [AuthBloc.signInAnonymously] is called unsuccessfully '
+      'then emit [AuthLoading, AuthError]',
+      build: () {
+        when(
+          () => signInAnonymously(),
+        ).thenAnswer((_) async => Left(testSignInFailure));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const SignInAnonymouslyEvent()),
+      expect: () => [
+        const AuthLoading(),
+        isA<AuthError>(),
+      ],
+      verify: (bloc) {
+        verify(
+          () => signInAnonymously(),
+        ).called(1);
+      },
+    );
+  });
+
+  group('updateUserProfile - ', () {
+    blocTest<AuthBloc, AuthState>(
+      'given AuthBloc '
+      'when [AuthBloc.updateUserProfile] is called '
+      'and complete',
+      build: () {
+        when(
+          () => updateUser(any()),
+        ).thenAnswer((_) async => const Right(null));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        UpdateUserProfileEvent(
+          action: testUpdateUserParams.action,
+          userData: testUpdateUserParams.userData,
+        ),
+      ),
+      expect: () => [
+        const AuthLoading(),
+        const UserProfileUpdated(),
+      ],
+      verify: (bloc) {
+        verify(() => updateUser(testUpdateUserParams)).called(1);
+        verifyNoMoreInteractions(updateUser);
+      },
+    );
+    blocTest<AuthBloc, AuthState>(
+      'given AuthBloc '
+      'when [AuthBloc.updateUserProfile] is called '
+      'then emit [AuthLoading, AuthError] ',
+      build: () {
+        when(
+          () => updateUser(any()),
+        ).thenAnswer((_) async => Left(testUpdateUserFailure));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        UpdateUserProfileEvent(
+          action: testUpdateUserParams.action,
+          userData: testUpdateUserParams.userData,
+        ),
+      ),
+      expect: () => [
+        const AuthLoading(),
+        AuthError(message: testUpdateUserFailure.message),
+      ],
+      verify: (bloc) {
+        verify(() => updateUser(testUpdateUserParams)).called(1);
+        verifyNoMoreInteractions(updateUser);
+      },
+    );
+  });
 
   group('signUpWithEmail - ', () {
     blocTest<AuthBloc, AuthState>(
@@ -316,13 +425,10 @@ void main() {
   });
 
   group('ForgotPassword - ', () {
-    final tForgotPasswordFailure = ForgotPasswordFailure(
-      message: 'message',
-      statusCode: 500,
-    );
+    const testEmail = 'test@mail.com';
     blocTest<AuthBloc, AuthState>(
       'given AuthBloc '
-      'when [ForgotPassword] is called '
+      'when [AuthBloc.forgotPassword] is called '
       'then emit [AuthLoading, ForgotPasswordSent]',
       build: () {
         when(
@@ -330,11 +436,15 @@ void main() {
         ).thenAnswer((_) async => const Right(null));
         return bloc;
       },
-      act: (bloc) => bloc.add(ForgotPasswordEvent(email: testUser.email!)),
+      act: (bloc) => bloc.add(
+        const ForgotPasswordEvent(
+          email: testEmail,
+        ),
+      ),
       expect: () => [const AuthLoading(), const ForgotPasswordSent()],
       verify: (bloc) {
         verify(
-          () => forgotPassword(testUser.email!),
+          () => forgotPassword(testEmail),
         ).called(1);
         verifyNoMoreInteractions(forgotPassword);
       },
@@ -347,22 +457,28 @@ void main() {
       build: () {
         when(
           () => forgotPassword(any()),
-        ).thenAnswer((_) async => Left(tForgotPasswordFailure));
+        ).thenAnswer((_) async => Left(testForgotPasswordFailure));
         return bloc;
       },
-      act: (bloc) => bloc.add(ForgotPasswordEvent(email: testUser.email!)),
+      act: (bloc) => bloc.add(
+        const ForgotPasswordEvent(
+          email: testEmail,
+        ),
+      ),
       expect: () => [
         const AuthLoading(),
-        AuthError(message: tForgotPasswordFailure.message),
+        AuthError(message: testForgotPasswordFailure.message),
       ],
       verify: (bloc) {
-        verify(() => forgotPassword(testUser.email!)).called(1);
+        verify(
+          () => forgotPassword(testEmail),
+        ).called(1);
         verifyNoMoreInteractions(forgotPassword);
       },
     );
   });
 
-  group('getCurrentUser', () {
+  group('getCurrentUser -', () {
     blocTest<AuthBloc, AuthState>(
       'given AuthBloc '
       'when [AuthBloc.getCurrentUser] is called '

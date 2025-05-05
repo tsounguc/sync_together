@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:sync_together/core/enums/update_user_action.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -18,6 +19,7 @@ void main() {
   setUp(() {
     remoteDataSource = MockAuthRemoteDataSource();
     repositoryImpl = AuthRepositoryImpl(remoteDataSource);
+    registerFallbackValue(UpdateUserAction.email);
   });
 
   const name = 'test name';
@@ -397,6 +399,150 @@ void main() {
         );
         verify(
           () => remoteDataSource.getCurrentUser(),
+        ).called(1);
+        verifyNoMoreInteractions(remoteDataSource);
+      },
+    );
+  });
+
+  group('forgotPassword - ', () {
+    test(
+      'given AuthRepositoryImpl, '
+      'when [AuthRemoteDataSource.forgotPassword] is called '
+      'then complete call to remote data source successfully ',
+      () async {
+        // Arrange
+        when(
+          () => remoteDataSource.forgotPassword(
+            email: any(named: 'email'),
+          ),
+        ).thenAnswer((_) async => Future.value());
+
+        // Act
+        final result = await repositoryImpl.forgotPassword(
+          testUserModel.email!,
+        );
+
+        // Assert
+        expect(
+          result,
+          const Right<Failure, void>(null),
+        );
+        verify(
+          () => remoteDataSource.forgotPassword(
+            email: testUserModel.email!,
+          ),
+        ).called(1);
+        verifyNoMoreInteractions(remoteDataSource);
+      },
+    );
+
+    test(
+      'given AuthRepositoryImpl, '
+      'when call [AuthRemoteDataSource.forgotPassword] unsuccessful '
+      'then return [ForgotPasswordFailure] ',
+      () async {
+        // Arrange
+        const testException = ForgotPasswordException(
+          message: 'message',
+          statusCode: '500',
+        );
+        when(
+          () => remoteDataSource.forgotPassword(
+            email: any(named: 'email'),
+          ),
+        ).thenThrow(testException);
+
+        // Act
+        final result = await repositoryImpl.forgotPassword(
+          testUserModel.email!,
+        );
+
+        // Assert
+        expect(
+          result,
+          Left<Failure, void>(
+            ForgotPasswordFailure.fromException(testException),
+          ),
+        );
+        verify(
+          () => remoteDataSource.forgotPassword(
+            email: testUserModel.email!,
+          ),
+        ).called(1);
+        verifyNoMoreInteractions(remoteDataSource);
+      },
+    );
+  });
+
+  group('updateUserProfile - ', () {
+    test(
+      'given AutRepositoryImpl, '
+      'when [AuthRemoteDataSource.updateUserProfile] is called '
+      'then complete call to remote data source successfully ',
+      () async {
+        // Arrange
+        when(
+          () => remoteDataSource.updateUserProfile(
+            action: any(named: 'action'),
+            userData: any<dynamic>(named: 'userData'),
+          ),
+        ).thenAnswer((_) => Future.value());
+        // Act
+        final result = await repositoryImpl.updateUserProfile(
+          action: UpdateUserAction.email,
+          userData: testUserModel.email,
+        );
+
+        // Assert
+        expect(
+          result,
+          const Right<Failure, void>(null),
+        );
+        verify(
+          () => remoteDataSource.updateUserProfile(
+            action: UpdateUserAction.email,
+            userData: testUserModel.email,
+          ),
+        );
+      },
+    );
+
+    test(
+      'given AuthRepositoryImpl, '
+      'when call [AuthRemoteDataSource.updateUserProfile] unsuccessful '
+      'then return [UpdateUserFailure] ',
+      () async {
+        // Arrange
+        const testException = UpdateUserException(
+          message: 'message',
+          statusCode: '500',
+        );
+        when(
+          () => remoteDataSource.updateUserProfile(
+            action: any(named: 'action'),
+            userData: any<dynamic>(named: 'userData'),
+          ),
+        ).thenThrow(testException);
+
+        // Act
+        final result = await repositoryImpl.updateUserProfile(
+          action: UpdateUserAction.email,
+          userData: testUserModel.email,
+        );
+
+        // Assert
+        expect(
+          result,
+          Left<Failure, void>(
+            UpdateUserFailure.fromException(testException),
+          ),
+        );
+        verify(
+          () => remoteDataSource.updateUserProfile(
+            action: UpdateUserAction.email,
+            userData: testUserModel.email,
+          ),
         ).called(1);
         verifyNoMoreInteractions(remoteDataSource);
       },

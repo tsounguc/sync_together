@@ -57,6 +57,10 @@ abstract class AuthRepository {
   /// - **Failure:** Returns an `AuthFailure`.
   ResultVoid forgotPassword(String email);
 
+  /// Updates user profile data
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns an `AuthFailure`.
   ResultVoid updateUserProfile({
     required UpdateUserAction action,
     required dynamic userData,
