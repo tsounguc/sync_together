@@ -9,7 +9,7 @@ abstract class ChatRepository {
   /// Sends a message to a specific room.
   ///
   /// - **Success:** Returns `void`.
-  /// - **Failure:** Returns a `ChatFailure`.
+  /// - **Failure:** Returns a `MessageFailure`.
   ResultVoid sendMessage({
     required String roomId,
     required Message message,
@@ -18,7 +18,7 @@ abstract class ChatRepository {
   /// Listens to real-time message updates in a room.
   ///
   /// - **Success:** Returns a stream of messages.
-  /// - **Failure:** Returns a `ChatFailure`.
+  /// - **Failure:** Returns a `MessageFailure`.
   ResultStream<List<Message>> listenToMessages({
     required String roomId,
   });
@@ -26,16 +26,16 @@ abstract class ChatRepository {
   /// Deletes a specific message.
   ///
   /// - **Success:** Returns `void`.
-  /// - **Failure:** Returns a `ChatFailure`.
+  /// - **Failure:** Returns a `MessageFailure`.
   ResultVoid deleteMessage({
     required String roomId,
     required String messageId,
   });
 
-  /// Edits a previously sent message (optional future feature).
+  /// Edits a previously sent message.
   ///
   /// - **Success:** Returns `void`.
-  /// - **Failure:** Returns a `ChatFailure`.
+  /// - **Failure:** Returns a `MessageFailure`.
   ResultVoid editMessage({
     required String roomId,
     required String messageId,
@@ -45,7 +45,7 @@ abstract class ChatRepository {
   /// Fetches the latest batch of messages without listening.
   ///
   /// - **Success:** Returns a list of messages.
-  /// - **Failure:** Returns a `ChatFailure`.
+  /// - **Failure:** Returns a `MessageFailure`.
   ResultFuture<List<Message>> fetchMessages({
     required String roomId,
     int limit = 20,
@@ -54,7 +54,7 @@ abstract class ChatRepository {
   /// Clears all messages in a room (e.g. for moderators).
   ///
   /// - **Success:** Returns `void`.
-  /// - **Failure:** Returns a `ChatFailure`.
+  /// - **Failure:** Returns a `MessageFailure`.
   ResultVoid clearRoomMessages({
     required String roomId,
   });

@@ -21,10 +21,10 @@ class MessageModel extends Message {
   /// Used for default values or initializing empty states.
   MessageModel.empty()
       : this(
-          id: '',
-          senderId: '',
-          senderName: '',
-          text: '',
+          id: '_empty.id',
+          senderId: '_empty.senderId',
+          senderName: '_empty.senderName',
+          text: '_empty.text',
           timestamp: DateTime.now(),
         );
 

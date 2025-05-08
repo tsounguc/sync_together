@@ -33,6 +33,26 @@ class MessageSending extends ChatState {
   const MessageSending();
 }
 
+/// Message Editing state
+class MessageEditing extends ChatState {
+  const MessageEditing();
+}
+
+/// Messages fetching state
+class FetchingMessages extends ChatState {
+  const FetchingMessages();
+}
+
+/// Message Deleting state
+class MessageDeleting extends ChatState {
+  const MessageDeleting();
+}
+
+/// Messages Clearing state
+class MessagesClearing extends ChatState {
+  const MessagesClearing();
+}
+
 /// Success state when messages received
 class MessagesReceived extends ChatState {
   const MessagesReceived(this.messages);
@@ -45,4 +65,29 @@ class MessagesReceived extends ChatState {
 /// Success state when message sent
 class MessageSent extends ChatState {
   const MessageSent();
+}
+
+/// Success state when message edited
+class MessageEdited extends ChatState {
+  const MessageEdited();
+}
+
+/// Success state when message deleted
+class MessageDeleted extends ChatState {
+  const MessageDeleted();
+}
+
+/// Success state when message fetched
+class MessagesFetched extends ChatState {
+  const MessagesFetched(this.messages);
+
+  final List<Message> messages;
+
+  @override
+  List<Object?> get props => [messages];
+}
+
+/// Success state when messages cleared
+class MessagesCleared extends ChatState {
+  const MessagesCleared();
 }

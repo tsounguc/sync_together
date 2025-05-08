@@ -53,4 +53,54 @@ class ChatRepositoryImpl implements ChatRepository {
       return Left(SendMessageFailure.fromException(e));
     }
   }
+
+  @override
+  ResultVoid clearRoomMessages({required String roomId}) async {
+    try {
+      final result = await remoteDataSource.clearRoomMessages(roomId: roomId);
+      return Right(result);
+    } on ClearRoomMessagesException catch (e) {
+      return Left(ClearRoomMessagesFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid deleteMessage({required String roomId, required String messageId}) async {
+    try {
+      final result = await remoteDataSource.deleteMessage(
+        roomId: roomId,
+        messageId: messageId,
+      );
+      return Right(result);
+    } on DeleteMessageException catch (e) {
+      return Left(DeleteMessageFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid editMessage({required String roomId, required String messageId, required String newText}) async {
+    try {
+      final result = await remoteDataSource.editMessage(
+        roomId: roomId,
+        messageId: messageId,
+        newText: newText,
+      );
+      return Right(result);
+    } on EditMessageException catch (e) {
+      return Left(EditMessageFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultFuture<List<Message>> fetchMessages({required String roomId, int limit = 20}) async {
+    try {
+      final result = await remoteDataSource.fetchMessages(
+        roomId: roomId,
+        limit: limit,
+      );
+      return Right(result);
+    } on FetchMessagesException catch (e) {
+      return Left(FetchMessagesFailure.fromException(e));
+    }
+  }
 }

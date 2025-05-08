@@ -18,6 +18,10 @@ import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dar
 import 'package:sync_together/features/chat/data/datasources/chat_remote_data_source.dart';
 import 'package:sync_together/features/chat/data/repositories/chat_repository_impl.dart';
 import 'package:sync_together/features/chat/domain/repositories/chat_repository.dart';
+import 'package:sync_together/features/chat/domain/usecases/clear_room_messages.dart';
+import 'package:sync_together/features/chat/domain/usecases/delete_message.dart';
+import 'package:sync_together/features/chat/domain/usecases/edit_message.dart';
+import 'package:sync_together/features/chat/domain/usecases/fetch_messages.dart';
 import 'package:sync_together/features/chat/domain/usecases/listen_to_messages.dart';
 import 'package:sync_together/features/chat/domain/usecases/send_message.dart';
 import 'package:sync_together/features/chat/presentation/cubit/chat_cubit.dart';

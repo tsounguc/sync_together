@@ -17,11 +17,19 @@ Future<void> _initChat() async {
       () => ChatCubit(
         listenToMessages: serviceLocator(),
         sendMessage: serviceLocator(),
+        editMessage: serviceLocator(),
+        deleteMessage: serviceLocator(),
+        fetchMessages: serviceLocator(),
+        clearRoomMessages: serviceLocator(),
       ),
     )
     // Use cases
     ..registerLazySingleton(() => ListenToMessages(serviceLocator()))
     ..registerLazySingleton(() => SendMessage(serviceLocator()))
+    ..registerLazySingleton(() => EditMessage(serviceLocator()))
+    ..registerLazySingleton(() => DeleteMessage(serviceLocator()))
+    ..registerLazySingleton(() => FetchMessages(serviceLocator()))
+    ..registerLazySingleton(() => ClearRoomMessages(serviceLocator()))
     // Repositories
     ..registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(serviceLocator()),
