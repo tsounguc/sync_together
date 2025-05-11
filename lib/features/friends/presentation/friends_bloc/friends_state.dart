@@ -1,45 +1,45 @@
-part of 'friend_bloc.dart';
+part of 'friends_bloc.dart';
 
 /// Base state for Friend system.
-sealed class FriendState extends Equatable {
-  const FriendState();
+sealed class FriendsState extends Equatable {
+  const FriendsState();
 
   @override
   List<Object> get props => [];
 }
 
 /// Initial state.
-final class FriendInitial extends FriendState {
-  const FriendInitial();
+final class FriendsInitial extends FriendsState {
+  const FriendsInitial();
 }
 
 /// Loading state.
-final class FriendLoading extends FriendState {
-  const FriendLoading();
+final class FriendsLoadingState extends FriendsState {
+  const FriendsLoadingState();
 }
 
 /// Success state for friend request actions.
-final class FriendRequestSent extends FriendState {
+final class FriendRequestSent extends FriendsState {
   const FriendRequestSent();
 }
 
 /// Success state for accepting a request.
-final class FriendRequestAccepted extends FriendState {
+final class FriendRequestAccepted extends FriendsState {
   const FriendRequestAccepted();
 }
 
 /// Success state for rejecting a request.
-final class FriendRequestRejected extends FriendState {
+final class FriendRequestRejected extends FriendsState {
   const FriendRequestRejected();
 }
 
 /// Success state for removing a friend.
-final class FriendRemoved extends FriendState {
+final class FriendRemoved extends FriendsState {
   const FriendRemoved();
 }
 
 /// State when friends are fetched.
-final class FriendsLoaded extends FriendState {
+final class FriendsLoaded extends FriendsState {
   const FriendsLoaded(this.friends);
 
   final List<Friend> friends;
@@ -49,7 +49,7 @@ final class FriendsLoaded extends FriendState {
 }
 
 /// State when friend requests are fetched.
-final class FriendRequestsLoaded extends FriendState {
+final class FriendRequestsLoaded extends FriendsState {
   const FriendRequestsLoaded(this.requests);
 
   final List<FriendRequest> requests;
@@ -59,15 +59,15 @@ final class FriendRequestsLoaded extends FriendState {
 }
 
 /// State when users are fetched
-final class UsersLoaded extends FriendState {
+final class UsersLoaded extends FriendsState {
   const UsersLoaded(this.users);
 
   final List<UserEntity> users;
 }
 
 /// Error state.
-final class FriendError extends FriendState {
-  const FriendError(this.message);
+final class FriendsError extends FriendsState {
+  const FriendsError(this.message);
 
   final String message;
 

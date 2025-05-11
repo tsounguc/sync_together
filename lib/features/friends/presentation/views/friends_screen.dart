@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 import 'package:sync_together/features/friends/presentation/views/find_friends_screen.dart';
 import 'package:sync_together/features/friends/presentation/views/friend_requests_screen.dart';
 import 'package:sync_together/features/friends/presentation/widgets/friend_list_tile.dart';
@@ -22,7 +22,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     super.initState();
     userId = context.currentUser?.uid;
     if (userId != null) {
-      context.read<FriendBloc>().add(GetFriendsEvent(userId: userId!));
+      context.read<FriendsBloc>().add(GetFriendsEvent(userId: userId!));
     }
   }
 
@@ -64,17 +64,17 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
           // 📌 Friends List
           Expanded(
-            child: BlocConsumer<FriendBloc, FriendState>(
+            child: BlocConsumer<FriendsBloc, FriendsState>(
               listener: (context, state) {
                 if (state is FriendRemoved) {
-                  context.read<FriendBloc>().add(
+                  context.read<FriendsBloc>().add(
                         GetFriendsEvent(userId: userId!),
                       );
                 }
               },
               builder: (context, state) {
                 debugPrint('FriendState: $state');
-                if (state is FriendLoading) {
+                if (state is FriendsLoadingState) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is FriendsLoaded) {
                   final friends = state.friends;
@@ -88,7 +88,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       return FriendListTile(friend: friend);
                     },
                   );
-                } else if (state is FriendError) {
+                } else if (state is FriendsError) {
                   return Center(child: Text('Error: ${state.message}'));
                 }
                 return const Center(child: Text('Loading...'));

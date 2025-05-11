@@ -118,7 +118,7 @@ class AppRouter {
       case FriendsScreen.id:
         return _pageBuilder(
           (_) => BlocProvider(
-            create: (context) => serviceLocator<FriendBloc>(),
+            create: (context) => serviceLocator<FriendsBloc>(),
             child: const FriendsScreen(),
           ),
           settings: settings,
@@ -126,7 +126,7 @@ class AppRouter {
       case FriendRequestsScreen.id:
         return _pageBuilder(
           (_) => BlocProvider(
-            create: (context) => serviceLocator<FriendBloc>(),
+            create: (context) => serviceLocator<FriendsBloc>(),
             child: const FriendRequestsScreen(),
           ),
           settings: settings,
@@ -134,7 +134,7 @@ class AppRouter {
       case FindFriendsScreen.id:
         return _pageBuilder(
           (_) => BlocProvider(
-            create: (context) => serviceLocator<FriendBloc>(),
+            create: (context) => serviceLocator<FriendsBloc>(),
             child: const FindFriendsScreen(),
           ),
           settings: settings,

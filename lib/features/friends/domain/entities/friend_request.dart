@@ -12,6 +12,19 @@ class FriendRequest extends Equatable {
     required this.sentAt,
   });
 
+  /// Empty Constructor for [FriendRequest]
+  ///
+  /// This helps when writing unit tests.
+  FriendRequest.empty()
+      : this(
+          id: '',
+          senderId: '',
+          senderName: '',
+          receiverId: '',
+          receiverName: '',
+          sentAt: DateTime.now(),
+        );
+
   /// The unique ID of the friend request document.
   final String id;
 

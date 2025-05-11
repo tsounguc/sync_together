@@ -11,14 +11,12 @@ import 'package:sync_together/features/friends/domain/entities/friend_request.da
 ///
 /// Each method **returns an Either type** (`ResultFuture<T>`),
 /// ensuring that failures are handled explicitly instead of using exceptions.
-abstract class FriendRepository {
+abstract class FriendsRepository {
   /// Sends a friend request.
   ///
   /// - **Success:** Returns `void`.
   /// - **Failure:** Returns an `FriendsFailure`.
-  ResultVoid sendFriendRequest({
-    required FriendRequest request
-  });
+  ResultVoid sendFriendRequest({required FriendRequest request});
 
   /// Accepts a friend request.
   ///

@@ -21,11 +21,11 @@ class FriendRequestModel extends FriendRequest {
   /// Used for default values or initializing empty states.
   FriendRequestModel.empty()
       : this(
-          id: '',
-          senderId: '',
-          senderName: '',
-          receiverId: '',
-          receiverName: '',
+          id: '_empty.id',
+          senderId: '_empty.senderId',
+          senderName: '_empty.senderName',
+          receiverId: '_empty.receiverId',
+          receiverName: '_empty.receiverName',
           sentAt: DateTime.now(),
         );
 

@@ -24,11 +24,11 @@ class FriendModel extends Friend {
   /// Used for default values or initializing empty states.
   FriendModel.empty()
       : this(
-          id: '',
-          user1Id: '',
-          user1Name: '',
-          user2Id: '',
-          user2Name: '',
+          id: '_empty.id',
+          user1Id: '_empty.user1Id',
+          user1Name: '_empty.user1Name',
+          user2Id: '_empty.user2Id',
+          user2Name: '_empty.user2Name',
           friendship: [],
           createdAt: DateTime.now(),
         );
@@ -65,7 +65,7 @@ class FriendModel extends Friend {
         'user2Id': user2Id,
         'user2Name': user2Name,
         'friendship': friendship,
-        'createAt': Timestamp.fromDate(createdAt),
+        'createdAt': Timestamp.fromDate(createdAt),
       };
 
   /// Creates a copy of the current [FriendModel] with optional updates.

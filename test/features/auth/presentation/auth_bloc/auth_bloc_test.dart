@@ -150,7 +150,7 @@ void main() {
       ],
       verify: (bloc) {
         verify(
-          () => signInWithEmail(any()),
+          () => signInWithEmail(testSignInParams),
         ).called(1);
       },
     );

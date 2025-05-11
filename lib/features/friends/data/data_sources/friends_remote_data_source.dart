@@ -12,7 +12,7 @@ import 'package:sync_together/features/friends/domain/entities/friend_request.da
 /// **Remote Data Source for Friends & Friend Requests**
 ///
 /// Handles all Firebase interactions related to friends and invitations.
-abstract class FriendRemoteDataSource {
+abstract class FriendsRemoteDataSource {
   /// Sends a friend request.
   ///
   /// - **Success:** Completes without returning a value.
@@ -59,8 +59,8 @@ abstract class FriendRemoteDataSource {
   Future<List<UserModel>> searchUsers(String query);
 }
 
-class FriendRemoteDataSourceImpl implements FriendRemoteDataSource {
-  FriendRemoteDataSourceImpl(this.firestore);
+class FriendsRemoteDataSourceImpl implements FriendsRemoteDataSource {
+  FriendsRemoteDataSourceImpl(this.firestore);
 
   final FirebaseFirestore firestore;
 
@@ -102,8 +102,6 @@ class FriendRemoteDataSourceImpl implements FriendRemoteDataSource {
       final friendRequestDoc = await friendRequestDocRef.get();
 
       if (!friendRequestDoc.exists) throw Exception('Friend request not found');
-
-      final friendRequestData = friendRequestDoc.data()!;
 
       final friendDocRef = _friends.doc();
       await friendDocRef.set({
@@ -218,7 +216,16 @@ class FriendRemoteDataSourceImpl implements FriendRemoteDataSource {
     required String receiverId,
   }) async {
     try {
-      final querySnapshot = await _friends.where('user1Id', isEqualTo: senderId).get();
+      final querySnapshot = await _friends
+          .where(
+            'user1Id',
+            isEqualTo: senderId,
+          )
+          .where(
+            'user2Id',
+            isEqualTo: receiverId,
+          )
+          .get();
 
       for (final doc in querySnapshot.docs) {
         await doc.reference.delete();

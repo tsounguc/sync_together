@@ -320,7 +320,7 @@ void main() {
 
     test(
       'given AuthRepositoryImpl, '
-      'and call [AuthRemoteDataSource.signOut] unsuccessful '
+      'when call [AuthRemoteDataSource.signOut] unsuccessful '
       'then return [SignOutFailure]',
       () async {
         // Arrange
@@ -374,7 +374,7 @@ void main() {
 
     test(
       'given AuthRepositoryImpl, '
-      'and call [AuthRemoteDataSource.getCurrentUser] unsuccessful '
+      'when call [AuthRemoteDataSource.getCurrentUser] is unsuccessful '
       'then return [GetCurrentUserFailure]',
       () async {
         // Arrange

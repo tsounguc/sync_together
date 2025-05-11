@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 import 'package:sync_together/features/friends/presentation/widgets/user_list_tile.dart';
 
 class FindFriendsScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
 
   void _performSearch(String query) {
     if (query.trim().isEmpty) return;
-    context.read<FriendBloc>().add(SearchUsersEvent(query: query));
+    context.read<FriendsBloc>().add(SearchUsersEvent(query: query));
   }
 
   @override
@@ -39,9 +39,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: BlocBuilder<FriendBloc, FriendState>(
+              child: BlocBuilder<FriendsBloc, FriendsState>(
                 builder: (context, state) {
-                  if (state is FriendLoading) {
+                  if (state is FriendsLoadingState) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is UsersLoaded) {
                     return ListView.builder(
@@ -50,7 +50,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
                         return UserListTile(user: state.users[index]);
                       },
                     );
-                  } else if (state is FriendError) {
+                  } else if (state is FriendsError) {
                     return Center(child: Text(state.message));
                   }
                   return const Center(child: Text('Search for users.'));

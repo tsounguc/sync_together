@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 
 /// **FriendRequestTile**
 ///
@@ -31,8 +31,8 @@ class FriendRequestTile extends StatelessWidget {
               icon: const Icon(Icons.check_circle, color: Colors.green),
               tooltip: 'Accept Request',
               onPressed: () {
-                context.read<FriendBloc>().add(
-                      AcceptFriendRequestEvent(request: request),
+                context.read<FriendsBloc>().add(
+                      AcceptFriendRequestEvent(request),
                     );
               },
             ),
@@ -40,8 +40,8 @@ class FriendRequestTile extends StatelessWidget {
               icon: const Icon(Icons.cancel, color: Colors.red),
               tooltip: 'Reject Request',
               onPressed: () {
-                context.read<FriendBloc>().add(
-                      RejectFriendRequestEvent(request: request),
+                context.read<FriendsBloc>().add(
+                      RejectFriendRequestEvent(request),
                     );
               },
             ),

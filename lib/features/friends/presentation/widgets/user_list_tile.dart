@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/friends/data/models/friend_request_model.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 
 class UserListTile extends StatelessWidget {
   const UserListTile({super.key, required this.user});
@@ -21,7 +21,7 @@ class UserListTile extends StatelessWidget {
       subtitle: Text(user.email ?? ''),
       trailing: ElevatedButton(
         onPressed: () {
-          context.read<FriendBloc>().add(
+          context.read<FriendsBloc>().add(
                 SendFriendRequestEvent(
                   FriendRequestModel.empty().copyWith(
                     senderId: context.currentUser!.uid,

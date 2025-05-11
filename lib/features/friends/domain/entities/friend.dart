@@ -13,6 +13,20 @@ class Friend extends Equatable {
     required this.createdAt,
   });
 
+  /// Empty Constructor for [Friend].
+  ///
+  /// This helps when writing unit tests.
+  Friend.empty()
+      : this(
+          id: '',
+          user1Id: '',
+          user1Name: '',
+          user2Id: '',
+          user2Name: '',
+          friendship: [],
+          createdAt: DateTime.now(),
+        );
+
   /// The unique ID of the friendship document.
   final String id;
 
@@ -40,7 +54,7 @@ class Friend extends Equatable {
         user1Name,
         user2Id,
         user2Name,
-    friendship,
+        friendship,
         createdAt,
       ];
 }

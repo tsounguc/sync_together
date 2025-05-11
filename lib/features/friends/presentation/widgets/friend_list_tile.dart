@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/features/friends/domain/entities/friend.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 
 class FriendListTile extends StatelessWidget {
   const FriendListTile({
@@ -13,7 +13,7 @@ class FriendListTile extends StatelessWidget {
   final Friend friend;
 
   void _removeFriend(BuildContext context) {
-    context.read<FriendBloc>().add(
+    context.read<FriendsBloc>().add(
           RemoveFriendEvent(
             senderId: friend.user1Id,
             receiverId: friend.user2Id,

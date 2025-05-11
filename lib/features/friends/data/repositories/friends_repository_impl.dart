@@ -4,15 +4,15 @@ import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
-import 'package:sync_together/features/friends/data/data_sources/friend_remote_data_source.dart';
+import 'package:sync_together/features/friends/data/data_sources/friends_remote_data_source.dart';
 import 'package:sync_together/features/friends/domain/entities/friend.dart';
 import 'package:sync_together/features/friends/domain/entities/friend_request.dart';
-import 'package:sync_together/features/friends/domain/repositories/friend_repository.dart';
+import 'package:sync_together/features/friends/domain/repositories/friends_repository.dart';
 
-class FriendRepositoryImpl implements FriendRepository {
-  FriendRepositoryImpl(this.remoteDataSource);
+class FriendsRepositoryImpl implements FriendsRepository {
+  FriendsRepositoryImpl(this.remoteDataSource);
 
-  final FriendRemoteDataSource remoteDataSource;
+  final FriendsRemoteDataSource remoteDataSource;
 
   @override
   ResultVoid sendFriendRequest({required FriendRequest request}) async {

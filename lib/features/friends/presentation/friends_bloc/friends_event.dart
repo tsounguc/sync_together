@@ -1,4 +1,4 @@
-part of 'friend_bloc.dart';
+part of 'friends_bloc.dart';
 
 /// Base event for the Friend system.
 sealed class FriendEvent extends Equatable {
@@ -20,7 +20,7 @@ final class SendFriendRequestEvent extends FriendEvent {
 
 /// Event to accept a friend request.
 final class AcceptFriendRequestEvent extends FriendEvent {
-  const AcceptFriendRequestEvent({required this.request});
+  const AcceptFriendRequestEvent(this.request);
 
   final FriendRequest request;
 
@@ -30,7 +30,7 @@ final class AcceptFriendRequestEvent extends FriendEvent {
 
 /// Event to reject a friend request.
 final class RejectFriendRequestEvent extends FriendEvent {
-  const RejectFriendRequestEvent({required this.request});
+  const RejectFriendRequestEvent(this.request);
 
   final FriendRequest request;
 

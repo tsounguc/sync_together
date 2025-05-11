@@ -9,7 +9,9 @@ class Message extends Equatable {
     required this.timestamp,
   });
 
-  /// Empty Constructor for the [Message].
+  /// Empty Constructor for [Message].
+  ///
+  /// This helps when writing unit tests.
   Message.empty()
       : this(
           id: '',

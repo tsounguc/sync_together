@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
+import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 import 'package:sync_together/features/friends/presentation/widgets/friend_request_tile.dart';
 
 class FriendRequestsScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     super.initState();
     final userId = context.currentUser?.uid;
     if (userId != null) {
-      context.read<FriendBloc>().add(GetFriendRequestsEvent(userId: userId));
+      context.read<FriendsBloc>().add(GetFriendRequestsEvent(userId: userId));
     }
   }
 
@@ -27,10 +27,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Friend Requests')),
-      body: BlocBuilder<FriendBloc, FriendState>(
+      body: BlocBuilder<FriendsBloc, FriendsState>(
         builder: (context, state) {
           debugPrint('FriendRequestScreen: $state');
-          if (state is FriendLoading) {
+          if (state is FriendsLoadingState) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is FriendRequestsLoaded) {
             final requests = state.requests;
@@ -44,7 +44,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                 return FriendRequestTile(request: request);
               },
             );
-          } else if (state is FriendError) {
+          } else if (state is FriendsError) {
             return Center(child: Text('Error: ${state.message}'));
           }
           return const Center(child: Text('Loading...'));

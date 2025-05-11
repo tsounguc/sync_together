@@ -105,7 +105,7 @@ Future<void> _initFriend() async {
   serviceLocator
     // App Logic
     ..registerFactory(
-      () => FriendBloc(
+      () => FriendsBloc(
         sendFriendRequest: serviceLocator(),
         acceptFriendRequest: serviceLocator(),
         rejectFriendRequest: serviceLocator(),
@@ -124,12 +124,12 @@ Future<void> _initFriend() async {
     ..registerLazySingleton(() => GetFriendRequests(serviceLocator()))
     ..registerLazySingleton(() => SearchUsers(serviceLocator()))
     // Repositories
-    ..registerLazySingleton<FriendRepository>(
-      () => FriendRepositoryImpl(serviceLocator()),
+    ..registerLazySingleton<FriendsRepository>(
+      () => FriendsRepositoryImpl(serviceLocator()),
     )
     // Data sources
-    ..registerLazySingleton<FriendRemoteDataSource>(
-      () => FriendRemoteDataSourceImpl(serviceLocator()),
+    ..registerLazySingleton<FriendsRemoteDataSource>(
+      () => FriendsRemoteDataSourceImpl(serviceLocator()),
     );
 }
 

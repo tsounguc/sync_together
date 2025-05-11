@@ -1,16 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
-import 'package:sync_together/features/friends/domain/repositories/friend_repository.dart';
+import 'package:sync_together/features/friends/domain/repositories/friends_repository.dart';
 
-class RemoveFriend extends UseCaseWithParams<void, RemoveFriendRequestParams> {
+class RemoveFriend extends UseCaseWithParams<void, RemoveFriendParams> {
   const RemoveFriend(this.repository);
 
-  final FriendRepository repository;
+  final FriendsRepository repository;
 
   @override
   ResultFuture<void> call(
-    RemoveFriendRequestParams params,
+    RemoveFriendParams params,
   ) =>
       repository.removeFriend(
         senderId: params.senderId,
@@ -18,13 +18,13 @@ class RemoveFriend extends UseCaseWithParams<void, RemoveFriendRequestParams> {
       );
 }
 
-class RemoveFriendRequestParams extends Equatable {
-  const RemoveFriendRequestParams({
+class RemoveFriendParams extends Equatable {
+  const RemoveFriendParams({
     required this.senderId,
     required this.receiverId,
   });
 
-  const RemoveFriendRequestParams.empty()
+  const RemoveFriendParams.empty()
       : senderId = '',
         receiverId = '';
 

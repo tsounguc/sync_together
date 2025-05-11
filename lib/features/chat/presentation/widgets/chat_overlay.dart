@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/features/chat/domain/entities/message.dart';
-import 'package:sync_together/features/chat/presentation/cubit/chat_cubit.dart';
+import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 
 class ChatOverlay extends StatefulWidget {
   const ChatOverlay({
