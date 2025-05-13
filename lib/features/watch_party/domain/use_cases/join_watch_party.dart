@@ -24,10 +24,15 @@ class JoinWatchPartyParams extends Equatable {
     required this.userId,
   });
 
+  /// Empty constructor for testing purposes.
+  const JoinWatchPartyParams.empty()
+      : partyId = '',
+        userId = '';
+
   /// The unique ID of the watch party session.
   final String partyId;
 
-  /// The ID of the user joining the session.
+  /// ID of the user joining the session.
   final String userId;
 
   @override

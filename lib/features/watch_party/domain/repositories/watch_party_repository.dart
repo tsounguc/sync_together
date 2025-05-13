@@ -4,6 +4,8 @@ import 'package:sync_together/features/watch_party/domain/entities/watch_party.d
 
 /// **Repository contract for handling Watch Party operations**.
 abstract class WatchPartyRepository {
+  // Session Management
+
   /// Creates a new watch party session.
   ///
   /// - **Success:** Returns `WatchParty`.
@@ -33,6 +35,25 @@ abstract class WatchPartyRepository {
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<WatchParty> getWatchParty(String partyId);
 
+  /// Leaves watch party.
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultVoid leaveWatchParty({required String userId, required String partyId});
+
+  /// Ends watch party.
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultVoid endWatchParty({required String partyId});
+
+  /// Listen to list of participants
+  ///
+  /// - **Success:** Returns a list of participant ids
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultStream<List<String>> listenToParticipants({required String partyId});
+
+  // Party Lifecycle
   /// Starts watch party.
   ///
   /// - **Success:** Returns `void`.
@@ -43,7 +64,7 @@ abstract class WatchPartyRepository {
   ///
   /// - **Success:** Returns bool.
   /// - **Failure:** Returns a `WatchPartyFailure`.
-  ResultStream<bool> watchStartStatus({required String partyId});
+  ResultStream<bool> listenToPartyStart({required String partyId});
 
   /// Update watch party video url.
   ///
@@ -52,5 +73,24 @@ abstract class WatchPartyRepository {
   ResultVoid updateVideoUrl({
     required String partyId,
     required String newUrl,
+  });
+
+  // Playback Sync
+  /// Sends real-time playback sync data (position + state).
+  ///
+  /// - **Success:** Returns `void`.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultVoid sendSyncData({
+    required String partyId,
+    required double playbackPosition,
+    required bool isPlaying,
+  });
+
+  /// Get the updated video playback position .
+  ///
+  /// - **Success:** Returns Map.
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultStream<DataMap> getSyncedData({
+    required String partyId,
   });
 }
