@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 
+/// **StreamingPlatformModel** represents the Json file user data model.
+///
+/// This extends [StreamingPlatform] and includes JSON serialization methods.
 class StreamingPlatformModel extends StreamingPlatform {
   const StreamingPlatformModel({
     required super.name,
@@ -15,17 +18,26 @@ class StreamingPlatformModel extends StreamingPlatform {
     super.playStoreUrl,
   });
 
+  /// Represents an empty [StreamingPlatformModel] instance.
+  ///
+  /// Used for default values or initializing empty states.
   const StreamingPlatformModel.empty()
       : this(
-          name: '',
-          logoPath: '',
+          name: '_empty.name',
+          logoPath: '_empty.logoPath',
           isDRMProtected: false,
-          defaultUrl: '',
+          defaultUrl: '_empty.defaultUrl',
+          packageName: null,
+          deeplinkUrl: null,
+          appstoreUrl: null,
+          playStoreUrl: null,
         );
 
+  /// Creates a [StreamingPlatformModel] from a JSON string.
   factory StreamingPlatformModel.fromJson(String source) =>
       StreamingPlatformModel.fromMap(jsonDecode(source) as DataMap);
 
+  /// Creates a [StreamingPlatformModel] from a key-value map.
   StreamingPlatformModel.fromMap(DataMap dataMap)
       : this(
           name: dataMap['name'] as String,
@@ -53,6 +65,7 @@ class StreamingPlatformModel extends StreamingPlatform {
         'playStoreUrl': playStoreUrl,
       };
 
+  /// Creates a copy of the current [StreamingPlatformModel] with optional updates.
   StreamingPlatformModel copyWith({
     String? name,
     String? logoPath,
