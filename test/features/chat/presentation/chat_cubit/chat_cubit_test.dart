@@ -107,7 +107,7 @@ void main() {
 
   test(
     'given ChatCubit '
-    'when bloc is instantiated '
+    'when cubit is instantiated '
     'then initial state should be [ChatInitial]',
     () async {
       // Arrange
