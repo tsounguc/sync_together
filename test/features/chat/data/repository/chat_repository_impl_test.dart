@@ -50,7 +50,10 @@ void main() {
         ).thenAnswer((_) async => Future.value());
 
         // Act
-        final result = await repositoryImpl.sendMessage(roomId: roomId, message: testMessage);
+        final result = await repositoryImpl.sendMessage(
+          roomId: roomId,
+          message: testMessage,
+        );
 
         // Assert
         expect(result, const Right<Failure, void>(null));

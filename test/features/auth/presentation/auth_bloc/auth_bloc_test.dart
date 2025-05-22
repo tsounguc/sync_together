@@ -157,7 +157,7 @@ void main() {
 
     blocTest<AuthBloc, AuthState>(
       'given AuthBloc '
-      'when [AuthBloc.signInWithEmail] is called unsuccessful '
+      'when [AuthBloc.signInWithEmail] is called unsuccessfully '
       'then emit [AuthLoading, AuthError]',
       build: () {
         when(

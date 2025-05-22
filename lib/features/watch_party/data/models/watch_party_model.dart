@@ -30,15 +30,15 @@ class WatchPartyModel extends WatchParty {
   /// Used for default values or initializing empty states.
   WatchPartyModel.empty()
       : this(
-          id: '',
-          title: '',
-          videoUrl: '',
+          id: '_empty.id',
+          title: '_empty.title',
+          videoUrl: '_empty.videoUrl',
           platform: const StreamingPlatformModel.empty(),
-          createdAt: DateTime.now(),
+          createdAt: DateTime.utc(2025, 03, 03, 16, 45),
           isPrivate: false,
-          hostId: '',
+          hostId: '_empty.hostId',
           participantIds: [],
-          lastSyncedTime: DateTime(0, 0, 0),
+          lastSyncedTime: DateTime.utc(2025, 03, 03, 16, 45),
           isPlaying: false,
           hasStarted: false,
           playbackPosition: 0,

@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -37,9 +37,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         "document.querySelector('video')?.currentTime",
       );
       final position = double.tryParse(result.toString()) ?? 0;
-      context.read<WatchPartyBloc>().add(
-            SyncPlaybackEvent(
-              watchPartyId: widget.watchParty.id,
+      context.read<WatchPartySessionBloc>().add(
+            SendSyncDataEvent(
+              partyId: widget.watchParty.id,
               playbackPosition: position,
               isPlaying: true,
             ),
@@ -102,12 +102,14 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           final newUrl = change.url ?? '';
           if (newUrl.isNotEmpty && newUrl != widget.watchParty.videoUrl) {
             debugPrint('URL changed. Updating Firestore: $newUrl');
-            context.read<WatchPartyBloc>().add(
-                  UpdateVideoUrlEvent(
-                    watchPartyId: widget.watchParty.id,
-                    newUrl: newUrl,
-                  ),
-                );
+            if (context.currentUser?.uid == widget.watchParty.hostId) {
+              context.read<WatchPartySessionBloc>().add(
+                    UpdateVideoUrlEvent(
+                      partyId: widget.watchParty.id,
+                      newUrl: newUrl,
+                    ),
+                  );
+            }
           }
         },
       );
@@ -154,12 +156,16 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   Future<void> _playVideo() async {
-    await webViewController.runJavaScript("document.querySelector('video')?.play();");
+    await webViewController.runJavaScript(
+      "document.querySelector('video')?.play();",
+    );
     _startAutoSyncLoop();
   }
 
   Future<void> _pauseVideo() async {
-    await webViewController.runJavaScript("document.querySelector('video')?.pause();");
+    await webViewController.runJavaScript(
+      "document.querySelector('video')?.pause();",
+    );
     _stopAutoSyncLoop();
   }
 
@@ -167,7 +173,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   void initState() {
     super.initState();
     _initializeWebView();
-    context.read<WatchPartyBloc>().add(
+    context.read<WatchPartySessionBloc>().add(
           GetSyncedDataEvent(
             partyId: widget.watchParty.id,
           ),
@@ -176,7 +182,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<WatchPartyBloc, WatchPartyState>(
+    return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) {
         if (state is SyncUpdated) {
           debugPrint('Sync update received:  position=${state.playbackPosition}');

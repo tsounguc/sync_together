@@ -1,0 +1,21 @@
+{
+  "id": "_empty.id",
+  "title": "_empty.title",
+  "videoUrl": "_empty.videoUrl",
+  "platform": {
+    "name": "_empty.name",
+    "logoPath": "_empty.logoPath",
+    "isDRMProtected": false,
+    "defaultUrl": "_empty.defaultUrl",
+    "packageName": null,
+    "deeplinkUrl": null,
+    "appstoreUrl": null,
+    "playStoreUrl": null
+  },
+  "isPrivate": false,
+  "hostId": "_empty.hostId",
+  "participantIds": [],
+  "isPlaying": false,
+  "hasStarted": false,
+  "playbackPosition": 0.0
+}

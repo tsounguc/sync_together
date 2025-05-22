@@ -24,7 +24,7 @@ class SignUpWithEmail extends UseCaseWithParams<UserEntity, SignUpParams> {
 
 /// **Parameters for Signing Up**
 ///
-/// Includes an email and password.
+/// Includes a name, email, and password.
 class SignUpParams extends Equatable {
   const SignUpParams({
     required this.name,

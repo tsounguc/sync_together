@@ -1,4 +1,4 @@
-part of 'watch_party_list_cubit.dart';
+part of 'public_parties_cubit.dart';
 
 sealed class WatchPartyListState extends Equatable {
   const WatchPartyListState();

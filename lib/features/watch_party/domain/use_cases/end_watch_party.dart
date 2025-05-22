@@ -2,12 +2,17 @@ import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/domain/repositories/watch_party_repository.dart';
 
-class WatchStartStatus extends StreamUseCaseWithParams<bool, String> {
-  WatchStartStatus(this.repository);
+/// **Use Case: End a watch party**
+///
+/// Calls the [WatchPartyRepository] to end the watch party.
+class EndWatchParty extends UseCaseWithParams<void, String> {
+  EndWatchParty(this.repository);
+
   final WatchPartyRepository repository;
+
   @override
-  ResultStream<bool> call(
+  ResultFuture<void> call(
     String params,
   ) =>
-      repository.watchStartStatus(partyId: params);
+      repository.endWatchParty(partyId: params);
 }

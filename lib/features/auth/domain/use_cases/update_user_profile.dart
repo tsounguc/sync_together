@@ -6,7 +6,7 @@ import 'package:sync_together/features/auth/domain/repositories/auth_repository.
 
 /// **Use Case: UpdateUserProfile**
 ///
-/// Calls the [AuthRepository] to log out the user.
+/// Calls the [AuthRepository] to update user data.
 class UpdateUserProfile extends UseCaseWithParams<void, UpdateUserProfileParams> {
   UpdateUserProfile(this.repository);
   final AuthRepository repository;
@@ -23,7 +23,7 @@ class UpdateUserProfile extends UseCaseWithParams<void, UpdateUserProfileParams>
 
 /// **Parameters for updating user profile**
 ///
-/// Includes an email and password.
+/// Includes an UpdateUserAction and userData.
 class UpdateUserProfileParams extends Equatable {
   const UpdateUserProfileParams({
     required this.action,

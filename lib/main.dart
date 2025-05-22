@@ -8,13 +8,15 @@ import 'package:sync_together/core/router/app_router.dart';
 import 'package:sync_together/core/services/service_locator.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/splash_screen.dart';
-import 'package:sync_together/features/friends/presentation/friend_bloc/friend_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/watch_party_overlay.dart';
+import 'package:sync_together/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setUpServices();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const MyApp());
 }
@@ -48,17 +50,19 @@ class MyApp extends StatelessWidget {
   }
 }
 
-@pragma("vm:entry-point")
-void overlayMain() async {
+@pragma('vm:entry-point')
+Future<void> overlayMain() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setUpServices();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
           create: (_) => UserProvider(),
-        )
+        ),
       ],
       child: BlocProvider(
         create: (_) => serviceLocator<AuthBloc>(),

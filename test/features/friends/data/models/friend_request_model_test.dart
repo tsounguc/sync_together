@@ -14,13 +14,15 @@ void main() {
     '_nanoseconds': 123456000,
   };
 
-  final date = DateTime.fromMillisecondsSinceEpoch(timestampData['_seconds']!).add(
-    Duration(microseconds: timestampData['_nanoseconds']!),
-  );
+  final date = DateTime.fromMillisecondsSinceEpoch(
+    timestampData['_seconds']!,
+  ).add(Duration(microseconds: timestampData['_nanoseconds']!));
 
   final timestamp = Timestamp.fromDate(date);
 
-  final testFriendRequestModel = FriendRequestModel.empty().copyWith(sentAt: date);
+  final testFriendRequestModel = FriendRequestModel.empty().copyWith(
+    sentAt: date,
+  );
 
   final testMap = jsonDecode(fixture('friend_request.json')) as DataMap;
 

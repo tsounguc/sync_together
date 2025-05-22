@@ -1,16 +1,12 @@
-// lib/features/watch_party/presentation/views/create_room_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/i_field.dart';
-import 'package:sync_together/core/router/app_router.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
-import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/views/room_lobby_screen.dart';
-import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({required this.selectedPlatform, super.key});
@@ -57,7 +53,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       hasStarted: false,
     );
 
-    context.read<WatchPartyBloc>().add(
+    context.read<WatchPartySessionBloc>().add(
           CreateWatchPartyEvent(
             party: newRoom,
             onSuccess: (createdParty) {},
@@ -79,16 +75,15 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             // Display selected platform
             Row(
               children: [
-                Image.asset(widget.selectedPlatform.logoPath,
-                    width: 32,
-                    height: 32,
-                    color: widget.selectedPlatform.logoPath.contains('disney') &&
-                            Theme.of(
-                                  context,
-                                ).brightness ==
-                                Brightness.dark
-                        ? Colors.white
-                        : null),
+                Image.asset(
+                  widget.selectedPlatform.logoPath,
+                  width: 32,
+                  height: 32,
+                  color: widget.selectedPlatform.logoPath.contains('disney') &&
+                          Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : null,
+                ),
                 const SizedBox(width: 12),
                 Text(widget.selectedPlatform.name),
               ],
@@ -124,7 +119,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               ],
             ),
             const Spacer(),
-            BlocConsumer<WatchPartyBloc, WatchPartyState>(
+            BlocConsumer<WatchPartySessionBloc, WatchPartySessionState>(
               listener: (context, state) {
                 if (state is WatchPartyCreated) {
                   // Navigator.pushReplacementNamed(context, WatchPartyScreen.id,
@@ -156,7 +151,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
                       );
               },
-            )
+            ),
           ],
         ),
       ),

@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/utils/firebase_constants.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/chat/data/datasources/chat_remote_data_source.dart';
@@ -21,7 +18,10 @@ void main() {
   const testRoomId = '123';
   final testWatchParty = WatchPartyModel.empty().copyWith(id: testRoomId);
 
-  Future<DocumentReference> sendMessage(MessageModel message, WatchPartyModel watchParty) async {
+  Future<DocumentReference> sendMessage(
+    MessageModel message,
+    WatchPartyModel watchParty,
+  ) async {
     return firestore
         .collection(FirebaseConstants.watchPartiesCollection)
         .doc(
@@ -49,8 +49,12 @@ void main() {
       'then upload [Message] to  watch party ',
       () async {
         // Arrange
-        final message = MessageModel.empty()
-            .copyWith(id: '1', senderId: 'sender_id', senderName: 'John Doe', text: 'hello world');
+        final message = MessageModel.empty().copyWith(
+          id: '1',
+          senderId: 'sender_id',
+          senderName: 'John Doe',
+          text: 'hello world',
+        );
 
         // Act
         await remoteDataSourceImpl.sendMessage(
@@ -113,7 +117,9 @@ void main() {
         }
 
         // Act
-        final result = remoteDataSourceImpl.listenToMessages(roomId: testRoomId);
+        final result = remoteDataSourceImpl.listenToMessages(
+          roomId: testRoomId,
+        );
 
         // Assert
         expect(
@@ -141,7 +147,9 @@ void main() {
         }
 
         // Act
-        final result = remoteDataSourceImpl.listenToMessages(roomId: testRoomId);
+        final result = remoteDataSourceImpl.listenToMessages(
+          roomId: testRoomId,
+        );
 
         // Assert
         expect(result, emits(equals(<MessageModel>[])));
@@ -249,7 +257,9 @@ void main() {
       () async {
         // Arrange
         // Act
-        final result = await remoteDataSourceImpl.fetchMessages(roomId: testRoomId);
+        final result = await remoteDataSourceImpl.fetchMessages(
+          roomId: testRoomId,
+        );
         // Assert
         expect(
           result,

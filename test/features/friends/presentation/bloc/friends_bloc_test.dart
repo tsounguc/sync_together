@@ -428,7 +428,7 @@ void main() {
         return bloc;
       },
       act: (bloc) => bloc.add(
-        SearchUsersEvent(
+        const SearchUsersEvent(
           query: 'testUser.displayName',
         ),
       ),

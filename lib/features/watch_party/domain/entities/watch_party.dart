@@ -25,12 +25,12 @@ class WatchParty extends Equatable {
           id: '',
           title: '',
           videoUrl: '',
-          platform: StreamingPlatform.empty(),
+          platform: const StreamingPlatform.empty(),
           createdAt: DateTime.now(),
           isPrivate: false,
           hostId: '',
           participantIds: ['1'],
-          lastSyncedTime: DateTime.now(),
+          lastSyncedTime: DateTime.fromMillisecondsSinceEpoch(0),
           isPlaying: false,
           hasStarted: false,
           playbackPosition: 0,
@@ -73,11 +73,32 @@ class WatchParty extends Equatable {
   final bool hasStarted;
 
   @override
+  String toString() {
+    return '''
+    WatchParty(
+       id: $id,
+       hostId: $hostId,
+       videoUrl: $videoUrl,
+       platform: $platform,
+       title: $title,
+       participantsIds: $participantIds,
+       createdAt: $createdAt,
+       isPrivate: $isPrivate,
+       lastSyncedTime: $lastSyncedTime,
+       playbackPosition: $playbackPosition,
+       isPlaying: $isPlaying,
+       hasStarted: $hasStarted,
+    )
+    ''';
+  }
+
+  @override
   List<Object?> get props => [
         id,
         hostId,
         videoUrl,
         platform,
+        title,
         participantIds,
         createdAt,
         isPlaying,

@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   android_intent_plus: ^5.3.0
+  bloc_concurrency: ^0.3.0
   cloud_firestore: ^5.6.5
   cupertino_icons: ^1.0.8
   dartz: ^0.10.1

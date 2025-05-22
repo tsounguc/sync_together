@@ -55,7 +55,7 @@ Future<void> _initPlatforms() async {
     )
     // Data sources
     ..registerLazySingleton<PlatformsDataSource>(
-      () => PlatformsDataSourceImpl(),
+      PlatformsDataSourceImpl.new,
     );
   //External Dependencies
 }
@@ -64,35 +64,39 @@ Future<void> _initWatchParty() async {
   serviceLocator
     // App Logic
     ..registerFactory(
-      () => WatchPartyBloc(
-          createWatchParty: serviceLocator(),
-          getWatchParty: serviceLocator(),
-          joinWatchParty: serviceLocator(),
-          syncPlayback: serviceLocator(),
-          getSyncedData: serviceLocator(),
-          startParty: serviceLocator(),
-          watchStartStatus: serviceLocator(),
-          updateVideoUrl: serviceLocator()),
+      () => WatchPartySessionBloc(
+        createWatchParty: serviceLocator(),
+        joinWatchParty: serviceLocator(),
+        getWatchParty: serviceLocator(),
+        leaveWatchParty: serviceLocator(),
+        endWatchParty: serviceLocator(),
+        listenToParticipants: serviceLocator(),
+        startParty: serviceLocator(),
+        listenToPartyStart: serviceLocator(),
+        updateVideoUrl: serviceLocator(),
+        sendSyncData: serviceLocator(),
+        getSyncedData: serviceLocator(),
+      ),
     )
     ..registerFactory(
-      () => WatchPartyListCubit(serviceLocator()),
+      () => PublicPartiesCubit(serviceLocator()),
     )
     // Use cases
     ..registerLazySingleton(() => CreateWatchParty(serviceLocator()))
-    ..registerLazySingleton(() => StartWatchParty(serviceLocator()))
-    ..registerLazySingleton(() => GetWatchParty(serviceLocator()))
     ..registerLazySingleton(() => JoinWatchParty(serviceLocator()))
-    ..registerLazySingleton(() => SyncPlayback(serviceLocator()))
-    ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
+    ..registerLazySingleton(() => GetWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => LeaveWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => EndWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => ListenToParticipants(serviceLocator()))
+    ..registerLazySingleton(() => StartWatchParty(serviceLocator()))
+    ..registerLazySingleton(() => ListenToPartyStart(serviceLocator()))
     ..registerLazySingleton(() => UpdateVideoUrl(serviceLocator()))
-    ..registerLazySingleton(() => WatchStartStatus(serviceLocator()))
+    ..registerLazySingleton(() => SendSyncData(serviceLocator()))
+    ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
     ..registerLazySingleton(() => GetPublicWatchParties(serviceLocator()))
     // Repositories
     ..registerLazySingleton<WatchPartyRepository>(
       () => WatchPartyRepositoryImpl(serviceLocator()),
-    )
-    ..registerLazySingleton<PlaybackRepository>(
-      () => PlaybackRepositoryImpl(serviceLocator()),
     )
     // Data sources
     ..registerLazySingleton<WatchPartyRemoteDataSource>(

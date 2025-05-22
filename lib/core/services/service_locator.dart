@@ -42,20 +42,21 @@ import 'package:sync_together/features/platforms/domain/repositories/platforms_r
 import 'package:sync_together/features/platforms/domain/use_cases/load_platforms.dart';
 import 'package:sync_together/features/platforms/presentation/platforms_cubit/platforms_cubit.dart';
 import 'package:sync_together/features/watch_party/data/data_sources/watch_party_remote_data_source.dart';
-import 'package:sync_together/features/watch_party/data/repositories/playback_repository_impl.dart';
 import 'package:sync_together/features/watch_party/data/repositories/watch_party_repository_impl.dart';
-import 'package:sync_together/features/watch_party/domain/repositories/playback_repository.dart';
 import 'package:sync_together/features/watch_party/domain/repositories/watch_party_repository.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/create_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/end_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_public_watch_parties.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/leave_watch_party.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_participants.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_start.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/send_sync_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
-import 'package:sync_together/features/watch_party/domain/use_cases/sync_playback.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/update_video_url.dart';
-import 'package:sync_together/features/watch_party/domain/use_cases/watch_start_status.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_list_cubit/watch_party_list_cubit.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
+import 'package:sync_together/features/watch_party/presentation/public_parties_cubit/public_parties_cubit.dart';
 
 part 'service_locator.main.dart';

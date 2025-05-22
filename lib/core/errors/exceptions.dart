@@ -178,6 +178,39 @@ class SyncWatchPartyException extends WatchPartyException {
   });
 }
 
+/// **Exception thrown when leaving a watch party.**
+class LeaveWatchPartyException extends WatchPartyException {
+  const LeaveWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when ending a watch party.**
+class EndWatchPartyException extends WatchPartyException {
+  const EndWatchPartyException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when listen to participants in a watch party.**
+class ListenToParticipantsException extends WatchPartyException {
+  const ListenToParticipantsException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when listening to if watch party has started.**
+class ListenToPartyStartException extends WatchPartyException {
+  const ListenToPartyStartException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when starting a watch party.**
 class StartWatchPartyException extends WatchPartyException {
   const StartWatchPartyException({
     required super.message,
@@ -188,6 +221,28 @@ class StartWatchPartyException extends WatchPartyException {
 /// **Exception thrown when getting list of public watch parties.**
 class GetPublicWatchPartiesException extends WatchPartyException {
   const GetPublicWatchPartiesException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+/// **Exception thrown when sending real-time playback sync data.**
+class SendSyncDataException extends WatchPartyException {
+  const SendSyncDataException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+class GetSyncedDataException extends WatchPartyException {
+  const GetSyncedDataException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+class UpdateVideoUrlException extends WatchPartyException {
+  const UpdateVideoUrlException({
     required super.message,
     required super.statusCode,
   });

@@ -5,6 +5,7 @@ import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/utils/firebase_constants.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
+import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Remote Data Source for Watch Parties**
 ///
@@ -14,7 +15,7 @@ abstract class WatchPartyRemoteDataSource {
   ///
   /// - **Success:** Returns a [WatchPartyModel].
   /// - **Failure:** Throws a [WatchPartyException].
-  Future<WatchPartyModel> createWatchParty({required WatchPartyModel party});
+  Future<WatchPartyModel> createWatchParty({required WatchParty party});
 
   /// Joins an existing watch party session.
   ///
@@ -37,7 +38,51 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Failure:** Throws a [WatchPartyException].
   Future<WatchPartyModel> getWatchParty(String partyId);
 
-  /// Send playback time to database.
+  /// Leaves watch party.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Future<void> leaveWatchParty({
+    required String userId,
+    required String partyId,
+  });
+
+  /// Ends watch party.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Future<void> endWatchParty({
+    required String partyId,
+  });
+
+  /// Listens to list of participants
+  ///
+  /// - **Success:** Returns a list of participant ids
+  /// - **Failure:** Throws a [WatchPartyException].
+  Stream<List<String>> listenToParticipants({required String partyId});
+
+  /// Start watch party.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Future<void> startParty({required String partyId});
+
+  /// Listen to start status of a WatchParty
+  ///
+  /// - **Success:** Returns s bool.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Stream<bool> listenToPartyStart({required String partyId});
+
+  /// Update watch party video url.
+  ///
+  /// - **Success:** Completes without returning a value.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Future<void> updateVideoUrl({
+    required String partyId,
+    required String newUrl,
+  });
+
+  /// Sends playback time to database.
   ///
   /// - **Success:** Completes without returning a value.
   /// - **Failure:** Throws a [WatchPartyException].
@@ -52,27 +97,6 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Success:** Returns Map.
   /// - **Failure:** Throws a [WatchPartyException].
   Stream<DataMap> getSyncedData({required String partyId});
-
-  /// Start watch party.
-  ///
-  /// - **Success:** Completes without returning a value.
-  /// - **Failure:** Throws a [WatchPartyException].
-  Future<void> startParty({required String partyId});
-
-  /// Listen to start status of a WatchParty
-  ///
-  /// - **Success:** Returns s bool.
-  /// - **Failure:** Throws a [WatchPartyException].
-  Stream<bool> watchStartStatus({required String partyId});
-
-  /// Update watch party video url.
-  ///
-  /// - **Success:** Completes without returning a value.
-  /// - **Failure:** Throws a [WatchPartyException].
-  Future<void> updateVideoUrl({
-    required String partyId,
-    required String newUrl,
-  });
 }
 
 class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
@@ -80,11 +104,11 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
 
   final FirebaseFirestore firestore;
   @override
-  Future<WatchPartyModel> createWatchParty({required WatchPartyModel party}) async {
+  Future<WatchPartyModel> createWatchParty({required WatchParty party}) async {
     try {
       final docRef = _watchParties.doc();
 
-      final watchParty = party.copyWith(
+      final watchParty = (party as WatchPartyModel).copyWith(
         id: docRef.id,
       );
 
@@ -105,46 +129,19 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   }
 
   @override
-  Future<WatchPartyModel> getWatchParty(
-    String partyId,
-  ) async {
-    try {
-      final docRef = firestore.collection(FirebaseConstants.watchPartiesCollection).doc(partyId);
-      final doc = await docRef.get();
-
-      if (!doc.exists) {
-        throw const GetWatchPartyException(
-          message: 'Watch party not found.',
-          statusCode: '',
-        );
-      }
-
-      return WatchPartyModel.fromMap(doc.data()!);
-    } on FirebaseAuthException catch (e) {
-      throw GetWatchPartyException(
-        message: e.message ?? 'Error Occurred',
-        statusCode: e.code,
-      );
-    } catch (e, s) {
-      debugPrintStack(stackTrace: s);
-      throw GetWatchPartyException(
-        message: e.toString(),
-        statusCode: '505',
-      );
-    }
-  }
-
-  @override
   Future<WatchPartyModel> joinWatchParty({
     required String partyId,
     required String userId,
   }) async {
     try {
-      final docRef = firestore.collection(FirebaseConstants.watchPartiesCollection).doc(partyId);
+      final docRef = _watchParties.doc(partyId);
       final doc = await docRef.get();
 
       if (!doc.exists) {
-        throw const JoinWatchPartyException(message: 'Watch party not found.', statusCode: '');
+        throw const JoinWatchPartyException(
+          message: 'Watch party not found.',
+          statusCode: '',
+        );
       }
 
       final data = doc.data()!;
@@ -154,7 +151,7 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
 
       if (!updatedParticipants.contains(userId)) {
         updatedParticipants.add(userId);
-        await docRef.update({'participants': updatedParticipants});
+        await docRef.update({'participantIds': updatedParticipants});
       }
 
       return WatchPartyModel.fromMap(doc.data()!);
@@ -186,8 +183,221 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
                 )
                 .toList(),
           );
-      print(watchParties);
       return watchParties;
+    } on FirebaseAuthException catch (e) {
+      throw SyncWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw SyncWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Future<WatchPartyModel> getWatchParty(
+    String partyId,
+  ) async {
+    try {
+      final doc = await _watchParties.doc(partyId).get();
+
+      if (!doc.exists) {
+        throw const GetWatchPartyException(
+          message: 'Watch party not found.',
+          statusCode: '',
+        );
+      }
+
+      return WatchPartyModel.fromMap(doc.data()!);
+    } on FirebaseAuthException catch (e) {
+      throw GetWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw GetWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Future<void> leaveWatchParty({
+    required String userId,
+    required String partyId,
+  }) async {
+    try {
+      final docRef = _watchParties.doc(partyId);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        throw const LeaveWatchPartyException(
+          message: 'Watch party not found.',
+          statusCode: '',
+        );
+      }
+      final data = doc.data();
+      final participantIds = List<String>.from(
+        data?['participantIds'] as List? ?? [],
+      )..remove(userId);
+
+      await docRef.update({'participantIds': participantIds});
+    } on FirebaseAuthException catch (e) {
+      throw LeaveWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw LeaveWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Future<void> endWatchParty({required String partyId}) async {
+    try {
+      await _watchParties.doc(partyId).delete();
+    } on FirebaseAuthException catch (e) {
+      throw EndWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw EndWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Stream<List<String>> listenToParticipants({required String partyId}) {
+    try {
+      final participantsStream = _watchParties.doc(partyId).snapshots().map(
+        (snapshot) {
+          final data = snapshot.data();
+          return List<String>.from(data?['participantIds'] as List? ?? []);
+        },
+      );
+
+      return participantsStream.handleError(
+        (dynamic error) {
+          if (error is FirebaseException) {
+            throw ListenToParticipantsException(
+              message: error.message ?? 'Unknown error occurred',
+              statusCode: error.code,
+            );
+          }
+          throw ListenToParticipantsException(
+            message: error.toString(),
+            statusCode: '505',
+          );
+        },
+      );
+    } on FirebaseException catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw ListenToParticipantsException(
+        message: e.message ?? 'Unknown error occurred',
+        statusCode: '501',
+      );
+    } on ListenToParticipantsException {
+      rethrow;
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      throw ListenToParticipantsException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Future<void> startParty({required String partyId}) async {
+    try {
+      await _watchParties.doc(partyId).update({
+        'hasStarted': true,
+      });
+    } on FirebaseAuthException catch (e) {
+      throw StartWatchPartyException(
+        message: e.message ?? 'Error Occurred',
+        statusCode: e.code,
+      );
+    } on ListenToParticipantsException {
+      rethrow;
+    } catch (e, s) {
+      debugPrint('StartPartyException: $e\n$s ');
+      throw StartWatchPartyException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Stream<bool> listenToPartyStart({required String partyId}) async* {
+    try {
+      final docRef = _watchParties.doc(partyId);
+
+      final snapshot = await docRef.get();
+      final initialHasStarted = snapshot.data()?['hasStarted'] == true;
+      yield initialHasStarted;
+      final statusStream = docRef.snapshots().map(
+        (snapshot) {
+          final data = snapshot.data();
+          if (data == null) return false;
+          return data['hasStarted'] == true;
+        },
+      );
+      yield* statusStream.handleError((dynamic error) {
+        if (error is FirebaseException) {
+          throw ListenToPartyStartException(
+            message: error.message ?? 'Unknown error occurred',
+            statusCode: error.code,
+          );
+        }
+        throw ListenToPartyStartException(
+          message: error.toString(),
+          statusCode: '505',
+        );
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      debugPrintStack(stackTrace: stackTrace);
+      yield* Stream<bool>.error(
+        ListenToPartyStartException(
+          message: e.message ?? 'Unknown error occurred',
+          statusCode: e.code,
+        ),
+      );
+    } on ListenToPartyStartException catch (e) {
+      yield* Stream<bool>.error(e);
+    } catch (e, stackTrace) {
+      debugPrintStack(stackTrace: stackTrace);
+      yield* Stream<bool>.error(
+        const ListenToPartyStartException(
+          message: 'Unknown error occurred',
+          statusCode: '500',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> updateVideoUrl({
+    required String partyId,
+    required String newUrl,
+  }) async {
+    try {
+      await _watchParties.doc(partyId).update({'videoUrl': newUrl});
     } on FirebaseAuthException catch (e) {
       throw SyncWatchPartyException(
         message: e.message ?? 'Error Occurred',
@@ -210,8 +420,13 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   }) async {
     try {
       await _watchParties.doc(partyId).set(
-          {'playbackPosition': playbackPosition, 'lastSyncedTime': Timestamp.now(), 'isPlaying': isPlaying},
-          SetOptions(merge: true));
+        {
+          'playbackPosition': playbackPosition,
+          'lastSyncedTime': Timestamp.now(),
+          'isPlaying': isPlaying,
+        },
+        SetOptions(merge: true),
+      );
     } on FirebaseAuthException catch (e) {
       throw SyncWatchPartyException(
         message: e.message ?? 'Error Occurred',
@@ -248,88 +463,6 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
         );
       },
     );
-  }
-
-  @override
-  Future<void> startParty({required String partyId}) async {
-    try {
-      await _watchParties.doc(partyId).update({
-        'hasStarted': true,
-      });
-    } on FirebaseAuthException catch (e) {
-      throw StartWatchPartyException(
-        message: e.message ?? 'Error Occurred',
-        statusCode: e.code,
-      );
-    } catch (e, s) {
-      debugPrintStack(stackTrace: s);
-      throw StartWatchPartyException(
-        message: e.toString(),
-        statusCode: '505',
-      );
-    }
-  }
-
-  @override
-  Stream<bool> watchStartStatus({required String partyId}) {
-    try {
-      final statusStream = _watchParties.doc(partyId).snapshots().map((snapshot) {
-        final data = snapshot.data();
-        if (data == null) return false;
-        return data['hasStarted'] == false;
-      });
-      return statusStream.handleError((dynamic error) {
-        if (error is FirebaseException) {
-          throw StartWatchPartyException(
-            message: error.message ?? 'Unknown error occurred',
-            statusCode: error.code,
-          );
-        }
-        throw StartWatchPartyException(
-          message: error.toString(),
-          statusCode: '505',
-        );
-      });
-    } on FirebaseException catch (e, stackTrace) {
-      debugPrintStack(stackTrace: stackTrace);
-      return Stream.error(
-        StartWatchPartyException(
-          message: e.message ?? 'Unknown error occurred',
-          statusCode: e.code,
-        ),
-      );
-    } on StartWatchPartyException catch (e) {
-      return Stream.error(e);
-    } catch (e, stackTrace) {
-      debugPrintStack(stackTrace: stackTrace);
-      return Stream.error(
-        const StartWatchPartyException(
-          message: 'Unknown error occurred',
-          statusCode: '500',
-        ),
-      );
-    }
-  }
-
-  @override
-  Future<void> updateVideoUrl({
-    required String partyId,
-    required String newUrl,
-  }) async {
-    try {
-      await _watchParties.doc(partyId).update({'videoUrl': newUrl});
-    } on FirebaseAuthException catch (e) {
-      throw SyncWatchPartyException(
-        message: e.message ?? 'Error Occurred',
-        statusCode: e.code,
-      );
-    } catch (e, s) {
-      debugPrintStack(stackTrace: s);
-      throw SyncWatchPartyException(
-        message: e.toString(),
-        statusCode: '505',
-      );
-    }
   }
 
   CollectionReference<DataMap> get _watchParties => firestore.collection(

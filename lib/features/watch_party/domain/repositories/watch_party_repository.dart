@@ -1,5 +1,4 @@
 import 'package:sync_together/core/utils/type_defs.dart';
-import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Repository contract for handling Watch Party operations**.
@@ -11,7 +10,7 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns `WatchParty`.
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<WatchParty> createWatchParty({
-    required WatchPartyModel party,
+    required WatchParty party,
   });
 
   /// Joins an existing watch party.

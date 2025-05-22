@@ -34,7 +34,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         children: [
           // 📌 Navigation Buttons
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 ElevatedButton.icon(

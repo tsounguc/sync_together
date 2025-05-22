@@ -1,4 +1,4 @@
-part of 'watch_party_bloc.dart';
+part of 'watch_party_session_bloc.dart';
 
 /// Base event for watch party.
 sealed class WatchPartyEvent extends Equatable {
@@ -15,7 +15,7 @@ final class CreateWatchPartyEvent extends WatchPartyEvent {
     this.onFailure,
   });
 
-  final WatchPartyModel party;
+  final WatchParty party;
   final void Function(WatchParty)? onSuccess;
   final void Function(String)? onFailure;
 
@@ -35,21 +35,6 @@ class JoinWatchPartyEvent extends WatchPartyEvent {
 
   @override
   List<Object?> get props => [partyId, userId];
-}
-
-/// Event to sync playback position across users
-class SyncPlaybackEvent extends WatchPartyEvent {
-  const SyncPlaybackEvent({
-    required this.watchPartyId,
-    required this.playbackPosition,
-    required this.isPlaying,
-  });
-  final String watchPartyId;
-  final double playbackPosition;
-  final bool isPlaying;
-
-  @override
-  List<Object?> get props => [watchPartyId, playbackPosition, isPlaying];
 }
 
 /// Event to get synced playback position across users
@@ -80,27 +65,60 @@ class UpdateWatchPartyEvent extends WatchPartyEvent {
 /// Event to update watch party video url state
 class UpdateVideoUrlEvent extends WatchPartyEvent {
   const UpdateVideoUrlEvent({
-    required this.watchPartyId,
+    required this.partyId,
     required this.newUrl,
   });
 
-  final String watchPartyId;
+  final String partyId;
   final String newUrl;
 
   @override
-  List<Object?> get props => [watchPartyId, newUrl];
+  List<Object?> get props => [partyId, newUrl];
 }
 
-/// Event to update watch party state
+/// Event to get watch party state
 class GetWatchPartyEvent extends WatchPartyEvent {
   const GetWatchPartyEvent(
-    this.watchPartyId,
+    this.partyId,
   );
 
-  final String watchPartyId;
+  final String partyId;
 
   @override
-  List<Object?> get props => [watchPartyId];
+  List<Object?> get props => [partyId];
+}
+
+/// Event to leave watch party state
+class LeaveWatchPartyEvent extends WatchPartyEvent {
+  const LeaveWatchPartyEvent({
+    required this.partyId,
+    required this.userId,
+  });
+
+  final String partyId;
+  final String userId;
+
+  @override
+  List<Object?> get props => [partyId, userId];
+}
+
+class EndWatchPartyEvent extends WatchPartyEvent {
+  const EndWatchPartyEvent(this.partyId);
+
+  final String partyId;
+
+  @override
+  List<Object?> get props => [partyId];
+}
+
+/// Event to listen to participants watch party
+class ListenToParticipantsEvent extends WatchPartyEvent {
+  const ListenToParticipantsEvent(this.partyId);
+
+  final String partyId;
+
+  @override
+  List<Object?> get props => [partyId];
 }
 
 /// Event to start watch party
@@ -113,9 +131,29 @@ class StartPartyEvent extends WatchPartyEvent {
   List<Object?> get props => [partyId];
 }
 
+/// Event to send playback position and playing status watch party
+class SendSyncDataEvent extends WatchPartyEvent {
+  const SendSyncDataEvent({
+    required this.partyId,
+    required this.playbackPosition,
+    required this.isPlaying,
+  });
+
+  final String partyId;
+  final double playbackPosition;
+  final bool isPlaying;
+
+  @override
+  List<Object?> get props => [
+        partyId,
+        playbackPosition,
+        isPlaying,
+      ];
+}
+
 /// Event to listen for party starting
-class ListenToStartPartyEvent extends WatchPartyEvent {
-  const ListenToStartPartyEvent(this.partyId);
+class ListenToPartyStartEvent extends WatchPartyEvent {
+  const ListenToPartyStartEvent(this.partyId);
 
   final String partyId;
 

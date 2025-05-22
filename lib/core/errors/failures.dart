@@ -274,6 +274,66 @@ class GetWatchPartyFailure extends WatchPartyFailure {
         );
 }
 
+/// **Failure that occurs when leaving a watch party.**
+class LeaveWatchPartyFailure extends WatchPartyFailure {
+  LeaveWatchPartyFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [LeaveWatchPartyException] into a [LeaveWatchPartyFailure].
+  LeaveWatchPartyFailure.fromException(LeaveWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when ending a watch party.**
+class EndWatchPartyFailure extends WatchPartyFailure {
+  EndWatchPartyFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [EndWatchPartyException] into a [EndWatchPartyFailure].
+  EndWatchPartyFailure.fromException(EndWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when listening to participants in watch party.**
+class ListenToParticipantsFailure extends WatchPartyFailure {
+  ListenToParticipantsFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [ListenToParticipantsException]
+  /// into a [ListenToParticipantsFailure].
+  ListenToParticipantsFailure.fromException(ListenToParticipantsException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+class ListenToPartyStartFailure extends WatchPartyFailure {
+  ListenToPartyStartFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [ListenToPartyStartException] into a [ListenToPartyStartFailure].
+  ListenToPartyStartFailure.fromException(ListenToPartyStartException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
 /// **Failure that occurs when starting a watch party.**
 class StartWatchPartyFailure extends WatchPartyFailure {
   StartWatchPartyFailure({required super.message, required super.statusCode});
@@ -286,12 +346,52 @@ class StartWatchPartyFailure extends WatchPartyFailure {
         );
 }
 
+/// **Failure that occurs when starting a watch party.**
+class SendSyncDataFailure extends WatchPartyFailure {
+  SendSyncDataFailure({required super.message, required super.statusCode});
+
+  /// Converts a [SendSyncDataException] into a [SendSyncDataFailure].
+  SendSyncDataFailure.fromException(SendSyncDataException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
 /// **Failure that occurs when syncing a watch party.**
 class SyncWatchPartyFailure extends WatchPartyFailure {
   SyncWatchPartyFailure({required super.message, required super.statusCode});
 
   /// Converts a [SyncWatchPartyException] into a [SyncWatchPartyFailure].
   SyncWatchPartyFailure.fromException(SyncWatchPartyException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+class GetSyncedDataFailure extends WatchPartyFailure {
+  GetSyncedDataFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [GetSyncedDataException] into a [GetSyncedDataFailure].
+  GetSyncedDataFailure.fromException(GetSyncedDataException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+class UpdateVideoUrlFailure extends WatchPartyFailure {
+  UpdateVideoUrlFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [UpdateVideoUrlException] into a [UpdateVideoUrlFailure].
+  UpdateVideoUrlFailure.fromException(UpdateVideoUrlException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,

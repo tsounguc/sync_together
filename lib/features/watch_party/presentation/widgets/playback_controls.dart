@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 /// **PlaybackControls Widget**
@@ -50,9 +50,9 @@ class WebPlaybackControls extends StatelessWidget {
 
     if (result != null) {
       final position = double.tryParse(result.toString()) ?? 0;
-      context.read<WatchPartyBloc>().add(
-            SyncPlaybackEvent(
-              watchPartyId: watchPartyId,
+      context.read<WatchPartySessionBloc>().add(
+            SendSyncDataEvent(
+              partyId: watchPartyId,
               playbackPosition: position,
               isPlaying: isPlaying,
             ),

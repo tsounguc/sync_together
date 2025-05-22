@@ -75,11 +75,13 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         .collection(FirebaseConstants.messagesCollection)
         .orderBy('timestamp', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map(
-              (doc) => MessageModel.fromMap(doc.data()),
-            )
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => MessageModel.fromMap(doc.data()),
+              )
+              .toList(),
+        );
 
     return dataStream.handleError((dynamic error) {
       if (error is FirebaseException) {

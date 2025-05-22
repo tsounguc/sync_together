@@ -16,7 +16,7 @@ class UserEntity extends Equatable {
     this.isAnonymous = false,
   });
 
-  /// Empty Constructor for the [UserEntity].
+  /// Empty Constructor for [UserEntity].
   ///
   /// This sets the uid to an empty string,
   /// while nullable fields remain null.

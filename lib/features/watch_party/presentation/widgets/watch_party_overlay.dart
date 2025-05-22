@@ -1,12 +1,10 @@
-// lib/features/watch_party/presentation/widgets/watch_party_overlay.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/services/service_locator.dart';
-import 'package:sync_together/features/chat/presentation/cubit/chat_cubit.dart';
+import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 import 'package:sync_together/features/chat/presentation/widgets/chat_overlay.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_bloc/watch_party_bloc.dart';
-import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
 class WatchPartyOverlay extends StatefulWidget {
   const WatchPartyOverlay({
@@ -54,7 +52,7 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
     super.dispose();
   }
 
-  void _handleClose() async {
+  Future<void> _handleClose() async {
     await _controller.reverse(); // Animate fade out
     widget.onClose(); // Call parent close
   }
@@ -96,11 +94,16 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                       children: [
                         const Text(
                           'Watch Party',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         // Native Mode Controls
-                        NativePlaybackControls(watchPartyId: widget.watchPartyId),
+                        NativePlaybackControls(
+                          watchPartyId: widget.watchPartyId,
+                        ),
                         Align(
                           alignment: Alignment.bottomRight,
                           child: IconButton(
@@ -108,7 +111,9 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                               _showChat ? Icons.chat_bubble : Icons.chat_bubble_outline,
                               color: Colors.white,
                             ),
-                            onPressed: () => setState(() => _showChat = !_showChat),
+                            onPressed: () => setState(
+                              () => _showChat = !_showChat,
+                            ),
                           ),
                         ),
                       ],
@@ -133,7 +138,7 @@ class _WatchPartyOverlayState extends State<WatchPartyOverlay> with SingleTicker
                   right: -20,
                   top: 250,
                   child: BlocProvider(
-                    create: (context) => serviceLocator<ChatCubit>(), // or use your DI locator
+                    create: (context) => serviceLocator<ChatCubit>(),
                     child: ChatOverlay(
                       roomId: widget.watchPartyId,
                       currentUserId: context.currentUser?.uid ?? '',
@@ -155,13 +160,15 @@ class NativePlaybackControls extends StatelessWidget {
   final String watchPartyId;
 
   void _sendSyncEvent(BuildContext context) {
-    context.read<WatchPartyBloc>().add(GetSyncedDataEvent(partyId: watchPartyId));
+    context.read<WatchPartySessionBloc>().add(
+          GetSyncedDataEvent(partyId: watchPartyId),
+        );
   }
 
   void _sendPlayingEvent(BuildContext context) {
-    context.read<WatchPartyBloc>().add(
-          SyncPlaybackEvent(
-            watchPartyId: watchPartyId,
+    context.read<WatchPartySessionBloc>().add(
+          SendSyncDataEvent(
+            partyId: watchPartyId,
             playbackPosition: 0, // No way to get exact position in Native Mode
             isPlaying: true,
           ),
@@ -169,9 +176,9 @@ class NativePlaybackControls extends StatelessWidget {
   }
 
   void _sendPausedEvent(BuildContext context) {
-    context.read<WatchPartyBloc>().add(
-          SyncPlaybackEvent(
-            watchPartyId: watchPartyId,
+    context.read<WatchPartySessionBloc>().add(
+          SendSyncDataEvent(
+            partyId: watchPartyId,
             playbackPosition: 0, // No way to get exact position in Native Mode
             isPlaying: false,
           ),
@@ -188,7 +195,7 @@ class NativePlaybackControls extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: () => _sendPlayingEvent(context),
           icon: const Icon(Icons.play_arrow, size: 18),
-          label: const Text('I\'m Playing'),
+          label: const Text("I'm Playing"),
         ),
         ElevatedButton.icon(
           onPressed: () => _sendPausedEvent(context),

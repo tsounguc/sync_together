@@ -42,7 +42,10 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  ResultVoid sendMessage({required String roomId, required Message message}) async {
+  ResultVoid sendMessage({
+    required String roomId,
+    required Message message,
+  }) async {
     try {
       final result = await remoteDataSource.sendMessage(
         roomId: roomId,
@@ -65,7 +68,10 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  ResultVoid deleteMessage({required String roomId, required String messageId}) async {
+  ResultVoid deleteMessage({
+    required String roomId,
+    required String messageId,
+  }) async {
     try {
       final result = await remoteDataSource.deleteMessage(
         roomId: roomId,
@@ -78,7 +84,11 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  ResultVoid editMessage({required String roomId, required String messageId, required String newText}) async {
+  ResultVoid editMessage({
+    required String roomId,
+    required String messageId,
+    required String newText,
+  }) async {
     try {
       final result = await remoteDataSource.editMessage(
         roomId: roomId,
@@ -92,7 +102,10 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  ResultFuture<List<Message>> fetchMessages({required String roomId, int limit = 20}) async {
+  ResultFuture<List<Message>> fetchMessages({
+    required String roomId,
+    int limit = 20,
+  }) async {
     try {
       final result = await remoteDataSource.fetchMessages(
         roomId: roomId,

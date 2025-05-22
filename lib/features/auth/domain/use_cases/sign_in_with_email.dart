@@ -28,7 +28,10 @@ class SignInParams extends Equatable {
       : email = '',
         password = '';
 
+  /// Email of user
   final String email;
+
+  /// Password of user
   final String password;
 
   @override

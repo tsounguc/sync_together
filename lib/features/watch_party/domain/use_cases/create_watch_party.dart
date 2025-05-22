@@ -1,11 +1,12 @@
-import 'package:equatable/equatable.dart';
 import 'package:sync_together/core/usecases/usecase.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/repositories/watch_party_repository.dart';
 
-/// Creates a new watch party session.
+/// **Use Case: Create watch party**
+///
+/// Calls the [WatchPartyRepository] to create a new watch party.
 class CreateWatchParty extends UseCaseWithParams<WatchParty, WatchPartyModel> {
   const CreateWatchParty(this.repository);
 
@@ -13,7 +14,7 @@ class CreateWatchParty extends UseCaseWithParams<WatchParty, WatchPartyModel> {
 
   @override
   ResultFuture<WatchParty> call(
-    WatchPartyModel params,
+    WatchParty params,
   ) =>
       repository.createWatchParty(
         party: params,

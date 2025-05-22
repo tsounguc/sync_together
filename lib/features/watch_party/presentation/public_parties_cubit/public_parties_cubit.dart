@@ -1,12 +1,13 @@
-import 'package:bloc/bloc.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_public_watch_parties.dart';
 
-part 'watch_party_list_state.dart';
+part 'public_parties_state.dart';
 
-class WatchPartyListCubit extends Cubit<WatchPartyListState> {
-  WatchPartyListCubit(this._getPublicWatchParties) : super(WatchPartyListInitial());
+class PublicPartiesCubit extends Cubit<WatchPartyListState> {
+  PublicPartiesCubit(this._getPublicWatchParties) : super(WatchPartyListInitial());
 
   final GetPublicWatchParties _getPublicWatchParties;
 

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sync_together/features/platforms/data/models/streaming_platform_model.dart';
 
-import '../../../../fixtures/fixture_reader.dart';
 
 void main() {
   const testModel = StreamingPlatformModel(
