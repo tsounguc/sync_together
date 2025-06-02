@@ -49,7 +49,7 @@ SyncTogether is a cross-platform watch party app that allows users to watch thei
 
 ### **1. Clone the Repository**
 ```sh
-git clone https://github.com/YOUR_USERNAME/sync_together.git
+git clone https://github.com/tsounguc/sync_together.git
 cd sync_together
 ```
 
