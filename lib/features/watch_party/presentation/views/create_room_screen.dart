@@ -25,14 +25,16 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   bool _isPrivate = false;
 
-  void _createRoom() {
+  void _onCreateRoomPressed() {
     final title = _titleController.text.trim();
     final url = _urlController.text.trim();
 
-    if (title.isEmpty) {
+    if (title.isEmpty
+        // || (!widget.selectedPlatform.isDRMProtected && url.isEmpty)
+        ) {
       CoreUtils.showSnackBar(
         context,
-        'Please enter a title and video URL',
+        'Please enter a title',
       );
 
       return;
@@ -56,8 +58,21 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     context.read<WatchPartySessionBloc>().add(
           CreateWatchPartyEvent(
             party: newRoom,
-            onSuccess: (createdParty) {},
-            onFailure: (message) {},
+            onSuccess: (createdParty) {
+              Navigator.popUntil(
+                context,
+                ModalRoute.withName('/'),
+              );
+              Navigator.pushNamed(
+                context,
+                RoomLobbyScreen.id,
+                arguments: createdParty,
+              );
+            },
+            onFailure: (message) => CoreUtils.showSnackBar(
+              context,
+              message,
+            ),
           ),
         );
   }
@@ -88,7 +103,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                 Text(widget.selectedPlatform.name),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             IField(
               controller: _titleController,
               hintText: 'Room Title',
@@ -96,12 +111,16 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
             const SizedBox(height: 16),
             if (widget.selectedPlatform.isDRMProtected)
-              Text('Make sure everyone opens the '
-                  'same movie in ${widget.selectedPlatform.name}')
+              Text(
+                'This platform is DRM protected. Everyone must open the same video manually.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              )
             else
               IField(
                 controller: _urlController,
                 hintText: 'Streaming Video URL',
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.done,
               ),
             const SizedBox(height: 16),
             Row(
@@ -121,15 +140,15 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             const Spacer(),
             BlocConsumer<WatchPartySessionBloc, WatchPartySessionState>(
               listener: (context, state) {
-                if (state is WatchPartyCreated) {
-                  // Navigator.pushReplacementNamed(context, WatchPartyScreen.id,
-                  //     arguments: WatchPartyScreenArguments(state.watchParty, widget.selectedPlatform));
-                  Navigator.pushReplacementNamed(
-                    context,
-                    RoomLobbyScreen.id,
-                    arguments: state.party,
-                  );
-                }
+                // if (state is WatchPartyCreated) {
+                //   // Navigator.pushReplacementNamed(context, WatchPartyScreen.id,
+                //   //     arguments: WatchPartyScreenArguments(state.watchParty, widget.selectedPlatform));
+                //   Navigator.pushReplacementNamed(
+                //     context,
+                //     RoomLobbyScreen.id,
+                //     arguments: state.party,
+                //   );
+                // }
                 if (state is WatchPartyError) {
                   CoreUtils.showSnackBar(
                     context,
@@ -145,7 +164,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         ],
                       )
                     : ElevatedButton.icon(
-                        onPressed: _createRoom,
+                        onPressed: _onCreateRoomPressed,
                         icon: const Icon(Icons.add),
                         label: const Text('Create Room'),
                         style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/utils/firebase_constants.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/auth/data/models/user_model.dart';
 import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
@@ -97,6 +98,12 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Success:** Returns Map.
   /// - **Failure:** Throws a [WatchPartyException].
   Stream<DataMap> getSyncedData({required String partyId});
+
+  /// Retrieves a user by ID.
+  ///
+  /// - **Success:** Returns UserModel.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Future<UserModel> getUserById(String uid);
 }
 
 class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
@@ -465,7 +472,40 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
     );
   }
 
+  @override
+  Future<UserModel> getUserById(String uid) async {
+    try {
+      final doc = await _users.doc(uid).get();
+      final data = doc.data();
+
+      if (data == null) {
+        throw GetUserByIdException(
+          message: 'User $uid not found in Firestore.',
+          statusCode: '404',
+        );
+      }
+      return UserModel.fromMap(data);
+    } on FirebaseAuthException catch (e) {
+      throw GetUserByIdException(
+        message: e.message ?? 'Error retrieving user $uid',
+        statusCode: e.code,
+      );
+    } on GetUserByIdException {
+      rethrow;
+    } catch (e, s) {
+      debugPrint('StartPartyException: $e\n$s ');
+      throw GetUserByIdException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
   CollectionReference<DataMap> get _watchParties => firestore.collection(
         FirebaseConstants.watchPartiesCollection,
+      );
+
+  CollectionReference<DataMap> get _users => firestore.collection(
+        FirebaseConstants.usersCollection,
       );
 }

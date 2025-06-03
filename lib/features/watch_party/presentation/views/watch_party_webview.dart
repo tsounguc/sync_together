@@ -3,11 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sync_together/core/enums/sync_status.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
+import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -25,25 +28,39 @@ class WatchPartyWebView extends StatefulWidget {
 }
 
 class _WatchPartyWebViewState extends State<WatchPartyWebView> {
-  late final WebViewController webViewController;
+  WebViewController? _webViewController;
   int loadingPercentage = 0;
 
   Timer? _playbackSyncTimer;
+  bool _showChat = true;
+
+  SyncStatus _syncStatus = SyncStatus.synced;
 
   void _startAutoSyncLoop() {
     _playbackSyncTimer?.cancel();
     _playbackSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
-      final result = await webViewController.runJavaScriptReturningResult(
-        "document.querySelector('video')?.currentTime",
-      );
-      final position = double.tryParse(result.toString()) ?? 0;
-      context.read<WatchPartySessionBloc>().add(
-            SendSyncDataEvent(
-              partyId: widget.watchParty.id,
-              playbackPosition: position,
-              isPlaying: true,
-            ),
-          );
+      try {
+        final result = await _webViewController?.runJavaScriptReturningResult(
+          "document.querySelector('video')?.currentTime",
+        );
+        final position = double.tryParse(result.toString()) ?? 0;
+
+        final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
+          "document.querySelector('video')?.paused === false",
+        );
+
+        final isPlaying = isPlayingResult.toString() == 'true';
+
+        context.read<WatchPartySessionBloc>().add(
+              SendSyncDataEvent(
+                partyId: widget.watchParty.id,
+                playbackPosition: position,
+                isPlaying: isPlaying,
+              ),
+            );
+      } catch (e) {
+        debugPrint('Sync timer error: $e');
+      }
     });
   }
 
@@ -58,9 +75,6 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         : widget.watchParty.videoUrl.startsWith('http')
             ? widget.watchParty.videoUrl
             : 'https://${widget.watchParty.videoUrl}';
-    debugPrint('videoUrl: ${widget.watchParty.videoUrl}');
-    debugPrint('defaultUrl: ${widget.watchParty.platform.defaultUrl}');
-    debugPrint('validUrl: $validUrl');
 
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
@@ -79,7 +93,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       ..loadRequest(Uri.parse(validUrl));
 
     setState(() {
-      webViewController = controller;
+      _webViewController = controller;
     });
   }
 
@@ -101,7 +115,6 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         onUrlChange: (UrlChange change) {
           final newUrl = change.url ?? '';
           if (newUrl.isNotEmpty && newUrl != widget.watchParty.videoUrl) {
-            debugPrint('URL changed. Updating Firestore: $newUrl');
             if (context.currentUser?.uid == widget.watchParty.hostId) {
               context.read<WatchPartySessionBloc>().add(
                     UpdateVideoUrlEvent(
@@ -149,23 +162,19 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     """;
 
     try {
-      await webViewController.runJavaScript(jsCommand);
+      await _webViewController?.runJavaScript(jsCommand);
     } catch (e) {
       debugPrint('Error running JavaScript to seek video: $e');
     }
   }
 
   Future<void> _playVideo() async {
-    await webViewController.runJavaScript(
-      "document.querySelector('video')?.play();",
-    );
+    await _webViewController?.runJavaScript("document.querySelector('video')?.play();");
     _startAutoSyncLoop();
   }
 
   Future<void> _pauseVideo() async {
-    await webViewController.runJavaScript(
-      "document.querySelector('video')?.pause();",
-    );
+    await _webViewController?.runJavaScript("document.querySelector('video')?.pause();");
     _stopAutoSyncLoop();
   }
 
@@ -181,44 +190,106 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   @override
+  void dispose() {
+    _stopAutoSyncLoop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_webViewController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is SyncUpdated) {
           debugPrint('Sync update received:  position=${state.playbackPosition}');
-          _seekToPosition(state.playbackPosition);
+
+          final result = await _webViewController?.runJavaScriptReturningResult(
+            "document.querySelector('video')?.currentTime",
+          );
+          final localPosition = double.tryParse(result.toString()) ?? 0;
+
+          final drift = (state.playbackPosition - localPosition).abs();
+
+          // Update sync status
+          setState(() {
+            _syncStatus = drift < 2.0 ? SyncStatus.synced : SyncStatus.syncing;
+          });
+
+          // Seek only if the drift is large enough
+          if (drift > 1.5) {
+            await _seekToPosition(state.playbackPosition);
+          }
+
           if (state.isPlaying) {
-            _playVideo();
+            await _playVideo();
           } else {
-            _pauseVideo();
+            await _pauseVideo();
           }
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(widget.watchParty.title)),
-        body: loadingPercentage < 100
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(value: loadingPercentage / 100),
-                    const SizedBox(height: 16),
-                    Text('Loading... $loadingPercentage%'),
-                  ],
+        appBar: AppBar(
+          title: Text(widget.watchParty.title),
+          actions: [
+            IconButton(
+              icon: Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
+              onPressed: () => setState(() => _showChat = !_showChat),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              flex: 2,
+              child: loadingPercentage < 100
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(value: loadingPercentage / 100),
+                          const SizedBox(height: 16),
+                          Text('Loading... $loadingPercentage%'),
+                        ],
+                      ),
+                    )
+                  : Stack(
+                      children: [
+                        WebViewWidget(controller: _webViewController!),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: SyncStatusBadge(status: _syncStatus),
+                        ),
+                      ],
+                    ),
+            ),
+            if (_showChat)
+              Expanded(
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    border: Border(
+                      top: BorderSide(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  ),
+                  child: WatchPartyChat(
+                    partyId: widget.watchParty.id,
+                  ),
                 ),
-              )
-            : WebViewWidget(controller: webViewController),
+              ),
+          ],
+        ),
         bottomNavigationBar: WebPlaybackControls(
-          controller: webViewController,
+          controller: _webViewController!,
           watchPartyId: widget.watchParty.id,
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _stopAutoSyncLoop();
-    super.dispose();
   }
 }

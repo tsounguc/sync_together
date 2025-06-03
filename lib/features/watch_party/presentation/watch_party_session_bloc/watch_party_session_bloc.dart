@@ -7,10 +7,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/create_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/end_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/get_user_by_id.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/leave_watch_party.dart';
@@ -36,6 +38,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
     required this.updateVideoUrl,
     required this.sendSyncData,
     required this.getSyncedData,
+    required this.getUserById,
   }) : super(const WatchPartySessionInitial()) {
     on<CreateWatchPartyEvent>(_onCreateWatchParty);
     on<JoinWatchPartyEvent>(_onJoinWatchParty);
@@ -54,6 +57,23 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
     on<UpdateVideoUrlEvent>(_onUpdateVideoUrl);
     on<SendSyncDataEvent>(_onSendSyncData);
     on<GetSyncedDataEvent>(_onGetSyncedData);
+    on<_ParticipantsUpdatedReceived>(_handleParticipantsUpdated);
+
+    on<_ParticipantsErrorReceived>((event, emit) {
+      emit(WatchPartyError(event.message));
+    });
+
+    on<_PartyStartedRealtimeReceived>((event, emit) {
+      emit(const PartyStartedRealtime());
+    });
+
+    on<_PartyStartedErrorReceived>((event, emit) {
+      emit(WatchPartyError(event.message));
+    });
+
+    on<_ParticipantProfilesResolved>((event, emit) {
+      emit(ParticipantsProfilesUpdated(event.profiles));
+    });
   }
 
   final CreateWatchParty createWatchParty;
@@ -67,6 +87,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
   final UpdateVideoUrl updateVideoUrl;
   final SendSyncData sendSyncData;
   final GetSyncedData getSyncedData;
+  final GetUserById getUserById;
 
   Future<void> _onCreateWatchParty(
     CreateWatchPartyEvent event,
@@ -165,15 +186,15 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
       (result) {
         result.fold(
           (failure) {
-            emit(WatchPartyError(failure.message));
+            add(_ParticipantsErrorReceived(failure.message));
           },
           (participants) {
-            emit(ParticipantsUpdated(participants));
+            add(_ParticipantsUpdatedReceived(participants));
           },
         );
       },
       onError: (error) {
-        emit(WatchPartyError(error.toString()));
+        add(_ParticipantsErrorReceived(error.toString()));
       },
       onDone: () => _participantsSubscription?.cancel(),
     );
@@ -197,38 +218,26 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
     ListenToPartyStartEvent event,
     Emitter<WatchPartySessionState> emit,
   ) {
+    emit(WatchPartyLoading());
     startPartySubscription?.cancel();
 
-    emit(WatchPartyLoading());
-
     startPartySubscription = listenToPartyStart(event.partyId).listen(
-      /*onData*/ (result) {
-        if (emit.isDone) return;
-
+      (result) {
         result.fold(
           (failure) {
-            if (!emit.isDone) emit(WatchPartyError(failure.message));
-            startPartySubscription?.cancel();
+            add(_PartyStartedErrorReceived(failure.message));
           },
           (hasStarted) {
-            if (hasStarted && !emit.isDone) {
-              emit(const PartyStartedRealtime());
-              startPartySubscription?.cancel();
+            if (hasStarted == true) {
+              add(_PartyStartedRealtimeReceived(hasStarted: hasStarted));
             }
-
-            // Stop listening after party started
           },
         );
       },
       onError: (dynamic error) {
-        if (!emit.isDone) {
-          emit(WatchPartyError(error.toString()));
-        }
-        startPartySubscription?.cancel();
+        add(_PartyStartedErrorReceived(error.toString()));
       },
-      // onDone: () {
-      //   startPartySubscription?.cancel();
-      // },
+      onDone: () => startPartySubscription?.cancel(),
     );
   }
 
@@ -299,6 +308,23 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
     );
   }
 
+  Future<void> _handleParticipantsUpdated(
+    _ParticipantsUpdatedReceived event,
+    Emitter<WatchPartySessionState> emit,
+  ) async {
+    final profiles = <UserEntity>[];
+
+    for (final uid in event.participantIds) {
+      final result = await getUserById(uid);
+      result.fold(
+        (failure) => debugPrint('Error fetching user $uid: ${failure.message}'),
+        profiles.add,
+      );
+    }
+
+    add(_ParticipantProfilesResolved(profiles));
+  }
+
   @override
   Future<void> close() {
     subscription?.cancel();
@@ -306,4 +332,30 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
     _participantsSubscription?.cancel();
     return super.close();
   }
+}
+
+class _ParticipantsUpdatedReceived extends WatchPartyEvent {
+  const _ParticipantsUpdatedReceived(this.participantIds);
+  final List<String> participantIds;
+}
+
+class _ParticipantsErrorReceived extends WatchPartyEvent {
+  const _ParticipantsErrorReceived(this.message);
+  final String message;
+}
+
+class _PartyStartedRealtimeReceived extends WatchPartyEvent {
+  const _PartyStartedRealtimeReceived({required this.hasStarted});
+
+  final bool hasStarted;
+}
+
+class _PartyStartedErrorReceived extends WatchPartyEvent {
+  const _PartyStartedErrorReceived(this.message);
+  final String message;
+}
+
+class _ParticipantProfilesResolved extends WatchPartyEvent {
+  const _ParticipantProfilesResolved(this.profiles);
+  final List<UserEntity> profiles;
 }

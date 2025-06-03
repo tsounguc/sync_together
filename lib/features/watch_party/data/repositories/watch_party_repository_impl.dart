@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:sync_together/core/errors/exceptions.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/watch_party/data/data_sources/watch_party_remote_data_source.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/repositories/watch_party_repository.dart';
@@ -214,5 +215,17 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
             },
           ),
         );
+  }
+
+  @override
+  ResultFuture<UserEntity> getUserById(String uid) async {
+    try {
+      final result = await remoteDataSource.getUserById(uid);
+      return Right(result);
+    } on GetUserByIdException catch (e) {
+      return Left(
+        GetUserByIdFailure.fromException(e),
+      );
+    }
   }
 }

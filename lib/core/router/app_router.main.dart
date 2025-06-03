@@ -98,8 +98,15 @@ class AppRouter {
       case RoomLobbyScreen.id:
         final args = settings.arguments! as WatchParty;
         return _pageBuilder(
-          (_) => BlocProvider(
-            create: (context) => serviceLocator<WatchPartySessionBloc>(),
+          (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => serviceLocator<WatchPartySessionBloc>(),
+              ),
+              BlocProvider(
+                create: (context) => serviceLocator<ChatCubit>(),
+              ),
+            ],
             child: RoomLobbyScreen(
               watchParty: args,
             ),
@@ -109,8 +116,15 @@ class AppRouter {
       case WatchPartyScreen.id:
         final args = settings.arguments! as WatchPartyScreenArguments;
         return _pageBuilder(
-          (_) => BlocProvider(
-            create: (context) => serviceLocator<WatchPartySessionBloc>(),
+          (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => serviceLocator<WatchPartySessionBloc>(),
+              ),
+              BlocProvider(
+                create: (context) => serviceLocator<ChatCubit>(),
+              ),
+            ],
             child: WatchPartyScreen(
               watchParty: args.watchParty,
               platform: args.platform,
