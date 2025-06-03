@@ -1,0 +1,4 @@
+enum SyncStatus {
+  syncing,
+  synced,
+}

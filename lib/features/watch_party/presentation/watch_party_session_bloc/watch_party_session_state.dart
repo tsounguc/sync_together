@@ -102,3 +102,12 @@ class WatchPartyStarted extends WatchPartySessionState {}
 class PartyStartedRealtime extends WatchPartySessionState {
   const PartyStartedRealtime();
 }
+
+class ParticipantsProfilesUpdated extends WatchPartySessionState {
+  const ParticipantsProfilesUpdated(this.profiles);
+
+  final List<UserEntity> profiles;
+
+  @override
+  List<Object?> get props => [profiles];
+}

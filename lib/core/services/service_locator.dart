@@ -48,6 +48,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/create_watch
 import 'package:sync_together/features/watch_party/domain/use_cases/end_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_public_watch_parties.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/get_user_by_id.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/leave_watch_party.dart';

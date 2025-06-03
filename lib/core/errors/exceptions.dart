@@ -234,6 +234,14 @@ class SendSyncDataException extends WatchPartyException {
   });
 }
 
+/// **Exception thrown when getting a user by id.**
+class GetUserByIdException extends WatchPartyException {
+  const GetUserByIdException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
 class GetSyncedDataException extends WatchPartyException {
   const GetSyncedDataException({
     required super.message,

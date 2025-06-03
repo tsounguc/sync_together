@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/features/platforms/presentation/platforms_cubit/platforms_cubit.dart';
 import 'package:sync_together/features/platforms/presentation/widgets/platform_card.dart';
+import 'package:sync_together/features/platforms/presentation/widgets/platform_shimmer_grid.dart';
 import 'package:sync_together/features/watch_party/presentation/views/create_room_screen.dart';
 
 class PlatformSelectionScreen extends StatefulWidget {
@@ -28,9 +29,7 @@ class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
       body: BlocBuilder<PlatformsCubit, PlatformsState>(
         builder: (context, state) {
           if (state is PlatformsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const PlatformShimmerGrid();
           } else if (state is PlatformsError) {
             return Center(
               child: Text(state.message),
@@ -38,29 +37,39 @@ class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
           } else if (state is PlatformsLoaded) {
             final platforms = state.platforms;
 
-            return Padding(
-              padding: const EdgeInsets.all(8),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: platforms.length,
-                itemBuilder: (context, index) {
-                  final platform = platforms[index];
-                  return PlatformCard(
-                    platform: platform,
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        CreateRoomScreen.id,
-                        arguments: platform,
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final crossAxisCount = constraints.maxWidth > 900
+                    ? 5
+                    : constraints.maxWidth > 600
+                        ? 3
+                        : 2;
+                return Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: platforms.length,
+                    itemBuilder: (context, index) {
+                      final platform = platforms[index];
+                      return PlatformCard(
+                        platform: platform,
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            CreateRoomScreen.id,
+                            arguments: platform,
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             );
           }
           return const SizedBox.shrink();

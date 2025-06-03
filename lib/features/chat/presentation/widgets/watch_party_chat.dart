@@ -1,0 +1,175 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sync_together/core/extensions/context_extension.dart';
+import 'package:sync_together/core/i_field.dart';
+import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/features/chat/domain/entities/message.dart';
+import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
+import 'package:sync_together/features/chat/presentation/widgets/message_bubble.dart';
+
+class WatchPartyChat extends StatefulWidget {
+  const WatchPartyChat({
+    required this.partyId,
+    super.key,
+  });
+
+  final String partyId;
+
+  @override
+  State<WatchPartyChat> createState() => _WatchPartyChatState();
+}
+
+class _WatchPartyChatState extends State<WatchPartyChat> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  void _sendMessage() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    final currentUser = context.currentUser!;
+    context.read<ChatCubit>().sendTextMessage(
+          roomId: widget.partyId,
+          message: Message(
+            id: UniqueKey().toString(),
+            senderId: currentUser.uid,
+            senderName: currentUser.displayName!,
+            text: text,
+            timestamp: DateTime.now(),
+          ),
+        );
+    _controller.clear();
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ChatCubit>().listenToMessagesStream(
+          widget.partyId,
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: BlocBuilder<ChatCubit, ChatState>(
+            builder: (context, state) {
+              if (state is MessagesReceived) {
+                _scrollToBottom();
+                final messages = state.messages;
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: messages.length,
+                  reverse: false,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final isMe = message.senderId == context.currentUser?.uid;
+                    final isSameSender = index == 0 || messages[index - 1].senderId != message.senderId;
+
+                    return Align(
+                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      child: GestureDetector(
+                        onLongPress: isMe ? () => _showMessageOptions(context, message) : null,
+                        child: MessageBubble(
+                          isMe: isMe,
+                          isSamePerson: isSameSender,
+                          message: message,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }
+
+              if (state is ChatError) {
+                return Center(child: Text('Error: ${state.message}'));
+              }
+
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 24,
+          ).copyWith(bottom: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: IField(
+                  controller: _controller,
+                  onFieldSubmitted: (_) => _sendMessage(),
+                  hintText: 'Type your message...',
+                  borderRadius: BorderRadius.circular(10),
+                  textInputAction: TextInputAction.send,
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: _sendMessage,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showMessageOptions(BuildContext context, Message message) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement edit flow
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Delete'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.read<ChatCubit>().deleteTextMessage(
+                        roomId: widget.partyId,
+                        messageId: message.id,
+                      );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: const Text('Copy'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Clipboard.setData(ClipboardData(text: message.text));
+                  CoreUtils.showSnackBar(context, 'Message copied');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

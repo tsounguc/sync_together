@@ -1,4 +1,5 @@
 import 'package:sync_together/core/utils/type_defs.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 
 /// **Repository contract for handling Watch Party operations**.
@@ -92,4 +93,10 @@ abstract class WatchPartyRepository {
   ResultStream<DataMap> getSyncedData({
     required String partyId,
   });
+
+  /// Retrieves a user by its ID.
+  ///
+  /// - **Success:** Returns a user entity
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultFuture<UserEntity> getUserById(String uid);
 }

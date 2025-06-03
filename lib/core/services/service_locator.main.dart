@@ -76,6 +76,7 @@ Future<void> _initWatchParty() async {
         updateVideoUrl: serviceLocator(),
         sendSyncData: serviceLocator(),
         getSyncedData: serviceLocator(),
+        getUserById: serviceLocator(),
       ),
     )
     ..registerFactory(
@@ -94,6 +95,7 @@ Future<void> _initWatchParty() async {
     ..registerLazySingleton(() => SendSyncData(serviceLocator()))
     ..registerLazySingleton(() => GetSyncedData(serviceLocator()))
     ..registerLazySingleton(() => GetPublicWatchParties(serviceLocator()))
+    ..registerLazySingleton(() => GetUserById(serviceLocator()))
     // Repositories
     ..registerLazySingleton<WatchPartyRepository>(
       () => WatchPartyRepositoryImpl(serviceLocator()),

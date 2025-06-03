@@ -5,6 +5,8 @@ import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/profile_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/splash_screen.dart';
+import 'package:sync_together/features/auth/presentation/widgets/shimmer_party_list.dart';
+import 'package:sync_together/features/auth/presentation/widgets/watch_party_tile.dart';
 import 'package:sync_together/features/friends/presentation/views/friends_screen.dart';
 import 'package:sync_together/features/platforms/presentation/views/platform_selection_screen.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
@@ -104,37 +106,42 @@ class _HomeScreenState extends State<HomeScreen> {
         body: BlocBuilder<PublicPartiesCubit, WatchPartyListState>(
           builder: (context, state) {
             if (state is WatchPartyListLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const ShimmerPartyList();
             } else if (state is WatchPartyListLoaded) {
               if (state.parties.isEmpty) {
                 return const Center(child: Text('No public watch parties.'));
               }
 
-              return ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(16),
-                itemCount: state.parties.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final party = state.parties[index];
-                  return ListTile(
-                    tileColor: Colors.grey[900],
-                    leading: Image.asset(
-                      party.platform.logoPath,
-                      width: 40,
-                      height: 40,
-                    ),
-                    title: Text(party.title),
-                    subtitle: Text(
-                      '${party.platform.name} • ${party.participantIds.length} joined',
-                    ),
-                    trailing: ElevatedButton(
-                      onPressed: () => _joinRoom(party),
-                      child: const Text('Join'),
-                    ),
-                  );
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWideScreen = constraints.maxWidth > 800;
+                  return isWideScreen
+                      ? GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 3,
+                          ),
+                          itemCount: state.parties.length,
+                          itemBuilder: (context, index) => WatchPartyTile(
+                            party: state.parties[index],
+                            onPressed: () => _joinRoom(state.parties[index]),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(16),
+                          itemCount: state.parties.length,
+                          separatorBuilder: (_, __) => const SizedBox(
+                            height: 12,
+                          ),
+                          itemBuilder: (context, index) => WatchPartyTile(
+                            party: state.parties[index],
+                            onPressed: () => _joinRoom(state.parties[index]),
+                          ),
+                        );
                 },
               );
             } else if (state is WatchPartyListError) {

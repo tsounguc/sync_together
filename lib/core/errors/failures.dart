@@ -358,6 +358,18 @@ class SendSyncDataFailure extends WatchPartyFailure {
         );
 }
 
+/// **Failure that occurs when getting user by id.**
+class GetUserByIdFailure extends WatchPartyFailure {
+  GetUserByIdFailure({required super.message, required super.statusCode});
+
+  /// Converts a [GetUserByIdException] into a [GetUserByIdFailure].
+  GetUserByIdFailure.fromException(GetUserByIdException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
 /// **Failure that occurs when syncing a watch party.**
 class SyncWatchPartyFailure extends WatchPartyFailure {
   SyncWatchPartyFailure({required super.message, required super.statusCode});

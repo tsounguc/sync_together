@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sync_together/core/errors/failures.dart';
 import 'package:sync_together/features/chat/domain/entities/message.dart';
 import 'package:sync_together/features/chat/domain/usecases/clear_room_messages.dart';
@@ -31,7 +32,10 @@ class ChatCubit extends Cubit<ChatState> {
   late FetchMessages fetchMessages;
   late ClearRoomMessages clearRoomMessages;
 
-  Future<void> sendTextMessage({required String roomId, required Message message}) async {
+  Future<void> sendTextMessage({
+    required String roomId,
+    required Message message,
+  }) async {
     emit(const MessageSending());
     final result = await sendMessage(
       SendMessageParams(
@@ -41,7 +45,7 @@ class ChatCubit extends Cubit<ChatState> {
     );
     result.fold(
       (failure) => emit(ChatError(failure.message)),
-      (success) => emit(const MessageSent()),
+      (success) => debugPrint('Message sent successfully'),
     );
   }
 
@@ -104,7 +108,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     result.fold(
       (failure) => emit(ChatError(failure.message)),
-      (success) => emit(const MessageDeleted()),
+      (success) => debugPrint('Message deleted successfully'),
     );
   }
 
