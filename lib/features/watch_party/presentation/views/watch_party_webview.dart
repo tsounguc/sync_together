@@ -182,6 +182,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   void initState() {
     super.initState();
     _initializeWebView();
+
+    final isHost = context.currentUser?.uid == widget.watchParty.hostId;
+    if (isHost) {
+      // Start sending sync updates as host
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startAutoSyncLoop();
+      });
+    }
+
     // context.read<WatchPartySessionBloc>().add(
     //       GetSyncedDataEvent(
     //         partyId: widget.watchParty.id,
