@@ -254,7 +254,8 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
 
     result.fold(
       (failure) => emit(WatchPartyError(failure.message)),
-      (_) => debugPrint('Video URL updated in Firestore'),
+      (_) => emit(VideoUrlUpdated()),
+      // (_) => debugPrint('Video URL updated in Firestore'),
     );
   }
 

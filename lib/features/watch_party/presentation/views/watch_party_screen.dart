@@ -30,9 +30,9 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
     super.initState();
 
     // Start listening to live playback sync updates
-    context.read<WatchPartySessionBloc>().add(
-          GetSyncedDataEvent(partyId: widget.watchParty.id),
-        );
+    // context.read<WatchPartySessionBloc>().add(
+    //       GetSyncedDataEvent(partyId: widget.watchParty.id),
+    //     );
   }
 
   @override

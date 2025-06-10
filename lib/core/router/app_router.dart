@@ -21,6 +21,7 @@ import 'package:sync_together/features/platforms/presentation/views/platform_sel
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/public_parties_cubit/public_parties_cubit.dart';
 import 'package:sync_together/features/watch_party/presentation/views/create_room_screen.dart';
+import 'package:sync_together/features/watch_party/presentation/views/platform_video_picker_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/room_lobby_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';

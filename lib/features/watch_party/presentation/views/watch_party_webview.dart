@@ -112,19 +112,19 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
           return NavigationDecision.navigate;
         },
-        onUrlChange: (UrlChange change) {
-          final newUrl = change.url ?? '';
-          if (newUrl.isNotEmpty && newUrl != widget.watchParty.videoUrl) {
-            if (context.currentUser?.uid == widget.watchParty.hostId) {
-              context.read<WatchPartySessionBloc>().add(
-                    UpdateVideoUrlEvent(
-                      partyId: widget.watchParty.id,
-                      newUrl: newUrl,
-                    ),
-                  );
-            }
-          }
-        },
+        // onUrlChange: (UrlChange change) {
+        //   final newUrl = change.url ?? '';
+        //   if (newUrl.isNotEmpty && newUrl != widget.watchParty.videoUrl) {
+        //     if (context.currentUser?.uid == widget.watchParty.hostId) {
+        //       context.read<WatchPartySessionBloc>().add(
+        //             UpdateVideoUrlEvent(
+        //               partyId: widget.watchParty.id,
+        //               newUrl: newUrl,
+        //             ),
+        //           );
+        //     }
+        //   }
+        // },
       );
 
   bool _isExternalLink(String url) {
@@ -182,11 +182,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   void initState() {
     super.initState();
     _initializeWebView();
-    context.read<WatchPartySessionBloc>().add(
-          GetSyncedDataEvent(
-            partyId: widget.watchParty.id,
-          ),
-        );
+    // context.read<WatchPartySessionBloc>().add(
+    //       GetSyncedDataEvent(
+    //         partyId: widget.watchParty.id,
+    //       ),
+    //     );
   }
 
   @override
