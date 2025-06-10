@@ -6,6 +6,7 @@ import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 import 'package:sync_together/features/chat/presentation/widgets/chat_input_field.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
+import 'package:sync_together/features/watch_party/presentation/views/platform_video_picker_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
@@ -31,6 +32,14 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
   }
 
   void _startParty() {
+    final isDRMProtected = widget.watchParty.platform.isDRMProtected;
+    final hasVideoUrl = widget.watchParty.videoUrl.isNotEmpty;
+
+    if (!isDRMProtected && !hasVideoUrl) {
+      CoreUtils.showSnackBar(context, 'Please select a video before starting the party.');
+      return;
+    }
+
     context.read<WatchPartySessionBloc>().add(
           StartPartyEvent(widget.watchParty.id),
         );
@@ -43,6 +52,17 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
       arguments: WatchPartyScreenArguments(
         widget.watchParty,
         widget.watchParty.platform,
+      ),
+    );
+  }
+
+  void _goToPickVideo() {
+    Navigator.pushNamed(
+      context,
+      PlatformVideoPickerScreen.id,
+      arguments: PlatformVideoPickerScreenArgument(
+        watchParty: widget.watchParty,
+        platform: widget.watchParty.platform,
       ),
     );
   }
@@ -68,6 +88,10 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
         ),
         body: LayoutBuilder(builder: (context, constraints) {
           final isWide = constraints.maxWidth > 600;
+          final isHost = context.currentUser!.uid == widget.watchParty.hostId;
+          final isDRMProtected = widget.watchParty.platform.isDRMProtected;
+          final hasVideoUrl = widget.watchParty.videoUrl.isNotEmpty;
+
           return Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -83,8 +107,8 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 32),
-                // If you are the host
-                if (context.currentUser!.uid == widget.watchParty.hostId)
+                // Host: Start Party + Pick Video button
+                if (isHost) ...[
                   ElevatedButton.icon(
                     onPressed: _startParty,
                     icon: const Icon(Icons.play_arrow),
@@ -92,8 +116,18 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
                     style: ElevatedButton.styleFrom(
                       minimumSize: Size(isWide ? 300 : double.infinity, 50),
                     ),
-                  )
-                // If you are a guest
+                  ),
+                  if (!isDRMProtected && !hasVideoUrl)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: OutlinedButton.icon(
+                        onPressed: _goToPickVideo,
+                        icon: const Icon(Icons.search),
+                        label: const Text('Pick Video'),
+                      ),
+                    ),
+                ]
+                // Guest: waiting state
                 else ...[
                   const Text(
                     'Waiting for host to start the party...',

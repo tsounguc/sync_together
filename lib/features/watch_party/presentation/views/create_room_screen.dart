@@ -29,14 +29,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     final title = _titleController.text.trim();
     final url = _urlController.text.trim();
 
-    if (title.isEmpty
-        // || (!widget.selectedPlatform.isDRMProtected && url.isEmpty)
-        ) {
+    if (title.isEmpty) {
       CoreUtils.showSnackBar(
         context,
         'Please enter a title',
       );
-
       return;
     }
 
@@ -116,11 +113,21 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
               )
             else
-              IField(
-                controller: _urlController,
-                hintText: 'Streaming Video URL',
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.done,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IField(
+                    controller: _urlController,
+                    hintText: 'Paste video URL (optional)',
+                    keyboardType: TextInputType.url,
+                    textInputAction: TextInputAction.done,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Or leave it empty and pick the video later.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  ),
+                ],
               ),
             const SizedBox(height: 16),
             Row(
@@ -140,15 +147,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             const Spacer(),
             BlocConsumer<WatchPartySessionBloc, WatchPartySessionState>(
               listener: (context, state) {
-                // if (state is WatchPartyCreated) {
-                //   // Navigator.pushReplacementNamed(context, WatchPartyScreen.id,
-                //   //     arguments: WatchPartyScreenArguments(state.watchParty, widget.selectedPlatform));
-                //   Navigator.pushReplacementNamed(
-                //     context,
-                //     RoomLobbyScreen.id,
-                //     arguments: state.party,
-                //   );
-                // }
                 if (state is WatchPartyError) {
                   CoreUtils.showSnackBar(
                     context,

@@ -113,6 +113,19 @@ class AppRouter {
           ),
           settings: settings,
         );
+      case PlatformVideoPickerScreen.id:
+        final args = settings.arguments! as PlatformVideoPickerScreenArgument;
+        return _pageBuilder(
+          (_) => BlocProvider(
+            create: (context) => serviceLocator<WatchPartySessionBloc>(),
+            child: PlatformVideoPickerScreen(
+              watchParty: args.watchParty,
+              platform: args.platform,
+            ),
+          ),
+          settings: settings,
+        );
+
       case WatchPartyScreen.id:
         final args = settings.arguments! as WatchPartyScreenArguments;
         return _pageBuilder(
@@ -185,6 +198,15 @@ PageRouteBuilder<dynamic> _pageBuilder(
 
 class WatchPartyScreenArguments {
   const WatchPartyScreenArguments(this.watchParty, this.platform);
+  final WatchParty watchParty;
+  final StreamingPlatform platform;
+}
+
+class PlatformVideoPickerScreenArgument {
+  const PlatformVideoPickerScreenArgument({
+    required this.watchParty,
+    required this.platform,
+  });
   final WatchParty watchParty;
   final StreamingPlatform platform;
 }
