@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0">
+<div id="player"></div>
+<script>
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+
+    function onYouTubeIframeAPIReady() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('v');
+
+      player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 },
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.PLAYING) {
+        setInterval(() => {
+          const currentTime = player.getCurrentTime();
+          const isPlaying = player.getPlayerState() == YT.PlayerState.PLAYING;
+          const payload = JSON.stringify({ time: currentTime, playing: isPlaying });
+          window.Flutter.postMessage(payload);
+        }, 3000);
+      }
+    }
+
+    function seekTo(seconds) {
+      if (player) {
+        player.seekTo(seconds, true);
+      }
+    }
+
+    function playVideo() {
+      if (player) {
+        player.playVideo();
+      }
+    }
+
+    function pauseVideo() {
+      if (player) {
+        player.pauseVideo();
+      }
+    }
+</script>
+</body>
+</html>
