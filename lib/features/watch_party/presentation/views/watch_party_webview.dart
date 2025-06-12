@@ -53,13 +53,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
               context: context,
               builder: (_) => AlertDialog(
                 title: const Text('Video unavailable'),
-                content: Text(
-                    'This video cannot be played (error $code). Try another one.'),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'))
-                ],
+                content: Text('This video cannot be played (error $code). Try another one.'),
+                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
               ),
             );
             return;
@@ -75,8 +70,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         NavigationDelegate(
           onPageFinished: (_) async {
             try {
-              await Future.delayed(const Duration(
-                  milliseconds: 300)); // give DOM some breathing room
+              await Future.delayed(const Duration(milliseconds: 300)); // give DOM some breathing room
               await _controller.runJavaScript('window.videoId = "$videoId";');
               await _controller.runJavaScript('initializePlayer();');
             } catch (e) {
@@ -92,8 +86,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     for (int i = 0; i < 50; i++) {
       // max ~5 seconds
       try {
-        final result = await _controller
-            .runJavaScriptReturningResult('window.playerReady === true');
+        final result = await _controller.runJavaScriptReturningResult('window.playerReady === true');
         if (result == true || result.toString() == 'true') return;
       } catch (_) {}
       await Future.delayed(const Duration(milliseconds: 100));
@@ -129,16 +122,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                    icon: const Icon(Icons.play_arrow), onPressed: playVideo),
-                IconButton(
-                    icon: const Icon(Icons.pause), onPressed: pauseVideo),
-                IconButton(
-                    icon: const Icon(Icons.replay_10),
-                    onPressed: () => seekTo(_currentTime - 10)),
-                IconButton(
-                    icon: const Icon(Icons.forward_10),
-                    onPressed: () => seekTo(_currentTime + 10)),
+                IconButton(icon: const Icon(Icons.play_arrow), onPressed: playVideo),
+                IconButton(icon: const Icon(Icons.pause), onPressed: pauseVideo),
+                IconButton(icon: const Icon(Icons.replay_10), onPressed: () => seekTo(_currentTime - 10)),
+                IconButton(icon: const Icon(Icons.forward_10), onPressed: () => seekTo(_currentTime + 10)),
               ],
             ),
             Expanded(
@@ -146,8 +133,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).scaffoldBackgroundColor,
-                  border: Border(
-                      top: BorderSide(color: Colors.grey.withOpacity(0.3))),
+                  border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.3))),
                 ),
                 child: WatchPartyChat(partyId: widget.watchParty.id),
               ),
