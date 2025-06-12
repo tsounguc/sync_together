@@ -78,12 +78,16 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
                   itemBuilder: (context, index) {
                     final message = messages[index];
                     final isMe = message.senderId == context.currentUser?.uid;
-                    final isSameSender = index == 0 || messages[index - 1].senderId != message.senderId;
+                    final isSameSender = index == 0 ||
+                        messages[index - 1].senderId != message.senderId;
 
                     return Align(
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment:
+                          isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: GestureDetector(
-                        onLongPress: isMe ? () => _showMessageOptions(context, message) : null,
+                        onLongPress: isMe
+                            ? () => _showMessageOptions(context, message)
+                            : null,
                         child: MessageBubble(
                           isMe: isMe,
                           isSamePerson: isSameSender,
@@ -105,9 +109,9 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 8,
+            horizontal: 24,
             vertical: 24,
-          ).copyWith(bottom: 4),
+          ).copyWith(bottom: 8, right: 10),
           child: Row(
             children: [
               Expanded(

@@ -7,11 +7,18 @@ class MediaResources {
   static const _baseLottie = 'assets/lottie';
   static const _baseData = 'assets/data';
   static const _basePlatformsLogos = 'assets/platforms_Logos';
+  static const _baseHtml = 'assets/html';
 
   // platforms
   static const platFormsData = '$_baseData/platforms.json';
+
   // platforms logos
   // static const platformsLogos = '$_basePlatformsLogos/logo/'
+
   // Images
   static const googleSignIn = '$_baseImage/google_sign_in.png';
+
+  // HTML
+  static const youtubePlayer = '$_baseHtml/youtube_player.html';
+
 }
