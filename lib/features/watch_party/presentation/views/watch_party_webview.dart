@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/enums/sync_status.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
-import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/core/resources/media_resources.dart';
 import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
@@ -25,137 +24,135 @@ class WatchPartyWebView extends StatefulWidget {
 
 class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   late final WebViewController _controller;
-  Timer? _syncTimer;
-  bool _showChat = true;
-  SyncStatus _syncStatus = SyncStatus.synced;
-  double _lastHostTime = 0;
+  double _currentTime = 0;
+  bool _isPlaying = false;
+  late final String videoId;
 
   @override
   void initState() {
     super.initState();
 
+    final videoUrl = widget.watchParty.videoUrl;
+    print('videoUrl: $videoUrl');
+
+    final start = videoUrl.indexOf('embed/');
+    final end = videoUrl.indexOf('?modestbranding');
+    final videoId = videoUrl.substring(start + 6, end);
+    print('videoId: $videoId');
+
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..addJavaScriptChannel('Flutter', onMessageReceived: _onJsMessage)
-      ..loadFlutterAsset('assets/html/youtube_player.html?v=${_extractVideoId(widget.watchParty.videoUrl)}');
+      ..addJavaScriptChannel(
+        'Flutter',
+        onMessageReceived: (JavaScriptMessage message) {
+          final data = jsonDecode(message.message);
 
-    if (context.currentUser?.uid == widget.watchParty.hostId) {
-      _startSyncLoop();
-    }
-  }
+          if (data['error'] == true && mounted) {
+            final code = data['code'];
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Video unavailable'),
+                content: Text(
+                    'This video cannot be played (error $code). Try another one.'),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'))
+                ],
+              ),
+            );
+            return;
+          }
 
-  String _extractVideoId(String url) {
-    final uri = Uri.parse(url);
-    if (uri.host.contains('youtube.com') && uri.queryParameters.containsKey('v')) {
-      return uri.queryParameters['v']!;
-    }
-    final segments = uri.pathSegments;
-    return segments.isNotEmpty ? segments.last : '';
-  }
-
-  void _onJsMessage(JavaScriptMessage message) {
-    final data = json.decode(message.message);
-    final position = (data['time'] as num?)?.toDouble() ?? 0.0;
-    final isPlaying = data['playing'] == true;
-
-    _lastHostTime = position;
-
-    if (context.currentUser?.uid == widget.watchParty.hostId) {
-      context.read<WatchPartySessionBloc>().add(
-        SendSyncDataEvent(
-          partyId: widget.watchParty.id,
-          playbackPosition: position,
-          isPlaying: isPlaying,
+          setState(() {
+            _currentTime = (data['time'] as num?)?.toDouble() ?? 0.0;
+            _isPlaying = data['playing'] == true;
+          });
+        },
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) async {
+            try {
+              await Future.delayed(const Duration(
+                  milliseconds: 300)); // give DOM some breathing room
+              await _controller.runJavaScript('window.videoId = "$videoId";');
+              await _controller.runJavaScript('initializePlayer();');
+            } catch (e) {
+              debugPrint('JS init error: $e');
+            }
+          },
         ),
-      );
+      )
+      ..loadFlutterAsset(MediaResources.youtubePlayer);
+  }
+
+  Future<void> _waitForPlayerReady() async {
+    for (int i = 0; i < 50; i++) {
+      // max ~5 seconds
+      try {
+        final result = await _controller
+            .runJavaScriptReturningResult('window.playerReady === true');
+        if (result == true || result.toString() == 'true') return;
+      } catch (_) {}
+      await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 
-  void _startSyncLoop() {
-    _syncTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
-      _controller.runJavaScript("window.Flutter.postMessage(JSON.stringify({ time: player.getCurrentTime(), playing: player.getPlayerState() === 1 }));");
-    });
+  Future<void> playVideo() async {
+    await _waitForPlayerReady();
+    await _controller.runJavaScript('playVideo();');
   }
 
-  void _stopSyncLoop() {
-    _syncTimer?.cancel();
-    _syncTimer = null;
+  Future<void> pauseVideo() async {
+    await _waitForPlayerReady();
+    await _controller.runJavaScript('pauseVideo();');
   }
 
-  @override
-  void dispose() {
-    _stopSyncLoop();
-    super.dispose();
-  }
-
-  Future<void> _seekTo(double seconds) async {
-    await _controller.runJavaScript("seekTo($seconds);");
-  }
-
-  Future<void> _play() async {
-    await _controller.runJavaScript("playVideo();");
-  }
-
-  Future<void> _pause() async {
-    await _controller.runJavaScript("pauseVideo();");
+  Future<void> seekTo(double seconds) async {
+    await _waitForPlayerReady();
+    await _controller.runJavaScript('seekTo($seconds);');
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
-      listener: (context, state) async {
-        if (state is SyncUpdated && context.currentUser?.uid != widget.watchParty.hostId) {
-          final drift = (state.playbackPosition - _lastHostTime).abs();
-          setState(() => _syncStatus = drift < 1.5 ? SyncStatus.synced : SyncStatus.syncing);
-
-          if (drift > 1.5) {
-            await _seekTo(state.playbackPosition);
-          }
-
-          if (state.isPlaying) {
-            await _play();
-          } else {
-            await _pause();
-          }
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.watchParty.title),
-          actions: [
-            IconButton(
-              icon: Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
-              onPressed: () => setState(() => _showChat = !_showChat),
-            ),
-          ],
-        ),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.watchParty.title)),
+      body: SafeArea(
+        child: Column(
           children: [
             Expanded(
               flex: 2,
-              child: Stack(
-                children: [
-                  WebViewWidget(controller: _controller),
-                  Positioned(top: 12, right: 12, child: SyncStatusBadge(status: _syncStatus)),
-                ],
+              child: WebViewWidget(controller: _controller),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                    icon: const Icon(Icons.play_arrow), onPressed: playVideo),
+                IconButton(
+                    icon: const Icon(Icons.pause), onPressed: pauseVideo),
+                IconButton(
+                    icon: const Icon(Icons.replay_10),
+                    onPressed: () => seekTo(_currentTime - 10)),
+                IconButton(
+                    icon: const Icon(Icons.forward_10),
+                    onPressed: () => seekTo(_currentTime + 10)),
+              ],
+            ),
+            Expanded(
+              flex: 3,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  border: Border(
+                      top: BorderSide(color: Colors.grey.withOpacity(0.3))),
+                ),
+                child: WatchPartyChat(partyId: widget.watchParty.id),
               ),
             ),
-            if (_showChat)
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.3))),
-                  ),
-                  child: WatchPartyChat(partyId: widget.watchParty.id),
-                ),
-              ),
           ],
-        ),
-        bottomNavigationBar: WebPlaybackControls(
-          controller: _controller,
-          watchPartyId: widget.watchParty.id,
         ),
       ),
     );
