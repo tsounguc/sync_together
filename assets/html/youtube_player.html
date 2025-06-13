@@ -1,10 +1,105 @@
+<!--<!DOCTYPE html>-->
+<!--<html style="height: 100%; margin: 0; padding: 0;">-->
+<!--<head>-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>-->
+<!--</head>-->
+<!--<body style="margin:0; padding:0; height:100vh; width:100vw;">-->
+<!--<div id="player" style="width: 100%; height: 100%;"></div>-->
+
+<!--<script>-->
+<!--    var tag = document.createElement('script');-->
+<!--    tag.src = "https://www.youtube.com/iframe_api";-->
+<!--    var firstScriptTag = document.getElementsByTagName('script')[0];-->
+<!--    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);-->
+
+<!--    var player;-->
+<!--    var playerReady = false;-->
+
+<!--    function onYouTubeIframeAPIReady() {-->
+<!--      if (typeof initializePlayer === "function") {-->
+<!--        initializePlayer();-->
+<!--      }-->
+<!--    }-->
+
+<!--    function initializePlayer() {-->
+<!--      const videoId = window.videoId || 'dQw4w9WgXcQ'; // fallback-->
+<!--      player = new YT.Player('player', {-->
+<!--        height: '100%',-->
+<!--        width: '100%',-->
+<!--        videoId: videoId,-->
+<!--        playerVars: {-->
+<!--          autoplay: 1,-->
+<!--          controls: 1,-->
+<!--          modestbranding: 1,-->
+<!--          rel: 0,-->
+<!--          origin: "https://www.youtube.com"-->
+<!--        },-->
+<!--        events: {-->
+<!--          'onReady': () => {-->
+<!--            playerReady = true;-->
+<!--          },-->
+<!--          'onStateChange': onPlayerStateChange,-->
+<!--          'onError': onPlayerError-->
+<!--        }-->
+<!--      });-->
+<!--    }-->
+
+<!--    function onPlayerStateChange(event) {-->
+<!--      if (event.data === YT.PlayerState.PLAYING) {-->
+<!--        setInterval(() => {-->
+<!--          const currentTime = player.getCurrentTime();-->
+<!--          const isPlaying = player.getPlayerState() === YT.PlayerState.PLAYING;-->
+<!--          const payload = JSON.stringify({ time: currentTime, playing: isPlaying });-->
+<!--          window.Flutter.postMessage(payload);-->
+<!--        }, 3000);-->
+<!--      }-->
+<!--    }-->
+
+<!--    function onPlayerError(event) {-->
+<!--      const payload = JSON.stringify({ error: true, code: event.data });-->
+<!--      window.Flutter.postMessage(payload);-->
+<!--    }-->
+
+<!--    function seekTo(seconds) {-->
+<!--      if (playerReady) {-->
+<!--        player.seekTo(seconds, true);-->
+<!--      }-->
+<!--    }-->
+
+<!--    function playVideo() {-->
+<!--      if (playerReady) {-->
+<!--        player.playVideo();-->
+<!--      }-->
+<!--    }-->
+
+<!--    function pauseVideo() {-->
+<!--      if (playerReady) {-->
+<!--        player.pauseVideo();-->
+<!--      }-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
-<html style="height: 100%; margin: 0; padding: 0;">
+<html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          overflow: hidden;
+        }
+        #player {
+          width: 100vw;
+          height: 100vh;
+        }
+    </style>
 </head>
-<body style="margin:0; padding:0; height:100vh; width:100vw;">
-<div id="player" style="width: 100%; height: 100%;"></div>
+<body>
+<div id="player"></div>
 
 <script>
     var tag = document.createElement('script');
@@ -13,70 +108,28 @@
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     var player;
-    var playerReady = false;
+    var videoId = 'nkFPiu400bk'; // hardcoded for now
 
     function onYouTubeIframeAPIReady() {
-      if (typeof initializePlayer === "function") {
-        initializePlayer();
-      }
-    }
-
-    function initializePlayer() {
-      const videoId = window.videoId || 'dQw4w9WgXcQ'; // fallback
       player = new YT.Player('player', {
         height: '100%',
         width: '100%',
         videoId: videoId,
         playerVars: {
           autoplay: 1,
-          controls: 1,
           modestbranding: 1,
           rel: 0,
-          origin: "https://www.youtube.com"
+          controls: 1,
+          fs: 1
         },
         events: {
           'onReady': () => {
-            playerReady = true;
-          },
-          'onStateChange': onPlayerStateChange,
-          'onError': onPlayerError
+            window.playerReady = true;
+          }
         }
       });
-    }
-
-    function onPlayerStateChange(event) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        setInterval(() => {
-          const currentTime = player.getCurrentTime();
-          const isPlaying = player.getPlayerState() === YT.PlayerState.PLAYING;
-          const payload = JSON.stringify({ time: currentTime, playing: isPlaying });
-          window.Flutter.postMessage(payload);
-        }, 3000);
-      }
-    }
-
-    function onPlayerError(event) {
-      const payload = JSON.stringify({ error: true, code: event.data });
-      window.Flutter.postMessage(payload);
-    }
-
-    function seekTo(seconds) {
-      if (playerReady) {
-        player.seekTo(seconds, true);
-      }
-    }
-
-    function playVideo() {
-      if (playerReady) {
-        player.playVideo();
-      }
-    }
-
-    function pauseVideo() {
-      if (playerReady) {
-        player.pauseVideo();
-      }
     }
 </script>
 </body>
 </html>
+
