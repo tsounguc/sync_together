@@ -36,6 +36,61 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   SyncStatus _syncStatus = SyncStatus.synced;
 
+  bool get _isHost => context.currentUser?.uid == widget.watchParty.hostId;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebView();
+
+    if (_isHost) {
+      // Start sending sync updates as host
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startAutoSyncLoop();
+      });
+    }
+
+    // context.read<WatchPartySessionBloc>().add(
+    //       GetSyncedDataEvent(
+    //         partyId: widget.watchParty.id,
+    //       ),
+    //     );
+  }
+
+  @override
+  void dispose() {
+    _stopAutoSyncLoop();
+    super.dispose();
+  }
+
+  Future<void> _initializeWebView() async {
+    final validUrl = widget.watchParty.videoUrl.isEmpty
+        ? widget.watchParty.platform.defaultUrl
+        : widget.watchParty.videoUrl.startsWith('http')
+            ? widget.watchParty.videoUrl
+            : 'https://${widget.watchParty.videoUrl}';
+
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    final controller = WebViewController.fromPlatformCreationParams(params)
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(_navigationDelegate)
+      ..loadRequest(Uri.parse(validUrl));
+
+    setState(() {
+      _webViewController = controller;
+    });
+  }
+
   void _startAutoSyncLoop() {
     _playbackSyncTimer?.cancel();
     _playbackSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
@@ -69,32 +124,30 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     _playbackSyncTimer = null;
   }
 
-  Future<void> _initializeWebView() async {
-    final validUrl = widget.watchParty.videoUrl.isEmpty
-        ? widget.watchParty.platform.defaultUrl
-        : widget.watchParty.videoUrl.startsWith('http')
-            ? widget.watchParty.videoUrl
-            : 'https://${widget.watchParty.videoUrl}';
+  Future<void> _seekToPosition(double seconds) async {
+    final jsCommand = """
+      var video = document.querySelector('video');
+      if (video) {
+        video.currentTime = $seconds;
+        video.play();
+      }
+    """;
 
-    late final PlatformWebViewControllerCreationParams params;
-    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-      params = WebKitWebViewControllerCreationParams(
-        allowsInlineMediaPlayback: true,
-        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
-      );
-    } else {
-      params = const PlatformWebViewControllerCreationParams();
+    try {
+      await _webViewController?.runJavaScript(jsCommand);
+    } catch (e) {
+      debugPrint('Error running JavaScript to seek video: $e');
     }
+  }
 
-    final controller = WebViewController.fromPlatformCreationParams(params)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(_navigationDelegate)
-      ..loadRequest(Uri.parse(validUrl));
+  Future<void> _playVideo() async {
+    await _webViewController?.runJavaScript("document.querySelector('video')?.play();");
+    _startAutoSyncLoop();
+  }
 
-    setState(() {
-      _webViewController = controller;
-    });
+  Future<void> _pauseVideo() async {
+    await _webViewController?.runJavaScript("document.querySelector('video')?.pause();");
+    _stopAutoSyncLoop();
   }
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
@@ -152,58 +205,6 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     }
   }
 
-  Future<void> _seekToPosition(double seconds) async {
-    final jsCommand = """
-      var video = document.querySelector('video');
-      if (video) {
-        video.currentTime = $seconds;
-        video.play();
-      }
-    """;
-
-    try {
-      await _webViewController?.runJavaScript(jsCommand);
-    } catch (e) {
-      debugPrint('Error running JavaScript to seek video: $e');
-    }
-  }
-
-  Future<void> _playVideo() async {
-    await _webViewController?.runJavaScript("document.querySelector('video')?.play();");
-    _startAutoSyncLoop();
-  }
-
-  Future<void> _pauseVideo() async {
-    await _webViewController?.runJavaScript("document.querySelector('video')?.pause();");
-    _stopAutoSyncLoop();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-
-    final isHost = context.currentUser?.uid == widget.watchParty.hostId;
-    if (isHost) {
-      // Start sending sync updates as host
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _startAutoSyncLoop();
-      });
-    }
-
-    // context.read<WatchPartySessionBloc>().add(
-    //       GetSyncedDataEvent(
-    //         partyId: widget.watchParty.id,
-    //       ),
-    //     );
-  }
-
-  @override
-  void dispose() {
-    _stopAutoSyncLoop();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_webViewController == null) {
@@ -212,15 +213,17 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) async {
-        if (state is SyncUpdated) {
+        if (state is SyncUpdated && !_isHost) {
+          final remotePos = state.playbackPosition;
+          final remoteIsPlaying = state.isPlaying;
+
           debugPrint('Sync update received:  position=${state.playbackPosition}');
 
-          final result = await _webViewController?.runJavaScriptReturningResult(
+          final localPositionResult = await _webViewController?.runJavaScriptReturningResult(
             "document.querySelector('video')?.currentTime",
           );
-          final localPosition = double.tryParse(result.toString()) ?? 0;
-
-          final drift = (state.playbackPosition - localPosition).abs();
+          final localPosition = double.tryParse(localPositionResult.toString()) ?? 0;
+          final drift = (remotePos - localPosition).abs();
 
           // Update sync status
           setState(() {
@@ -229,12 +232,18 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
           // Seek only if the drift is large enough
           if (drift > 1.5) {
-            await _seekToPosition(state.playbackPosition);
+            await _seekToPosition(remotePos);
           }
 
-          if (state.isPlaying) {
+          final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
+            "document.querySelector('video')?.paused === false",
+          );
+
+          final isActuallyPlaying = isPlayingResult.toString() == 'true';
+
+          if (remoteIsPlaying && !isActuallyPlaying) {
             await _playVideo();
-          } else {
+          } else if (!remoteIsPlaying && isActuallyPlaying) {
             await _pauseVideo();
           }
         }
