@@ -42,8 +42,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   void initState() {
     super.initState();
     _initializeWebView();
-
-    if (_isHost) {
+    final isHost = context.currentUser?.uid == widget.watchParty.hostId;
+    if (isHost) {
       // Start sending sync updates as host
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _startAutoSyncLoop();
@@ -98,11 +98,14 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         final result = await _webViewController?.runJavaScriptReturningResult(
           "document.querySelector('video')?.currentTime",
         );
+        debugPrint('Video current time result: $result');
+
         final position = double.tryParse(result.toString()) ?? 0;
 
         final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
           "document.querySelector('video')?.paused === false",
         );
+        debugPrint('Video is playing result: $isPlayingResult');
 
         final isPlaying = isPlayingResult.toString() == 'true';
 
@@ -222,6 +225,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           final localPositionResult = await _webViewController?.runJavaScriptReturningResult(
             "document.querySelector('video')?.currentTime",
           );
+          debugPrint('Video local position result: $localPositionResult');
+
           final localPosition = double.tryParse(localPositionResult.toString()) ?? 0;
           final drift = (remotePos - localPosition).abs();
 
@@ -238,6 +243,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
             "document.querySelector('video')?.paused === false",
           );
+          debugPrint('Video is playing result: $isPlayingResult');
 
           final isActuallyPlaying = isPlayingResult.toString() == 'true';
 
