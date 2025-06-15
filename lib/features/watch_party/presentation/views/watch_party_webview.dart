@@ -13,6 +13,11 @@ import 'package:sync_together/features/watch_party/presentation/widgets/playback
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+// Import for Android features.
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+
+// Import for iOS/macOS features.
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class WatchPartyWebView extends StatefulWidget {
@@ -86,6 +91,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       ..setNavigationDelegate(_navigationDelegate)
       ..loadRequest(Uri.parse(validUrl));
 
+    if (controller.platform is AndroidWebViewController) {
+      await AndroidWebViewController.enableDebugging(true);
+      await (controller.platform as AndroidWebViewController).setMediaPlaybackRequiresUserGesture(false);
+    }
+
     setState(() {
       _webViewController = controller;
     });
@@ -131,6 +141,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     final jsCommand = """
       var video = document.querySelector('video');
       if (video) {
+        video.muted = true;
         video.currentTime = $seconds;
         video.play();
       }
@@ -225,9 +236,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           final localPositionResult = await _webViewController?.runJavaScriptReturningResult(
             "document.querySelector('video')?.currentTime",
           );
+          final localPosition = double.tryParse(localPositionResult.toString()) ?? 0;
           debugPrint('Video local position result: $localPositionResult');
 
-          final localPosition = double.tryParse(localPositionResult.toString()) ?? 0;
           final drift = (remotePos - localPosition).abs();
 
           // Update sync status
