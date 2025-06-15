@@ -13,6 +13,11 @@ import 'package:sync_together/features/watch_party/presentation/widgets/playback
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+// Import for Android features.
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+
+// Import for iOS/macOS features.
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class WatchPartyWebView extends StatefulWidget {
@@ -86,6 +91,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       ..setNavigationDelegate(_navigationDelegate)
       ..loadRequest(Uri.parse(validUrl));
 
+    if (controller.platform is AndroidWebViewController) {
+      await AndroidWebViewController.enableDebugging(true);
+      await (controller.platform as AndroidWebViewController)
+          .setMediaPlaybackRequiresUserGesture(false);
+    }
+
     setState(() {
       _webViewController = controller;
     });
@@ -100,7 +111,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         );
         final position = double.tryParse(result.toString()) ?? 0;
 
-        final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
+        final isPlayingResult =
+            await _webViewController?.runJavaScriptReturningResult(
           "document.querySelector('video')?.paused === false",
         );
 
@@ -128,6 +140,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     final jsCommand = """
       var video = document.querySelector('video');
       if (video) {
+        video.muted = true;
         video.currentTime = $seconds;
         video.play();
       }
@@ -141,12 +154,14 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   Future<void> _playVideo() async {
-    await _webViewController?.runJavaScript("document.querySelector('video')?.play();");
+    await _webViewController
+        ?.runJavaScript("document.querySelector('video')?.play();");
     _startAutoSyncLoop();
   }
 
   Future<void> _pauseVideo() async {
-    await _webViewController?.runJavaScript("document.querySelector('video')?.pause();");
+    await _webViewController
+        ?.runJavaScript("document.querySelector('video')?.pause();");
     _stopAutoSyncLoop();
   }
 
@@ -192,11 +207,14 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       if (url.startsWith('tel')) {
         await launchUrl(Uri(scheme: 'tel', path: url.substring(4)));
       } else if (url.contains('play.google.com') && Platform.isAndroid) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalNonBrowserApplication);
+        await launchUrl(Uri.parse(url),
+            mode: LaunchMode.externalNonBrowserApplication);
       } else if (url.contains('apps.apple.com') && Platform.isIOS) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalNonBrowserApplication);
+        await launchUrl(Uri.parse(url),
+            mode: LaunchMode.externalNonBrowserApplication);
       } else if (url.startsWith('mailto')) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalNonBrowserApplication);
+        await launchUrl(Uri.parse(url),
+            mode: LaunchMode.externalNonBrowserApplication);
       } else {
         await launchUrl(Uri.parse(url));
       }
@@ -217,12 +235,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           final remotePos = state.playbackPosition;
           final remoteIsPlaying = state.isPlaying;
 
-          debugPrint('Sync update received:  position=${state.playbackPosition}');
+          debugPrint(
+              'Sync update received:  position=${state.playbackPosition}');
 
-          final localPositionResult = await _webViewController?.runJavaScriptReturningResult(
+          final localPositionResult =
+              await _webViewController?.runJavaScriptReturningResult(
             "document.querySelector('video')?.currentTime",
           );
-          final localPosition = double.tryParse(localPositionResult.toString()) ?? 0;
+          final localPosition =
+              double.tryParse(localPositionResult.toString()) ?? 0;
           final drift = (remotePos - localPosition).abs();
 
           // Update sync status
@@ -235,7 +256,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             await _seekToPosition(remotePos);
           }
 
-          final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
+          final isPlayingResult =
+              await _webViewController?.runJavaScriptReturningResult(
             "document.querySelector('video')?.paused === false",
           );
 
@@ -267,7 +289,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(value: loadingPercentage / 100),
+                          CircularProgressIndicator(
+                              value: loadingPercentage / 100),
                           const SizedBox(height: 16),
                           Text('Loading... $loadingPercentage%'),
                         ],
