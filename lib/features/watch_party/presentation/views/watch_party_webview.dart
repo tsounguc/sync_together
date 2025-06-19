@@ -160,7 +160,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     try {
       await _webViewController?.runJavaScript("""
           var video = document.querySelector('video');
-          if (video) video.play();
+          if (video) {
+            video.muted = false;
+            video.volume = 1.0;
+            video.play();
+          }
           """);
     } catch (e) {
       debugPrint('Error running JS to play video: $e');
@@ -184,13 +188,16 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     if (video) {
       video.removeAttribute('controls');
       video.style.pointerEvents = 'none'; // Disable user interactions
+      
+      video.muted = false;
+      video.volume = 1.0;
     }
   ''';
 
     try {
       await _webViewController?.runJavaScript(js);
     } catch (e) {
-      debugPrint('[GuestSync] Failed to disable video controls: $e');
+      debugPrint('[GuestSync] Failed to disable playback functions: $e');
     }
   }
 
@@ -206,13 +213,36 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         if (result.toString() == 'true') {
           await _disableGuestVideoControls();
           await _seekToPosition(_latestPlaybackPosition!);
-          if (true == _latestIsPlaying) {
+
+          await _webViewController?.runJavaScript("""
+            var video = document.querySelector('video');
+            if (video) {
+              video.muted = false;
+              video.volume = 1.0;
+            }
+          """);
+
+          if (_latestIsPlaying == true) {
             await _playVideo();
+            final confirmedPlay =
+                await _webViewController?.runJavaScriptReturningResult(
+              "document.querySelector('video')?.paused === false",
+            );
+            if (confirmedPlay.toString() == 'true') {
+              _hasInitialSynced = true;
+              return;
+            }
           } else {
             await _pauseVideo();
+            final confirmedPause =
+                await _webViewController?.runJavaScriptReturningResult(
+              "document.querySelector('video')?.paused === true",
+            );
+
+            if (confirmedPause.toString() == 'true') {
+              _hasInitialSynced = true;
+            }
           }
-          _hasInitialSynced = true;
-          return;
         }
       } catch (_) {}
       await Future.delayed(const Duration(milliseconds: 300));
@@ -308,20 +338,24 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                   drift < 2.0 ? SyncStatus.synced : SyncStatus.syncing;
             });
 
+            // Only seek if drift is large enough
             if (drift > 1.5) {
               await _seekToPosition(state.playbackPosition);
             }
 
-            final playState =
-                await _webViewController?.runJavaScriptReturningResult(
-              "document.querySelector('video')?.paused === false",
-            );
-            final isActuallyPlaying = playState.toString() == 'true';
+            // Check play/pause difference * only if drift is small enough
+            if (drift < 2.0) {
+              final playState =
+                  await _webViewController?.runJavaScriptReturningResult(
+                "document.querySelector('video')?.paused === false",
+              );
+              final isActuallyPlaying = playState.toString() == 'true';
 
-            if (state.isPlaying && !isActuallyPlaying) {
-              await _playVideo();
-            } else if (!state.isPlaying && isActuallyPlaying) {
-              await _pauseVideo();
+              if (state.isPlaying && !isActuallyPlaying) {
+                await _playVideo();
+              } else if (!state.isPlaying && isActuallyPlaying) {
+                await _pauseVideo();
+              }
             }
           } catch (e) {
             debugPrint('Sync update error: $e');
@@ -382,10 +416,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
               ),
           ],
         ),
-        bottomNavigationBar: WebPlaybackControls(
-          controller: _webViewController!,
-          watchPartyId: widget.watchParty.id,
-        ),
+        bottomNavigationBar: _isHost
+            ? WebPlaybackControls(
+                controller: _webViewController!,
+                watchPartyId: widget.watchParty.id,
+              )
+            : null,
       ),
     );
   }
