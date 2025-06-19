@@ -110,6 +110,7 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   WatchPartyRemoteDataSourceImpl(this.firestore);
 
   final FirebaseFirestore firestore;
+
   @override
   Future<WatchPartyModel> createWatchParty({required WatchParty party}) async {
     try {
@@ -452,8 +453,6 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   Stream<DataMap> getSyncedData({required String partyId}) {
     final dataStream = _watchParties
         .doc(partyId)
-        .collection('sync')
-        .doc('playback')
         .snapshots()
         .map((snapshot) => snapshot.data() ?? {});
     return dataStream.handleError(

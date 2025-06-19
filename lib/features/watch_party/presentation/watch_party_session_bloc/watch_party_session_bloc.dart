@@ -23,9 +23,11 @@ import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_
 import 'package:sync_together/features/watch_party/domain/use_cases/update_video_url.dart';
 
 part 'watch_party_session_event.dart';
+
 part 'watch_party_session_state.dart';
 
-class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState> {
+class WatchPartySessionBloc
+    extends Bloc<WatchPartyEvent, WatchPartySessionState> {
   WatchPartySessionBloc({
     required this.createWatchParty,
     required this.joinWatchParty,
@@ -56,7 +58,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
     );
     on<UpdateVideoUrlEvent>(_onUpdateVideoUrl);
     on<SendSyncDataEvent>(_onSendSyncData);
-    on<GetSyncedDataEvent>(_onGetSyncedData);
+    on<GetSyncedDataEvent>(_onGetSyncedData, transformer: restartable());
     on<_ParticipantsUpdatedReceived>(_handleParticipantsUpdated);
 
     on<_ParticipantsErrorReceived>((event, emit) {
@@ -65,6 +67,15 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
 
     on<_PartyStartedRealtimeReceived>((event, emit) {
       emit(const PartyStartedRealtime());
+    });
+
+    on<_SyncedDataReceived>((event, emit) {
+      emit(
+        SyncUpdated(
+          playbackPosition: event.data['playbackPosition'] as double? ?? 0,
+          isPlaying: event.data['isPlaying'] as bool? ?? false,
+        ),
+      );
     });
 
     on<_PartyStartedErrorReceived>((event, emit) {
@@ -175,6 +186,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
   }
 
   StreamSubscription<Either<Failure, List<String>>>? _participantsSubscription;
+
   void _onListenToParticipants(
     ListenToParticipantsEvent event,
     Emitter<WatchPartySessionState> emit,
@@ -214,6 +226,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
   }
 
   StreamSubscription<Either<Failure, bool>>? startPartySubscription;
+
   void _onListenToStartParty(
     ListenToPartyStartEvent event,
     Emitter<WatchPartySessionState> emit,
@@ -278,26 +291,23 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
   }
 
   StreamSubscription<Either<Failure, DataMap>>? subscription;
+
   void _onGetSyncedData(
     GetSyncedDataEvent event,
     Emitter<WatchPartySessionState> emit,
   ) {
     subscription?.cancel();
+
     subscription = getSyncedData(event.partyId).listen(
       /*onData:*/
       (result) {
-        result.fold(
-          (failure) {
-            emit(WatchPartyError(failure.message));
-            subscription?.cancel();
-          },
-          (data) => emit(
-            SyncUpdated(
-              playbackPosition: data['playbackPosition'] as double? ?? 0,
-              isPlaying: data['isPlaying'] as bool? ?? false,
-            ),
-          ),
-        );
+        result.fold((failure) {
+          emit(WatchPartyError(failure.message));
+          subscription?.cancel();
+          debugPrint('[SyncBloc] Firestore sync failure: ${failure.message}');
+        }, (data) {
+          add(_SyncedDataReceived(data));
+        });
       },
       onError: (dynamic error) {
         emit(WatchPartyError(error.toString()));
@@ -322,8 +332,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
         profiles.add,
       );
     }
-
-    add(_ParticipantProfilesResolved(profiles));
+    if (!isClosed) add(_ParticipantProfilesResolved(profiles));
   }
 
   @override
@@ -335,13 +344,21 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
   }
 }
 
+class _SyncedDataReceived extends WatchPartyEvent {
+  const _SyncedDataReceived(this.data);
+
+  final DataMap data;
+}
+
 class _ParticipantsUpdatedReceived extends WatchPartyEvent {
   const _ParticipantsUpdatedReceived(this.participantIds);
+
   final List<String> participantIds;
 }
 
 class _ParticipantsErrorReceived extends WatchPartyEvent {
   const _ParticipantsErrorReceived(this.message);
+
   final String message;
 }
 
@@ -353,10 +370,12 @@ class _PartyStartedRealtimeReceived extends WatchPartyEvent {
 
 class _PartyStartedErrorReceived extends WatchPartyEvent {
   const _PartyStartedErrorReceived(this.message);
+
   final String message;
 }
 
 class _ParticipantProfilesResolved extends WatchPartyEvent {
   const _ParticipantProfilesResolved(this.profiles);
+
   final List<UserEntity> profiles;
 }
