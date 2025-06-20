@@ -326,10 +326,24 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    String? lastGuestNotice;
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) async {
         if (state is SyncUpdated) {
           _latestPlaybackPosition = state.playbackPosition;
+
+          if (!_isHost) {
+            // Show guest SnackBar if play/pause changed
+            if (_latestIsPlaying != state.isPlaying) {
+              if (state.isPlaying) {
+                lastGuestNotice = 'The host started the video';
+              } else {
+                lastGuestNotice = 'The host paused the video';
+              }
+              CoreUtils.showSnackBar(context, lastGuestNotice!);
+            }
+          }
+
           _latestIsPlaying = state.isPlaying;
 
           if (_isHost) return;
@@ -385,68 +399,70 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.watchParty.title),
-          actions: [
-            IconButton(
-              icon: Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
-              onPressed: () => setState(() => _showChat = !_showChat),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              flex: 2,
-              child: loadingPercentage < 100
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(widget.watchParty.title),
+            actions: [
+              IconButton(
+                icon: Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
+                onPressed: () => setState(() => _showChat = !_showChat),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: loadingPercentage < 100
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                                value: loadingPercentage / 100),
+                            const SizedBox(height: 16),
+                            Text('Loading... $loadingPercentage%'),
+                          ],
+                        ),
+                      )
+                    : Stack(
                         children: [
-                          CircularProgressIndicator(
-                              value: loadingPercentage / 100),
-                          const SizedBox(height: 16),
-                          Text('Loading... $loadingPercentage%'),
+                          WebViewWidget(controller: _webViewController!),
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: !_isHost && _showSyncBadge
+                                ? SyncStatusBadge(status: _syncStatus)
+                                : const SizedBox.shrink(),
+                          ),
                         ],
                       ),
-                    )
-                  : Stack(
-                      children: [
-                        WebViewWidget(controller: _webViewController!),
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: !_isHost && _showSyncBadge
-                              ? SyncStatusBadge(status: _syncStatus)
-                              : const SizedBox.shrink(),
+              ),
+              if (_showChat)
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      border: Border(
+                        top: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
                         ),
-                      ],
-                    ),
-            ),
-            if (_showChat)
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    border: Border(
-                      top: BorderSide(
-                        color: Colors.grey.withValues(alpha: 0.3),
                       ),
                     ),
+                    child: WatchPartyChat(partyId: widget.watchParty.id),
                   ),
-                  child: WatchPartyChat(partyId: widget.watchParty.id),
                 ),
-              ),
-          ],
+            ],
+          ),
+          bottomNavigationBar: _isHost
+              ? WebPlaybackControls(
+                  controller: _webViewController!,
+                  watchPartyId: widget.watchParty.id,
+                )
+              : null,
         ),
-        bottomNavigationBar: _isHost
-            ? WebPlaybackControls(
-                controller: _webViewController!,
-                watchPartyId: widget.watchParty.id,
-              )
-            : null,
       ),
     );
   }
