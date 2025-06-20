@@ -40,8 +40,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   // New: Local memory of latest sync state
   double? _latestPlaybackPosition;
-  bool? _latestIsPlaying;
+  bool _latestIsPlaying = false;
   bool _hasInitialSynced = false;
+
+  bool _showSyncBadge = true;
+  Timer? _syncBadgeTimer;
 
   @override
   void initState() {
@@ -298,6 +301,25 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     }
   }
 
+  void _updateSyncBadge(SyncStatus status) {
+    if (_isHost || status == _syncStatus) return;
+
+    setState(() {
+      _syncStatus = status;
+      _showSyncBadge = true;
+    });
+
+    _syncBadgeTimer?.cancel();
+
+    if (status == SyncStatus.synced) {
+      _syncBadgeTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() => _showSyncBadge = false);
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_webViewController == null) {
@@ -333,11 +355,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             final localPosition = double.tryParse(result.toString()) ?? 0;
 
             final drift = (state.playbackPosition - localPosition).abs();
-            setState(() {
-              _syncStatus =
-                  drift < 2.0 ? SyncStatus.synced : SyncStatus.syncing;
-            });
 
+            final newStatus =
+                drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
+            if (newStatus != _syncStatus) {
+              _updateSyncBadge(newStatus);
+            }
             // Only seek if drift is large enough
             if (drift > 1.5) {
               await _seekToPosition(state.playbackPosition);
@@ -394,7 +417,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                         Positioned(
                           top: 12,
                           right: 12,
-                          child: SyncStatusBadge(status: _syncStatus),
+                          child: !_isHost && _showSyncBadge
+                              ? SyncStatusBadge(status: _syncStatus)
+                              : const SizedBox.shrink(),
                         ),
                       ],
                     ),
