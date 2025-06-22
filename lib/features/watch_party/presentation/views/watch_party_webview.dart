@@ -324,6 +324,31 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     }
   }
 
+  void _confirmEndParty(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('End Watch Party?'),
+        content: const Text('This will disconnect all guests from the party.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<WatchPartySessionBloc>().add(
+                    EndWatchPartyEvent(widget.watchParty.id),
+                  );
+            },
+            child: const Text('End'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_webViewController == null) {
@@ -419,12 +444,22 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             debugPrint('Sync update error: $e');
           }
         }
+        if (state is WatchPartyEnded) {
+          CoreUtils.showSnackBar(context, 'Party ended');
+          Navigator.of(context).pop();
+        }
       },
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
             title: Text(widget.watchParty.title),
             actions: [
+              if (_isHost)
+                IconButton(
+                  icon: const Icon(Icons.stop_circle_outlined),
+                  tooltip: 'End Watch Party',
+                  onPressed: () => _confirmEndParty(context),
+                ),
               IconButton(
                 icon: Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
                 onPressed: () => setState(() => _showChat = !_showChat),
