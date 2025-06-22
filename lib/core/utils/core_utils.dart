@@ -26,7 +26,7 @@ class CoreUtils {
           ),
           margin: const EdgeInsets.symmetric(
             horizontal: 20,
-          ).copyWith(bottom: context.height * 0.82),
+          ).copyWith(bottom: context.height * 0.80),
         ),
       );
   }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/enums/sync_status.dart';
@@ -66,7 +65,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   @override
   void dispose() {
-    _stopAutoSyncLoop();
+    _syncBadgeTimer?.cancel();
+    _syncBadgeTimer = null;
+
+    _playbackSyncTimer?.cancel();
+    _playbackSyncTimer = null;
     super.dispose();
   }
 
@@ -313,7 +316,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
     if (status == SyncStatus.synced) {
       _syncBadgeTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) {
+        if (!mounted) return;
+        if (_syncStatus == SyncStatus.synced) {
           setState(() => _showSyncBadge = false);
         }
       });
@@ -370,29 +374,46 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
             final drift = (state.playbackPosition - localPosition).abs();
 
+            // Update sync badge status (for guest only)
             final newStatus =
                 drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
             if (newStatus != _syncStatus) {
               _updateSyncBadge(newStatus);
             }
-            // Only seek if drift is large enough
-            if (drift > 1.5) {
-              await _seekToPosition(state.playbackPosition);
-            }
 
-            // Check play/pause difference * only if drift is small enough
-            if (drift < 2.0) {
+            // Do not sync if already synced
+            if (drift < 1.5) {
               final playState =
                   await _webViewController?.runJavaScriptReturningResult(
                 "document.querySelector('video')?.paused === false",
               );
               final isActuallyPlaying = playState.toString() == 'true';
 
-              if (state.isPlaying && !isActuallyPlaying) {
-                await _playVideo();
-              } else if (!state.isPlaying && isActuallyPlaying) {
-                await _pauseVideo();
+              if (state.isPlaying != isActuallyPlaying) {
+                if (state.isPlaying) {
+                  await _playVideo();
+                } else {
+                  await _pauseVideo();
+                }
               }
+
+              return; // Already in sync — skip further actions
+            }
+
+            // Drift too high → seek
+            await _seekToPosition(state.playbackPosition);
+
+            // Ensure play/pause is correct after seeking
+            final playState =
+                await _webViewController?.runJavaScriptReturningResult(
+              "document.querySelector('video')?.paused === false",
+            );
+            final isActuallyPlaying = playState.toString() == 'true';
+
+            if (state.isPlaying && !isActuallyPlaying) {
+              await _playVideo();
+            } else if (!state.isPlaying && isActuallyPlaying) {
+              await _pauseVideo();
             }
           } catch (e) {
             debugPrint('Sync update error: $e');
@@ -432,8 +453,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                           Positioned(
                             top: 12,
                             right: 12,
-                            child: !_isHost && _showSyncBadge
-                                ? SyncStatusBadge(status: _syncStatus)
+                            child: !_isHost
+                                ? AnimatedOpacity(
+                                    opacity: _showSyncBadge ? 1.0 : 0.0,
+                                    duration: const Duration(milliseconds: 300),
+                                    child: SyncStatusBadge(status: _syncStatus),
+                                  )
                                 : const SizedBox.shrink(),
                           ),
                         ],
