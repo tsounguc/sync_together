@@ -2,34 +2,49 @@
 
 # SyncTogether
 
-SyncTogether is a cross-platform watch party app that allows users to watch their favorite shows and movies in perfect sync with friends, no matter where they are. It supports **Android, iOS, and Web**, and provides seamless room creation, real-time playback synchronization, in-room chat, and live voice/video communication.
+SyncTogether is a cross-platform watch party app that allows users to watch their favorite shows and
+movies in perfect sync with friends, no matter where they are. It supports **Android, iOS, and Web
+**, and provides seamless room creation, real-time playback synchronization, in-room chat, and live
+voice/video communication.
 
 ## 🚀 Features
 
-### **MVP Features**
-✅ **User Authentication**
-- Email & Password Sign-up/Login
-- Google Sign-In
-- Anonymous Sign-In
+### ✅ **MVP Features**
 
-✅ **Room Management**
-- Create and join watch party rooms with unique codes
-- Host permissions (kick users, change video, end room)
+#### **User Authentication**
 
-✅ **Playback Synchronization**
-- Real-time play, pause, and seek across all devices
-- Firestore Realtime Sync (MVP) with future WebRTC upgrade
+- [x] Email & Password Sign-up/Login
+- [x] Anonymous Sign-In
+- [ ] Google Sign-In (not yet implemented)
 
-✅ **In-Room Chat (Text, Voice, and Video)**
-- **Text Chat**: Real-time messaging in the room
-- **Voice Chat**: Users can talk while watching
-- **Video Chat**: Users can see each other while watching
-- **Powered by WebRTC with Firebase Signaling**
+#### **Room Management**
 
-✅ **Cross-Platform Support**
-- Works seamlessly on **Android, iOS, and Web**
+- [x] Create and join watch party rooms with unique codes
+- [x] Private room logic
+- [x] Host can end the room manually or by leaving
+
+#### **Playback Synchronization**
+
+- [x] Real-time play, pause, and seek across devices
+- [x] Firestore Realtime Sync (position + isPlaying)
+- [x] Host auto-sync loop every 3 seconds
+- [x] Guest sync and resync logic (JavaScript in WebView)
+
+#### **In-Room Chat**
+
+- [x] Text chat in real time
+- [ ] Voice chat (not yet implemented)
+- [ ] Video chat (not yet implemented)
+
+#### **Cross-Platform Support**
+
+- [x] Works on Android and iOS (fully tested)
+- [ ] Web support in progress (YouTube only; no overlay)
 
 ### **Future Enhancements (Post-MVP)**
+
+✅ **Google Sign-In**
+✅ **Host permissions (kick users, change video)**
 ✅ **WebRTC-based low-latency playback sync**  
 ✅ **Smart TV support (Android TV, Apple TV, Fire TV)**  
 ✅ **Streaming platform integration (Netflix, YouTube, etc.)**  
@@ -38,39 +53,46 @@ SyncTogether is a cross-platform watch party app that allows users to watch thei
 ✅ **Advanced moderation & user management tools**
 
 ## 🛠️ Tech Stack
+
 - **Frontend:** Flutter (Dart)
 - **Backend:** Firebase (Authentication, Firestore, Realtime Database)
 - **State Management:** BLoC
 - **Real-time Sync:** Firestore Realtime Updates (Future: WebRTC)
 - **Authentication:** Firebase Auth (Email, Google, Anonymous)
-- **Voice & Video Chat:** WebRTC with Firebase Signaling
+- **Chat:** Firestore-backed messaging
 
 ## 🔧 Setup Guide
 
 ### **1. Clone the Repository**
+
 ```sh
 git clone https://github.com/tsounguc/sync_together.git
 cd sync_together
 ```
 
 ### **2. Install Dependencies**
+
 ```sh
 flutter pub get
 ```
 
 ### **3. Configure Firebase**
+
 - Go to [Firebase Console](https://console.firebase.google.com/)
 - Create a project and enable Authentication (Email, Google, Anonymous Sign-In)
 - Enable Firestore for real-time room management
 - Enable Firebase Realtime Database for playback sync
-- Download `google-services.json` (Android) & `GoogleService-Info.plist` (iOS) and place them in `android/app/` and `ios/Runner/` respectively
+- Download `google-services.json` (Android) & `GoogleService-Info.plist` (iOS) and place them in
+  `android/app/` and `ios/Runner/` respectively
 
 ### **4. Run the App**
+
 ```sh
 flutter run
 ```
 
 ## 📂 Project Structure
+
 ```
 sync_together/
 ├── core/
@@ -108,8 +130,11 @@ sync_together/
 ```
 
 ## 🏗️ Architecture Overview
+
 SyncTogether follows **Clean Architecture** and **Test-Driven Development (TDD):**
-- **Core Layer:** Shared utilities, networking, error handling, WebRTC/WebSockets, notifications, and deep linking.
+
+- **Core Layer:** Shared utilities, networking, error handling, WebRTC/WebSockets, notifications,
+  and deep linking.
 - **Feature Layer:**
     - **Auth:** Manages user authentication and session persistence.
     - **Rooms:** Handles room creation, joining, and management.
@@ -133,6 +158,7 @@ SyncTogether follows **Clean Architecture** and **Test-Driven Development (TDD):
 ---
 
 ### 🔥 **Next Steps**
+
 - [ ] Implement Firebase-backed room management
 - [ ] Integrate WebRTC-based voice and video chat
 - [ ] Improve UI with sleek design

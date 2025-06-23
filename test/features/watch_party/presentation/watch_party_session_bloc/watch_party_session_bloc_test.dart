@@ -3,14 +3,18 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
+import 'package:sync_together/features/auth/data/models/user_model.dart';
+import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/create_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/end_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_synced_data.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/get_user_by_id.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/leave_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_participants.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_existence.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_start.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/send_sync_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
@@ -39,6 +43,11 @@ class MockSendSyncData extends Mock implements SendSyncData {}
 
 class MockGetSyncedData extends Mock implements GetSyncedData {}
 
+class MockGetUserById extends Mock implements GetUserById {}
+
+class MockListenToPartyExistence extends Mock
+    implements ListenToPartyExistence {}
+
 void main() {
   late CreateWatchParty createWatchParty;
   late JoinWatchParty joinWatchParty;
@@ -51,6 +60,8 @@ void main() {
   late UpdateVideoUrl updateVideoUrl;
   late SendSyncData sendSyncData;
   late GetSyncedData getSyncedData;
+  late GetUserById getUserById;
+  late ListenToPartyExistence listenToPartyExistence;
 
   late WatchPartySessionBloc bloc;
 
@@ -121,6 +132,8 @@ void main() {
     updateVideoUrl = MockUpdateVideoUrl();
     sendSyncData = MockSendSyncData();
     getSyncedData = MockGetSyncedData();
+    getUserById = MockGetUserById();
+    listenToPartyExistence = MockListenToPartyExistence();
 
     bloc = WatchPartySessionBloc(
       createWatchParty: createWatchParty,
@@ -134,6 +147,8 @@ void main() {
       updateVideoUrl: updateVideoUrl,
       sendSyncData: sendSyncData,
       getSyncedData: getSyncedData,
+      getUserById: getUserById,
+      listenToPartyExistence: listenToPartyExistence,
     );
 
     registerFallbackValue(testParty);
@@ -141,6 +156,10 @@ void main() {
     registerFallbackValue(leavePartyParams);
     registerFallbackValue(updateVideoUrlParams);
     registerFallbackValue(sendSyncDataParams);
+
+    when(() => getUserById(any())).thenAnswer(
+      (_) async => const Right(UserEntity.empty()),
+    );
   });
 
   test(
@@ -431,7 +450,10 @@ void main() {
   });
 
   group('listenToParticipants - ', () {
-    final testParticipantIds = ['123', '456'];
+    final testParticipantIds = [
+      const UserEntity.empty(),
+      const UserEntity.empty(),
+    ];
     blocTest<WatchPartySessionBloc, WatchPartySessionState>(
       'given WatchPartySessionBloc '
       'when [WatchPartySessionBloc.listenToParticipants] is called '
@@ -442,7 +464,13 @@ void main() {
           () => listenToParticipants(
             any(),
           ),
-        ).thenAnswer((_) => Stream.value(Right(testParticipantIds)));
+        ).thenAnswer(
+          (_) => Stream.value(
+            Right(
+              [testParticipantIds[0].uid, testParticipantIds[1].uid],
+            ),
+          ),
+        );
         return bloc;
       },
       act: (bloc) => bloc.add(
@@ -450,7 +478,7 @@ void main() {
       ),
       expect: () => [
         WatchPartyLoading(),
-        ParticipantsUpdated(testParticipantIds),
+        ParticipantsProfilesUpdated(testParticipantIds),
       ],
       verify: (_) {
         verify(
@@ -466,7 +494,8 @@ void main() {
       build: () {
         when(
           () => listenToParticipants(any()),
-        ).thenAnswer((_) => Stream.value(Left(testListenToParticipantsFailure)));
+        ).thenAnswer(
+            (_) => Stream.value(Left(testListenToParticipantsFailure)));
         return bloc;
       },
       act: (bloc) => bloc.add(
@@ -610,7 +639,7 @@ void main() {
           newUrl: updateVideoUrlParams.newUrl,
         ),
       ),
-      expect: () => <WatchPartySessionState>[],
+      expect: () => <WatchPartySessionState>[VideoUrlUpdated()],
       verify: (_) {
         verify(
           () => updateVideoUrl(updateVideoUrlParams),

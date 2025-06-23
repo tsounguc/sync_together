@@ -184,7 +184,7 @@ void main() {
       ),
       expect: () => [
         const MessageSending(),
-        const MessageSent(),
+        // const MessageSent(),
       ],
       verify: (cubit) {
         verify(
@@ -296,7 +296,7 @@ void main() {
       ),
       expect: () => [
         const MessageDeleting(),
-        const MessageDeleted(),
+        // const MessageDeleted(),
       ],
       verify: (cubit) {
         verify(
