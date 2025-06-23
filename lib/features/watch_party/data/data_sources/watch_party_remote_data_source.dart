@@ -427,6 +427,11 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
     required bool isPlaying,
   }) async {
     try {
+      final docRef = _watchParties.doc(partyId);
+      final snapshot = await docRef.get();
+
+      if (!snapshot.exists) return;
+
       await _watchParties.doc(partyId).set(
         {
           'playbackPosition': playbackPosition,
