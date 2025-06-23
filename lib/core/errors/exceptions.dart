@@ -210,6 +210,14 @@ class ListenToPartyStartException extends WatchPartyException {
   });
 }
 
+/// **Exception thrown when listening to if watch party exists.**
+class ListenToPartyExistenceException extends WatchPartyException {
+  const ListenToPartyExistenceException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
 /// **Exception thrown when starting a watch party.**
 class StartWatchPartyException extends WatchPartyException {
   const StartWatchPartyException({
@@ -257,7 +265,8 @@ class UpdateVideoUrlException extends WatchPartyException {
 }
 
 /// **Base class for all streaming platforms exceptions.**
-abstract class StreamingPlatformsException extends Equatable implements Exception {
+abstract class StreamingPlatformsException extends Equatable
+    implements Exception {
   const StreamingPlatformsException({
     required this.message,
     required this.statusCode,

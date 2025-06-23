@@ -74,6 +74,12 @@ abstract class WatchPartyRemoteDataSource {
   /// - **Failure:** Throws a [WatchPartyException].
   Stream<bool> listenToPartyStart({required String partyId});
 
+  /// Listen to party existence
+  ///
+  /// - **Success:** Returns s bool.
+  /// - **Failure:** Throws a [WatchPartyException].
+  Stream<bool> listenToPartyExistence({required String partyId});
+
   /// Update watch party video url.
   ///
   /// - **Success:** Completes without returning a value.
@@ -499,6 +505,39 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
     } catch (e, s) {
       debugPrint('StartPartyException: $e\n$s ');
       throw GetUserByIdException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Stream<bool> listenToPartyExistence({required String partyId}) {
+    try {
+      final existenceStream =
+          _watchParties.doc(partyId).snapshots().map((snapshot) {
+        return snapshot.exists;
+      });
+
+      return existenceStream.handleError((dynamic error) {
+        if (error is FirebaseException) {
+          throw ListenToPartyExistenceException(
+              message: error.message ?? 'Unknown error occurred',
+              statusCode: '500');
+        }
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ListenToPartyExistenceException(
+        message: e.message ?? 'Unknown error occurred',
+        statusCode: e.code,
+      );
+    } on ListenToPartyExistenceException {
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrintStack(stackTrace: stackTrace);
+      throw ListenToPartyExistenceException(
         message: e.toString(),
         statusCode: '505',
       );

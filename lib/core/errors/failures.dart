@@ -255,7 +255,8 @@ class GetPublicWatchPartiesFailure extends WatchPartyFailure {
   });
 
   /// Converts a [GetPublicWatchPartiesException] into a [GetPublicWatchPartiesFailure].
-  GetPublicWatchPartiesFailure.fromException(GetPublicWatchPartiesException exception)
+  GetPublicWatchPartiesFailure.fromException(
+      GetPublicWatchPartiesException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,
@@ -313,13 +314,15 @@ class ListenToParticipantsFailure extends WatchPartyFailure {
 
   /// Converts a [ListenToParticipantsException]
   /// into a [ListenToParticipantsFailure].
-  ListenToParticipantsFailure.fromException(ListenToParticipantsException exception)
+  ListenToParticipantsFailure.fromException(
+      ListenToParticipantsException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,
         );
 }
 
+/// **Failure that occurs when listening to start status in watch party.**
 class ListenToPartyStartFailure extends WatchPartyFailure {
   ListenToPartyStartFailure({
     required super.message,
@@ -328,6 +331,22 @@ class ListenToPartyStartFailure extends WatchPartyFailure {
 
   /// Converts a [ListenToPartyStartException] into a [ListenToPartyStartFailure].
   ListenToPartyStartFailure.fromException(ListenToPartyStartException exception)
+      : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when listening to party existence**
+class ListenToPartyExistenceFailure extends WatchPartyFailure {
+  ListenToPartyExistenceFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [ListenToPartyExistenceException] into a [ListenToPartyExistenceFailure].
+  ListenToPartyExistenceFailure.fromException(
+      ListenToPartyExistenceException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,

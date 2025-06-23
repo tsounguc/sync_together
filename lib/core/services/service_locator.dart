@@ -53,6 +53,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_pa
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/leave_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_participants.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_existence.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_start.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/send_sync_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';

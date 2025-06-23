@@ -17,6 +17,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_pa
 import 'package:sync_together/features/watch_party/domain/use_cases/join_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/leave_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_participants.dart';
+import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_existence.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_party_start.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/send_sync_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
@@ -41,6 +42,7 @@ class WatchPartySessionBloc
     required this.sendSyncData,
     required this.getSyncedData,
     required this.getUserById,
+    required this.listenToPartyExistence,
   }) : super(const WatchPartySessionInitial()) {
     on<CreateWatchPartyEvent>(_onCreateWatchParty);
     on<JoinWatchPartyEvent>(_onJoinWatchParty);
@@ -58,7 +60,15 @@ class WatchPartySessionBloc
     );
     on<UpdateVideoUrlEvent>(_onUpdateVideoUrl);
     on<SendSyncDataEvent>(_onSendSyncData);
-    on<GetSyncedDataEvent>(_onGetSyncedData, transformer: restartable());
+    on<GetSyncedDataEvent>(
+      _onGetSyncedData,
+      transformer: restartable(),
+    );
+    on<ListenToPartyExistenceEvent>(
+      _onWatchPartyEnded,
+      transformer: restartable(),
+    );
+
     on<_ParticipantsUpdatedReceived>(_handleParticipantsUpdated);
 
     on<_ParticipantsErrorReceived>((event, emit) {
@@ -85,6 +95,10 @@ class WatchPartySessionBloc
     on<_ParticipantProfilesResolved>((event, emit) {
       emit(ParticipantsProfilesUpdated(event.profiles));
     });
+
+    on<_WatchPartyEndedRealtime>((event, emit) {
+      emit(const WatchPartyEndedByHost());
+    });
   }
 
   final CreateWatchParty createWatchParty;
@@ -99,6 +113,7 @@ class WatchPartySessionBloc
   final SendSyncData sendSyncData;
   final GetSyncedData getSyncedData;
   final GetUserById getUserById;
+  final ListenToPartyExistence listenToPartyExistence;
 
   Future<void> _onCreateWatchParty(
     CreateWatchPartyEvent event,
@@ -301,13 +316,17 @@ class WatchPartySessionBloc
     subscription = getSyncedData(event.partyId).listen(
       /*onData:*/
       (result) {
-        result.fold((failure) {
-          emit(WatchPartyError(failure.message));
-          subscription?.cancel();
-          debugPrint('[SyncBloc] Firestore sync failure: ${failure.message}');
-        }, (data) {
-          add(_SyncedDataReceived(data));
-        });
+        result.fold(
+          (failure) {
+            emit(WatchPartyError(failure.message));
+            subscription?.cancel();
+            debugPrint(
+                '[WatchPartySessionBloc] Firestore sync failure: ${failure.message}');
+          },
+          (data) {
+            add(_SyncedDataReceived(data));
+          },
+        );
       },
       onError: (dynamic error) {
         emit(WatchPartyError(error.toString()));
@@ -315,6 +334,41 @@ class WatchPartySessionBloc
       },
       onDone: () {
         subscription?.cancel();
+      },
+    );
+  }
+
+  StreamSubscription<Either<Failure, bool>>? partyExistenceSubscription;
+
+  void _onWatchPartyEnded(
+    ListenToPartyExistenceEvent event,
+    Emitter<WatchPartySessionState> emit,
+  ) {
+    partyExistenceSubscription?.cancel();
+
+    partyExistenceSubscription = listenToPartyExistence(event.partyId).listen(
+      /*onData:*/
+      (result) {
+        result.fold(
+          (failure) {
+            emit(WatchPartyError(failure.message));
+            partyExistenceSubscription?.cancel();
+            debugPrint(
+                '[WatchPartySessionBloc] Firestore sync failure: ${failure.message}');
+          },
+          (existence) {
+            if (existence == false) {
+              add(const _WatchPartyEndedRealtime());
+            }
+          },
+        );
+      },
+      onError: (dynamic error) {
+        emit(WatchPartyError(error.toString()));
+        partyExistenceSubscription?.cancel();
+      },
+      onDone: () {
+        partyExistenceSubscription?.cancel();
       },
     );
   }
@@ -340,6 +394,7 @@ class WatchPartySessionBloc
     subscription?.cancel();
     startPartySubscription?.cancel();
     _participantsSubscription?.cancel();
+    partyExistenceSubscription?.cancel();
     return super.close();
   }
 }
@@ -378,4 +433,8 @@ class _ParticipantProfilesResolved extends WatchPartyEvent {
   const _ParticipantProfilesResolved(this.profiles);
 
   final List<UserEntity> profiles;
+}
+
+class _WatchPartyEndedRealtime extends WatchPartyEvent {
+  const _WatchPartyEndedRealtime();
 }

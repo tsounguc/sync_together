@@ -93,7 +93,8 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
   @override
   ResultStream<List<String>> listenToParticipants({required String partyId}) {
     return remoteDataSource.listenToParticipants(partyId: partyId).transform(
-          StreamTransformer<List<String>, Either<Failure, List<String>>>.fromHandlers(
+          StreamTransformer<List<String>,
+              Either<Failure, List<String>>>.fromHandlers(
             handleData: (participants, sink) {
               sink.add(Right(participants));
             },
@@ -227,5 +228,31 @@ class WatchPartyRepositoryImpl implements WatchPartyRepository {
         GetUserByIdFailure.fromException(e),
       );
     }
+  }
+
+  @override
+  ResultStream<bool> listenToPartyExistence({required String partyId}) {
+    return remoteDataSource.listenToPartyExistence(partyId: partyId).transform(
+          StreamTransformer<bool, Either<Failure, bool>>.fromHandlers(
+            handleData: (status, sink) {
+              sink.add(Right(status));
+            },
+            handleError: (error, stackTrace, sink) {
+              if (error is ListenToPartyExistenceException) {
+                sink.add(
+                    Left(ListenToPartyExistenceFailure.fromException(error)));
+              } else {
+                sink.add(
+                  Left(
+                    ListenToPartyExistenceFailure(
+                      message: error.toString(),
+                      statusCode: 505,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        );
   }
 }

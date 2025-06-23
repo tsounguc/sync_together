@@ -61,6 +61,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             ),
           );
     }
+
+    context.read<WatchPartySessionBloc>().add(
+          ListenToPartyExistenceEvent(
+            widget.watchParty.id,
+          ),
+        );
   }
 
   @override
@@ -444,7 +450,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             debugPrint('Sync update error: $e');
           }
         }
-        if (state is WatchPartyEnded) {
+        if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
           if (mounted) {
             CoreUtils.showSnackBar(context, 'The host ended the watch party');
             await Future.delayed(const Duration(seconds: 2));

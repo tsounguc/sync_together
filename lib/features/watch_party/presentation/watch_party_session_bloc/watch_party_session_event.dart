@@ -3,6 +3,7 @@ part of 'watch_party_session_bloc.dart';
 /// Base event for watch party.
 sealed class WatchPartyEvent extends Equatable {
   const WatchPartyEvent();
+
   @override
   List<Object?> get props => [];
 }
@@ -42,6 +43,7 @@ class GetSyncedDataEvent extends WatchPartyEvent {
   const GetSyncedDataEvent({
     required this.partyId,
   });
+
   final String partyId;
 
   @override
@@ -88,7 +90,7 @@ class GetWatchPartyEvent extends WatchPartyEvent {
   List<Object?> get props => [partyId];
 }
 
-/// Event to leave watch party state
+/// Event to leave watch party
 class LeaveWatchPartyEvent extends WatchPartyEvent {
   const LeaveWatchPartyEvent({
     required this.partyId,
@@ -102,6 +104,7 @@ class LeaveWatchPartyEvent extends WatchPartyEvent {
   List<Object?> get props => [partyId, userId];
 }
 
+/// Event to end watch party state
 class EndWatchPartyEvent extends WatchPartyEvent {
   const EndWatchPartyEvent(this.partyId);
 
@@ -109,6 +112,13 @@ class EndWatchPartyEvent extends WatchPartyEvent {
 
   @override
   List<Object?> get props => [partyId];
+}
+
+/// Event to listen to party existence
+class ListenToPartyExistenceEvent extends WatchPartyEvent {
+  const ListenToPartyExistenceEvent(this.partyId);
+
+  final String partyId;
 }
 
 /// Event to listen to participants watch party

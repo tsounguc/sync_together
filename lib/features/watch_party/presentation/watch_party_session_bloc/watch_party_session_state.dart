@@ -3,6 +3,7 @@ part of 'watch_party_session_bloc.dart';
 /// Base state for watch party.
 sealed class WatchPartySessionState extends Equatable {
   const WatchPartySessionState();
+
   @override
   List<Object?> get props => [];
 }
@@ -38,6 +39,7 @@ final class WatchPartyCreated extends WatchPartySessionState {
 /// Success state for joining watch party
 class WatchPartyJoined extends WatchPartySessionState {
   const WatchPartyJoined(this.party);
+
   final WatchParty party;
 
   @override
@@ -47,6 +49,7 @@ class WatchPartyJoined extends WatchPartySessionState {
 /// Success state for getting watch party
 class WatchPartyFetched extends WatchPartySessionState {
   const WatchPartyFetched(this.watchParty);
+
   final WatchParty watchParty;
 
   @override
@@ -61,6 +64,11 @@ class WatchPartyLeft extends WatchPartySessionState {
 /// Success state for ending watch party
 class WatchPartyEnded extends WatchPartySessionState {
   const WatchPartyEnded();
+}
+
+/// Success state for when host ends watch party
+class WatchPartyEndedByHost extends WatchPartySessionState {
+  const WatchPartyEndedByHost();
 }
 
 /// Success state for syncing playback

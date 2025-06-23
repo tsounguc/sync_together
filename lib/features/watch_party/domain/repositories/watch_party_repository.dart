@@ -99,4 +99,10 @@ abstract class WatchPartyRepository {
   /// - **Success:** Returns a user entity
   /// - **Failure:** Returns a `WatchPartyFailure`.
   ResultFuture<UserEntity> getUserById(String uid);
+
+  /// Emits `false` when the watch party document no longer exists (i.e. party ended).
+  ///
+  /// - **Success:** Returns a stream of bool (true = exists, false = deleted).
+  /// - **Failure:** Returns a `WatchPartyFailure`.
+  ResultStream<bool> listenToPartyExistence({required String partyId});
 }
