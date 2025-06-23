@@ -454,7 +454,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           if (mounted) {
             CoreUtils.showSnackBar(context, 'The host ended the watch party');
             await Future.delayed(const Duration(seconds: 2));
-            if (mounted) Navigator.of(context).pop();
+            if (mounted) {
+              Navigator.popUntil(
+                context,
+                ModalRoute.withName('/'),
+              );
+            }
           }
         }
       },
