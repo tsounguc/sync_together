@@ -355,6 +355,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     );
   }
 
+  void _leaveParty(BuildContext context) {
+    context.read<WatchPartySessionBloc>().add(
+          LeaveWatchPartyEvent(
+            partyId: widget.watchParty.id,
+            userId: context.currentUser?.uid ?? '',
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_webViewController == null) {
@@ -450,6 +459,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             debugPrint('Sync update error: $e');
           }
         }
+        if (state is WatchPartyLeft) {
+          if (mounted) {
+            await Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/',
+              (route) => false,
+            );
+          }
+        }
         if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
           if (mounted) {
             CoreUtils.showSnackBar(context, 'The host ended the watch party');
@@ -464,80 +482,94 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
         }
       },
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.watchParty.title),
-            leading: _isHost
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    tooltip: 'End Watch Party',
-                    onPressed: () => _confirmEndParty(context),
-                  )
-                : null,
-            actions: [
-              IconButton(
-                icon: Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
-                onPressed: () => setState(() => _showChat = !_showChat),
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                flex: 2,
-                child: loadingPercentage < 100
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          if (didPop) return;
+          if (_isHost) {
+            _confirmEndParty(context);
+          } else {
+            _leaveParty(context);
+          }
+        },
+        child: SafeArea(
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(widget.watchParty.title),
+              leading: _isHost
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      tooltip: 'End Watch Party',
+                      onPressed: () => _confirmEndParty(context),
+                    )
+                  : null,
+              actions: [
+                IconButton(
+                  icon:
+                      Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
+                  onPressed: () => setState(() => _showChat = !_showChat),
+                ),
+              ],
+            ),
+            body: Column(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: loadingPercentage < 100
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                  value: loadingPercentage / 100),
+                              const SizedBox(height: 16),
+                              Text('Loading... $loadingPercentage%'),
+                            ],
+                          ),
+                        )
+                      : Stack(
                           children: [
-                            CircularProgressIndicator(
-                                value: loadingPercentage / 100),
-                            const SizedBox(height: 16),
-                            Text('Loading... $loadingPercentage%'),
+                            WebViewWidget(controller: _webViewController!),
+                            Positioned(
+                              top: 12,
+                              right: 12,
+                              child: !_isHost
+                                  ? AnimatedOpacity(
+                                      opacity: _showSyncBadge ? 1.0 : 0.0,
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      child:
+                                          SyncStatusBadge(status: _syncStatus),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
                           ],
                         ),
-                      )
-                    : Stack(
-                        children: [
-                          WebViewWidget(controller: _webViewController!),
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: !_isHost
-                                ? AnimatedOpacity(
-                                    opacity: _showSyncBadge ? 1.0 : 0.0,
-                                    duration: const Duration(milliseconds: 300),
-                                    child: SyncStatusBadge(status: _syncStatus),
-                                  )
-                                : const SizedBox.shrink(),
+                ),
+                if (_showChat)
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        border: Border(
+                          top: BorderSide(
+                            color: Colors.grey.withValues(alpha: 0.3),
                           ),
-                        ],
-                      ),
-              ),
-              if (_showChat)
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      border: Border(
-                        top: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.3),
                         ),
                       ),
+                      child: WatchPartyChat(partyId: widget.watchParty.id),
                     ),
-                    child: WatchPartyChat(partyId: widget.watchParty.id),
                   ),
-                ),
-            ],
+              ],
+            ),
+            bottomNavigationBar: _isHost
+                ? WebPlaybackControls(
+                    controller: _webViewController!,
+                    watchPartyId: widget.watchParty.id,
+                  )
+                : null,
           ),
-          bottomNavigationBar: _isHost
-              ? WebPlaybackControls(
-                  controller: _webViewController!,
-                  watchPartyId: widget.watchParty.id,
-                )
-              : null,
         ),
       ),
     );
