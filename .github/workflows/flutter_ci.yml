@@ -27,4 +27,5 @@ jobs:
 
 
       - name: Run Tests
-        run: flutter test --no-pub --test-randomize-ordering-seed random
+        run: flutter test --test-randomize-ordering-seed=0
+
