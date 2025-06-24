@@ -6,7 +6,10 @@ import 'package:sync_together/features/friends/data/models/friend_request_model.
 import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 
 class UserListTile extends StatelessWidget {
-  const UserListTile({super.key, required this.user});
+  const UserListTile({
+    required this.user,
+    super.key,
+  });
 
   final UserEntity user;
 
@@ -14,7 +17,11 @@ class UserListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+        backgroundImage: user.photoUrl != null
+            ? NetworkImage(
+                user.photoUrl!,
+              )
+            : null,
         child: user.photoUrl == null ? const Icon(Icons.person) : null,
       ),
       title: Text(user.displayName ?? 'Unknown'),

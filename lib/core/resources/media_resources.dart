@@ -1,12 +1,12 @@
 class MediaResources {
   const MediaResources._();
 
-  static const _baseLogo = 'assets/logo';
+  // static const _baseLogo = 'assets/logo';
   static const _baseImage = 'assets/images';
-  static const _baseAudio = 'audio';
-  static const _baseLottie = 'assets/lottie';
+  // static const _baseAudio = 'audio';
+  // static const _baseLottie = 'assets/lottie';
   static const _baseData = 'assets/data';
-  static const _basePlatformsLogos = 'assets/platforms_Logos';
+  // static const _basePlatformsLogos = 'assets/platforms_Logos';
   static const _baseHtml = 'assets/html';
 
   // platforms
@@ -20,5 +20,4 @@ class MediaResources {
 
   // HTML
   static const youtubePlayer = '$_baseHtml/youtube_player.html';
-
 }

@@ -4,7 +4,9 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:uuid/uuid.dart';
 
 class WebRTCSignaling {
-  WebRTCSignaling({String? sessionId}) : sessionId = sessionId ?? const Uuid().v4();
+  WebRTCSignaling({
+    String? sessionId,
+  }) : sessionId = sessionId ?? const Uuid().v4();
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final String sessionId;

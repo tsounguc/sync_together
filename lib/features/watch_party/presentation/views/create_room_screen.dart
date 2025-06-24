@@ -109,8 +109,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             const SizedBox(height: 16),
             if (widget.selectedPlatform.isDRMProtected)
               Text(
-                'This platform is DRM protected. Everyone must open the same video manually.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                'This platform is DRM protected. '
+                'Everyone must open the same video manually.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
               )
             else
               Column(
@@ -125,7 +128,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   const SizedBox(height: 6),
                   Text(
                     'Or leave it empty and pick the video later.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
                   ),
                 ],
               ),
@@ -165,7 +170,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         onPressed: _onCreateRoomPressed,
                         icon: const Icon(Icons.add),
                         label: const Text('Create Room'),
-                        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                        ),
                       );
               },
             ),

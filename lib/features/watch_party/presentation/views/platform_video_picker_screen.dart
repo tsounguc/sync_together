@@ -3,9 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/router/app_router.dart';
 import 'package:sync_together/core/utils/video_url_helper.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
-import 'package:sync_together/features/watch_party/data/models/watch_party_model.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
-import 'package:sync_together/features/watch_party/domain/use_cases/get_watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -98,7 +96,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) {
         if (state is VideoUrlUpdated) {
-          print('Video URL updated. Starting party...');
+          debugPrint('Video URL updated. Starting party...');
           context.read<WatchPartySessionBloc>().add(
                 StartPartyEvent(
                   widget.watchParty.id,
@@ -106,7 +104,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
               );
         }
         if (state is WatchPartyStarted) {
-          print('Watch party started. Fetching latest party...');
+          debugPrint('Watch party started. Fetching latest party...');
           context.read<WatchPartySessionBloc>().add(
                 GetWatchPartyEvent(
                   widget.watchParty.id,
@@ -114,7 +112,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
               );
         }
         if (state is WatchPartyFetched) {
-          print('Party fetched: ${state.watchParty.videoUrl}');
+          debugPrint('Party fetched: ${state.watchParty.videoUrl}');
           _goToWatchParty(state.watchParty);
         }
       },

@@ -57,12 +57,15 @@ void main() {
         .add(data);
   }
 
-  Future<QuerySnapshot<DataMap>> getRequests(String receiverId) async => firestore
-      .collection(
-        FirebaseConstants.friendRequestsCollection,
-      )
-      .where('receiverId', isEqualTo: receiverId)
-      .get();
+  Future<QuerySnapshot<DataMap>> getRequests(
+    String receiverId,
+  ) async =>
+      firestore
+          .collection(
+            FirebaseConstants.friendRequestsCollection,
+          )
+          .where('receiverId', isEqualTo: receiverId)
+          .get();
 
   Future<QuerySnapshot<DataMap>> getFriends(String userId) async => firestore
       .collection(

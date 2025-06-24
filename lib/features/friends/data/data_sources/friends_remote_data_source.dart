@@ -187,7 +187,13 @@ class FriendsRemoteDataSourceImpl implements FriendsRemoteDataSource {
   @override
   Future<List<FriendModel>> getFriends(String userId) async {
     try {
-      final friendsList = await _friends.where('friendship', arrayContains: userId).get().then(
+      final friendsList = await _friends
+          .where(
+            'friendship',
+            arrayContains: userId,
+          )
+          .get()
+          .then(
             (value) => value.docs
                 .map(
                   (doc) => FriendModel.fromMap(doc.data()),
@@ -249,7 +255,10 @@ class FriendsRemoteDataSourceImpl implements FriendsRemoteDataSource {
     try {
       return _users
           .where('displayName', isGreaterThanOrEqualTo: query)
-          .where('displayName', isLessThanOrEqualTo: query + '\uf8ff')
+          .where(
+            'displayName',
+            isLessThanOrEqualTo: '$query\uf8ff',
+          )
           .limit(10)
           .get()
           .then(

@@ -5,9 +5,9 @@ import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.d
 
 class ChatOverlay extends StatefulWidget {
   const ChatOverlay({
-    super.key,
     required this.roomId,
     required this.currentUserId,
+    super.key,
   });
 
   final String roomId;
@@ -38,7 +38,10 @@ class _ChatOverlayState extends State<ChatOverlay> {
         text: text,
         timestamp: now,
       );
-      context.read<ChatCubit>().sendTextMessage(roomId: widget.roomId, message: message);
+      context.read<ChatCubit>().sendTextMessage(
+            roomId: widget.roomId,
+            message: message,
+          );
       _controller.clear();
     }
   }
@@ -62,11 +65,11 @@ class _ChatOverlayState extends State<ChatOverlay> {
         height: 300,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.92),
+          color: Colors.black.withValues(alpha: 0.92),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(4, 6),
             ),
@@ -74,8 +77,8 @@ class _ChatOverlayState extends State<ChatOverlay> {
         ),
         child: Column(
           children: [
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Icon(Icons.chat_bubble_outline, color: Colors.white70, size: 20),
                 SizedBox(width: 8),
                 Text(
@@ -98,11 +101,16 @@ class _ChatOverlayState extends State<ChatOverlay> {
                 },
                 builder: (context, state) {
                   if (state is ChatLoading) {
-                    return const Center(child: CircularProgressIndicator(color: Colors.white));
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
                   }
                   if (state is ChatError) {
                     return Center(
-                      child: Text(state.message, style: const TextStyle(color: Colors.redAccent)),
+                      child: Text(
+                        state.message,
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
                     );
                   }
                   if (state is MessagesReceived) {
@@ -117,7 +125,10 @@ class _ChatOverlayState extends State<ChatOverlay> {
                           alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                           child: Container(
                             margin: const EdgeInsets.symmetric(vertical: 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             constraints: const BoxConstraints(maxWidth: 220),
                             decoration: BoxDecoration(
                               color: isMe ? Colors.blueAccent : Colors.grey.shade700,
@@ -148,7 +159,10 @@ class _ChatOverlayState extends State<ChatOverlay> {
                       hintStyle: TextStyle(color: Colors.grey.shade500),
                       filled: true,
                       fillColor: Colors.grey.shade900,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
@@ -163,7 +177,7 @@ class _ChatOverlayState extends State<ChatOverlay> {
                   onPressed: _sendMessage,
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

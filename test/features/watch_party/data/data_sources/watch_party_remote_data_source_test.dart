@@ -388,7 +388,8 @@ void main() {
     test(
       'given WatchPartyRemoteDataSourceImpl '
       'when sendSyncData is called '
-      'then it updates playbackPosition, isPlaying, and lastSyncedTime in Firestore',
+      'then it updates playbackPosition, isPlaying, '
+      'and lastSyncedTime in Firestore',
       () async {
         // Arrange
         await createParty(testParty);

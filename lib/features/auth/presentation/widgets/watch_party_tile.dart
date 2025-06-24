@@ -25,7 +25,11 @@ class WatchPartyTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset(party.platform.logoPath, width: 40, height: 40),
+          Image.asset(
+            party.platform.logoPath,
+            width: 40,
+            height: 40,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

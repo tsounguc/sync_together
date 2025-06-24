@@ -8,8 +8,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 ///
 /// Provides UI controls for controlling video playback inside the WebView.
 /// This includes **Play, Pause, and Sync** functionality.
-class WebPlaybackControls extends StatelessWidget {
-  WebPlaybackControls({
+class WebPlaybackControls extends StatefulWidget {
+  const WebPlaybackControls({
     required this.controller,
     required this.watchPartyId,
     super.key,
@@ -21,12 +21,17 @@ class WebPlaybackControls extends StatelessWidget {
   /// The ID of the watch party.
   final String watchPartyId;
 
+  @override
+  State<WebPlaybackControls> createState() => _WebPlaybackControlsState();
+}
+
+class _WebPlaybackControlsState extends State<WebPlaybackControls> {
   var _isPlaying = false;
 
   /// **Play the void and sync position**
   Future<void> _playVideo(BuildContext context) async {
     const playScript = "document.querySelector('video')?.play();";
-    await controller.runJavaScript(playScript);
+    await widget.controller.runJavaScript(playScript);
     _isPlaying = true;
     await _syncPlayback(context, true);
 
@@ -36,7 +41,7 @@ class WebPlaybackControls extends StatelessWidget {
   /// **Pause the video and sync position**
   Future<void> _pauseVideo(BuildContext context) async {
     const pauseScript = "document.querySelector('video')?.pause();";
-    await controller.runJavaScript(pauseScript);
+    await widget.controller.runJavaScript(pauseScript);
     _isPlaying = false;
     await _syncPlayback(context, false);
 
@@ -46,13 +51,13 @@ class WebPlaybackControls extends StatelessWidget {
   /// **Fetches the current playback position & syncs it across users.**
   Future<void> _syncPlayback(BuildContext context, bool isPlaying) async {
     const script = "document.querySelector('video')?.currentTime";
-    final result = await controller.runJavaScriptReturningResult(script);
+    final result = await widget.controller.runJavaScriptReturningResult(script);
 
     if (result != null) {
       final position = double.tryParse(result.toString()) ?? 0;
       context.read<WatchPartySessionBloc>().add(
             SendSyncDataEvent(
-              partyId: watchPartyId,
+              partyId: widget.watchPartyId,
               playbackPosition: position,
               isPlaying: isPlaying,
             ),

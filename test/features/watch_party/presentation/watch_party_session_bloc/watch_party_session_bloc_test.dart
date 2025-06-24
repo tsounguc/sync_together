@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sync_together/core/errors/failures.dart';
-import 'package:sync_together/features/auth/data/models/user_model.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/create_watch_party.dart';
@@ -45,8 +44,7 @@ class MockGetSyncedData extends Mock implements GetSyncedData {}
 
 class MockGetUserById extends Mock implements GetUserById {}
 
-class MockListenToPartyExistence extends Mock
-    implements ListenToPartyExistence {}
+class MockListenToPartyExistence extends Mock implements ListenToPartyExistence {}
 
 void main() {
   late CreateWatchParty createWatchParty;
@@ -495,7 +493,8 @@ void main() {
         when(
           () => listenToParticipants(any()),
         ).thenAnswer(
-            (_) => Stream.value(Left(testListenToParticipantsFailure)));
+          (_) => Stream.value(Left(testListenToParticipantsFailure)),
+        );
         return bloc;
       },
       act: (bloc) => bloc.add(

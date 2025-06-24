@@ -13,7 +13,9 @@ void main() {
     '_nanoseconds': 0,
   };
 
-  final date = DateTime.fromMillisecondsSinceEpoch(timestampData['_seconds']!).add(
+  final date = DateTime.fromMillisecondsSinceEpoch(
+    timestampData['_seconds']!,
+  ).add(
     Duration(microseconds: timestampData['_nanoseconds']!),
   );
 

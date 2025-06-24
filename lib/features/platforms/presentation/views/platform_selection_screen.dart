@@ -7,6 +7,7 @@ import 'package:sync_together/features/watch_party/presentation/views/create_roo
 
 class PlatformSelectionScreen extends StatefulWidget {
   const PlatformSelectionScreen({super.key});
+
   static const String id = '/platform-selection-screen';
 
   @override
@@ -51,7 +52,6 @@ class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 1,
                     ),
                     itemCount: platforms.length,
                     itemBuilder: (context, index) {

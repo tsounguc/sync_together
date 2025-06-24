@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
-import 'package:sync_together/features/chat/data/models/message_model.dart';
 import 'package:sync_together/features/chat/domain/entities/message.dart';
 import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 

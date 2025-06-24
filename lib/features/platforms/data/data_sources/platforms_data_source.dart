@@ -7,7 +7,8 @@ import 'package:sync_together/features/platforms/data/models/streaming_platform_
 
 /// **PlatformsDataSource Interface**
 ///
-/// Defines the contract for loading streaming platform data from local or remote sources.
+/// Defines the contract for loading streaming platform data
+/// from local or remote sources.
 ///
 /// This layer isolates data-fetching logic so that the repository and domain
 /// layers remain agnostic to how the data is retrieved.
@@ -22,7 +23,9 @@ abstract class PlatformsDataSource {
 class PlatformsDataSourceImpl implements PlatformsDataSource {
   @override
   Future<List<StreamingPlatformModel>> loadPlatforms() async {
-    final jsonString = await rootBundle.loadString(MediaResources.platFormsData);
+    final jsonString = await rootBundle.loadString(
+      MediaResources.platFormsData,
+    );
     final jsonList = json.decode(jsonString) as List;
     final platforms = jsonList
         .map(

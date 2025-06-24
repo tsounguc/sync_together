@@ -118,7 +118,10 @@ class FriendsBloc extends Bloc<FriendEvent, FriendsState> {
     );
   }
 
-  Future<void> _onSearchUsers(SearchUsersEvent event, Emitter<FriendsState> emit) async {
+  Future<void> _onSearchUsers(
+    SearchUsersEvent event,
+    Emitter<FriendsState> emit,
+  ) async {
     emit(const FriendsLoadingState());
     final result = await searchUsers(event.query);
     result.fold(

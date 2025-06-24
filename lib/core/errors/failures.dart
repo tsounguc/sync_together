@@ -256,8 +256,8 @@ class GetPublicWatchPartiesFailure extends WatchPartyFailure {
 
   /// Converts a [GetPublicWatchPartiesException] into a [GetPublicWatchPartiesFailure].
   GetPublicWatchPartiesFailure.fromException(
-      GetPublicWatchPartiesException exception)
-      : this(
+    GetPublicWatchPartiesException exception,
+  ) : this(
           message: exception.message,
           statusCode: exception.statusCode,
         );
@@ -314,8 +314,7 @@ class ListenToParticipantsFailure extends WatchPartyFailure {
 
   /// Converts a [ListenToParticipantsException]
   /// into a [ListenToParticipantsFailure].
-  ListenToParticipantsFailure.fromException(
-      ListenToParticipantsException exception)
+  ListenToParticipantsFailure.fromException(ListenToParticipantsException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,
@@ -345,8 +344,7 @@ class ListenToPartyExistenceFailure extends WatchPartyFailure {
   });
 
   /// Converts a [ListenToPartyExistenceException] into a [ListenToPartyExistenceFailure].
-  ListenToPartyExistenceFailure.fromException(
-      ListenToPartyExistenceException exception)
+  ListenToPartyExistenceFailure.fromException(ListenToPartyExistenceException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,

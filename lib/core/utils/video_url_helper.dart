@@ -1,6 +1,6 @@
 class VideoUrlHelper {
   static String extractYoutubeVideoId(String url) {
-    final RegExp regExp = RegExp(
+    final regExp = RegExp(
       r'(?:v=|\/)([0-9A-Za-z_-]{11})(?:[&?]|$)',
       caseSensitive: false,
     );
@@ -9,7 +9,7 @@ class VideoUrlHelper {
   }
 
   static String extractVimeoVideoId(String url) {
-    final RegExp regExp = RegExp(
+    final regExp = RegExp(
       r'vimeo\.com/(?:video/)?(\d+)',
       caseSensitive: false,
     );

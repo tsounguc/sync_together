@@ -65,7 +65,8 @@ class StreamingPlatformModel extends StreamingPlatform {
         'playStoreUrl': playStoreUrl,
       };
 
-  /// Creates a copy of the current [StreamingPlatformModel] with optional updates.
+  /// Creates a copy of the current [StreamingPlatformModel]
+  /// with optional updates.
   StreamingPlatformModel copyWith({
     String? name,
     String? logoPath,

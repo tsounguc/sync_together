@@ -69,7 +69,9 @@ class WatchPartyModel extends WatchParty {
           lastSyncedTime: (dataMap['lastSyncedTime'] as Timestamp).toDate(),
           isPlaying: dataMap['isPlaying'] as bool,
           hasStarted: dataMap['hasStarted'] as bool,
-          playbackPosition: double.parse(dataMap['playbackPosition'].toString()),
+          playbackPosition: double.parse(
+            dataMap['playbackPosition'].toString(),
+          ),
         );
 
   /// Converts a [WatchPartyModel] instance to a JSON string.

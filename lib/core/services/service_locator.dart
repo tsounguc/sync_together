@@ -58,7 +58,7 @@ import 'package:sync_together/features/watch_party/domain/use_cases/listen_to_pa
 import 'package:sync_together/features/watch_party/domain/use_cases/send_sync_data.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/start_watch_party.dart';
 import 'package:sync_together/features/watch_party/domain/use_cases/update_video_url.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/public_parties_cubit/public_parties_cubit.dart';
+import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
 part 'service_locator.main.dart';

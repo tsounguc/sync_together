@@ -74,19 +74,19 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
                 return ListView.builder(
                   controller: _scrollController,
                   itemCount: messages.length,
-                  reverse: false,
                   itemBuilder: (context, index) {
                     final message = messages[index];
                     final isMe = message.senderId == context.currentUser?.uid;
-                    final isSameSender = index == 0 ||
-                        messages[index - 1].senderId != message.senderId;
+                    final isSameSender = index == 0 || messages[index - 1].senderId != message.senderId;
 
                     return Align(
-                      alignment:
-                          isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: GestureDetector(
                         onLongPress: isMe
-                            ? () => _showMessageOptions(context, message)
+                            ? () => _showMessageOptions(
+                                  context,
+                                  message,
+                                )
                             : null,
                         child: MessageBubble(
                           isMe: isMe,
@@ -136,7 +136,7 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   }
 
   void _showMessageOptions(BuildContext context, Message message) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder: (_) {
         return SafeArea(
@@ -147,7 +147,7 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
                 title: const Text('Edit'),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Implement edit flow
+                  // TODO(Edit-Message): Implement edit flow
                 },
               ),
               ListTile(

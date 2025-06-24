@@ -18,7 +18,10 @@ class SyncControlsBar extends StatelessWidget {
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) {
         if (state is SyncUpdated) {
-          CoreUtils.showSnackBar(context, 'Sync updated: ${state.playbackPosition}s');
+          CoreUtils.showSnackBar(
+            context,
+            'Sync updated: ${state.playbackPosition}s',
+          );
         }
       },
       child: Row(
@@ -41,7 +44,7 @@ class SyncControlsBar extends StatelessWidget {
           const SizedBox(width: 12),
           ElevatedButton.icon(
             icon: const Icon(Icons.pause),
-            label: const Text("Pause"),
+            label: const Text('Pause'),
             onPressed: isHost
                 ? () {
                     context.read<WatchPartySessionBloc>().add(
@@ -59,7 +62,9 @@ class SyncControlsBar extends StatelessWidget {
             icon: const Icon(Icons.sync),
             label: const Text('Sync'),
             onPressed: () {
-              context.read<WatchPartySessionBloc>().add(GetSyncedDataEvent(partyId: partyId));
+              context.read<WatchPartySessionBloc>().add(
+                    GetSyncedDataEvent(partyId: partyId),
+                  );
             },
           ),
         ],

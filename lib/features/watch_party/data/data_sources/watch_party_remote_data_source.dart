@@ -10,7 +10,8 @@ import 'package:sync_together/features/watch_party/domain/entities/watch_party.d
 
 /// **Remote Data Source for Watch Parties**
 ///
-/// Handles all Firestore operations related to creating, joining, and syncing watch parties.
+/// Handles all Firestore operations related to
+/// creating, joining, and syncing watch parties.
 abstract class WatchPartyRemoteDataSource {
   /// Creates a new watch party session.
   ///
@@ -463,7 +464,9 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   @override
   Stream<DataMap> getSyncedData({required String partyId}) {
     final dataStream = _watchParties
-        .doc(partyId)
+        .doc(
+          partyId,
+        )
         .snapshots()
         .map((snapshot) => snapshot.data() ?? {});
     return dataStream.handleError(
@@ -514,16 +517,21 @@ class WatchPartyRemoteDataSourceImpl implements WatchPartyRemoteDataSource {
   @override
   Stream<bool> listenToPartyExistence({required String partyId}) {
     try {
-      final existenceStream =
-          _watchParties.doc(partyId).snapshots().map((snapshot) {
+      final existenceStream = _watchParties
+          .doc(
+            partyId,
+          )
+          .snapshots()
+          .map((snapshot) {
         return snapshot.exists;
       });
 
       return existenceStream.handleError((dynamic error) {
         if (error is FirebaseException) {
           throw ListenToPartyExistenceException(
-              message: error.message ?? 'Unknown error occurred',
-              statusCode: '500');
+            message: error.message ?? 'Unknown error occurred',
+            statusCode: '500',
+          );
         }
       });
     } on FirebaseException catch (e, stackTrace) {

@@ -9,7 +9,8 @@ import 'package:sync_together/features/chat/domain/entities/message.dart';
 
 /// **Remote Data Source for Chat**
 ///
-/// Handles all Firestore operations related to creating, joining, and syncing watch parties.
+/// Handles all Firestore operations related to
+/// creating, joining, and syncing watch parties.
 abstract class ChatRemoteDataSource {
   /// Sends a new message session.
   ///
@@ -98,7 +99,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<void> sendMessage({required String roomId, required Message message}) async {
+  Future<void> sendMessage({
+    required String roomId,
+    required Message message,
+  }) async {
     try {
       final messageModel = MessageModel(
         id: message.id,
@@ -150,9 +154,18 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<void> deleteMessage({required String roomId, required String messageId}) async {
+  Future<void> deleteMessage({
+    required String roomId,
+    required String messageId,
+  }) async {
     try {
-      await _watchParties.doc(roomId).collection(FirebaseConstants.messagesCollection).doc(messageId).delete();
+      await _watchParties
+          .doc(roomId)
+          .collection(
+            FirebaseConstants.messagesCollection,
+          )
+          .doc(messageId)
+          .delete();
     } on FirebaseException catch (e) {
       throw DeleteMessageException(
         message: e.message ?? 'Unknown error occurred',
@@ -169,7 +182,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<void> editMessage({required String roomId, required String messageId, required String newText}) async {
+  Future<void> editMessage({
+    required String roomId,
+    required String messageId,
+    required String newText,
+  }) async {
     try {
       await firestore
           .collection(FirebaseConstants.watchPartiesCollection)
@@ -193,7 +210,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<List<MessageModel>> fetchMessages({required String roomId, int limit = 20}) async {
+  Future<List<MessageModel>> fetchMessages({
+    required String roomId,
+    int limit = 20,
+  }) async {
     try {
       return await _watchParties
           .doc(roomId)

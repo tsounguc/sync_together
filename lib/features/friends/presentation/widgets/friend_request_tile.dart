@@ -6,7 +6,8 @@ import 'package:sync_together/features/friends/presentation/friends_bloc/friends
 
 /// **FriendRequestTile**
 ///
-/// This widget displays a **pending friend request** with **Accept** and **Reject** buttons.
+/// This widget displays a **pending friend request**
+/// with **Accept** and **Reject** buttons.
 class FriendRequestTile extends StatelessWidget {
   const FriendRequestTile({required this.request, super.key});
 
@@ -20,7 +21,7 @@ class FriendRequestTile extends StatelessWidget {
         leading: const CircleAvatar(
           child: Icon(Icons.person),
         ),
-        title: Text('Request from: ${request.senderName}'), // Placeholder for username
+        title: Text('Request from: ${request.senderName}'),
         subtitle: Text('Sent on: ${DateFormat('MMM d, yyyy').format(
           request.sentAt.toLocal(),
         )}'),

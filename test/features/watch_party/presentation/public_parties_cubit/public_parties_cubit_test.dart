@@ -13,7 +13,10 @@ void main() {
   late PublicPartiesCubit cubit;
   late MockGetPublicWatchParties mockGetPublicWatchParties;
 
-  final testFailure = GetWatchPartyFailure(message: 'Failed to fetch', statusCode: 500);
+  final testFailure = GetWatchPartyFailure(
+    message: 'Failed to fetch',
+    statusCode: 500,
+  );
   final testParties = [
     WatchParty.empty(),
     WatchParty.empty(),
@@ -33,7 +36,9 @@ void main() {
   blocTest<PublicPartiesCubit, WatchPartyListState>(
     'emits [Loading, Loaded] when fetchPublicParties is successful',
     build: () {
-      when(() => mockGetPublicWatchParties()).thenAnswer((_) async => Right(testParties));
+      when(() => mockGetPublicWatchParties()).thenAnswer(
+        (_) async => Right(testParties),
+      );
       return cubit;
     },
     act: (cubit) => cubit.fetchPublicParties(),
@@ -49,7 +54,9 @@ void main() {
   blocTest<PublicPartiesCubit, WatchPartyListState>(
     'emits [Loading, Error] when fetchPublicParties fails',
     build: () {
-      when(() => mockGetPublicWatchParties()).thenAnswer((_) async => Left(testFailure));
+      when(() => mockGetPublicWatchParties()).thenAnswer(
+        (_) async => Left(testFailure),
+      );
       return cubit;
     },
     act: (cubit) => cubit.fetchPublicParties(),

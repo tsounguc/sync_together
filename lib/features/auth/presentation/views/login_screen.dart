@@ -34,9 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _signInWithGoogle(BuildContext context) {
-    context.read<AuthBloc>().add(const SignInWithGoogleEvent());
-  }
+  // void _signInWithGoogle(BuildContext context) {
+  //   context.read<AuthBloc>().add(const SignInWithGoogleEvent());
+  // }
 
   void _signInAnonymously(BuildContext context) {
     context.read<AuthBloc>().add(
@@ -134,32 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 30),
-                            // ElevatedButton.icon(
-                            //   onPressed: () => _signInWithGoogle(context),
-                            //   icon: Image.asset(
-                            //     MediaResources.googleSignIn,
-                            //     height: 40,
-                            //     width: 40,
-                            //   ),
-                            //   label: Text(
-                            //     'Sign in with Google',
-                            //     style: TextStyle(
-                            //       fontSize: 16,
-                            //       color: context.theme.textTheme.bodyMedium?.color,
-                            //     ),
-                            //   ),
-                            //   style: ElevatedButton.styleFrom(
-                            //     // backgroundColor: Colors.white,
-                            //     // foregroundColor: Colors.white,
-                            //     shape: RoundedRectangleBorder(
-                            //       borderRadius: BorderRadius.circular(8),
-                            //     ),
-                            //     padding: const EdgeInsets.symmetric(
-                            //       vertical: 12,
-                            //       horizontal: 16,
-                            //     ),
-                            //   ),
-                            // ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pushReplacementNamed(

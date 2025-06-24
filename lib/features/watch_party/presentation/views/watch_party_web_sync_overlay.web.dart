@@ -1,15 +1,15 @@
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
-import 'package:sync_together/features/chat/presentation/widgets/chat_input_field.dart';
 import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_controls_bar.dart';
+import 'package:web/web.dart' as web;
 
 class WatchPartyWebSyncOverlay extends StatefulWidget {
   const WatchPartyWebSyncOverlay({
@@ -30,7 +30,7 @@ class _WatchPartyWebSyncOverlayState extends State<WatchPartyWebSyncOverlay> {
   bool _popupBlocked = false;
   bool _showParticipants = true;
 
-  html.WindowBase? _streamingWindowRef;
+  web.Window? _streamingWindowRef;
 
   @override
   void initState() {
@@ -44,12 +44,12 @@ class _WatchPartyWebSyncOverlayState extends State<WatchPartyWebSyncOverlay> {
     );
 
     final bloc = context.read<WatchPartySessionBloc>();
-    html.window.onMessage.listen((event) {
+    web.window.onMessage.listen((event) {
       final data = event.data;
-      if (data is String) {
-        debugPrint('Received message from streaming window: $data');
-        // TODO: Handle specific commands
-      }
+      // if (data is String) {
+      debugPrint('Received message from streaming window: $data');
+      // TODO(Web-Sync-Overlay): Handle specific commands
+      // }
     });
     bloc.add(ListenToParticipantsEvent(widget.watchParty.id));
   }
@@ -58,16 +58,16 @@ class _WatchPartyWebSyncOverlayState extends State<WatchPartyWebSyncOverlay> {
     if (_hasLaunched) return;
     _hasLaunched = true;
 
-    final screenWidth = html.window.screen!.available.width;
-    final screenHeight = html.window.screen!.available.height;
+    final screenWidth = web.window.screen.width;
+    final screenHeight = web.window.screen.height;
 
     final overlayWidth = (screenWidth / 3).floor();
     final streamingWidth = (screenWidth * 2 / 3).floor();
     const top = 0;
 
     // Resize this window (main app overlay)
-    html.window.moveTo(const html.Point(0, top));
-    html.window.resizeTo(overlayWidth, screenHeight as int);
+    web.window.moveTo(0, top);
+    web.window.resizeTo(overlayWidth, screenHeight);
 
     // Open streaming window
     final url = widget.watchParty.videoUrl.isNotEmpty ? widget.watchParty.videoUrl : widget.platform.defaultUrl;
@@ -76,7 +76,7 @@ class _WatchPartyWebSyncOverlayState extends State<WatchPartyWebSyncOverlay> {
     final features = 'width=$streamingWidth,height=$screenHeight,'
         'left=$overlayWidth,top=$top';
 
-    final newWindow = html.window.open(uri, '_streamingWindow', features);
+    final newWindow = web.window.open(uri, '_streamingWindow', features);
 
     if (newWindow == null) {
       setState(() {
@@ -97,7 +97,7 @@ class _WatchPartyWebSyncOverlayState extends State<WatchPartyWebSyncOverlay> {
 
   void _sendMessageToStreamingWindow(String message) {
     if (_streamingWindowRef != null) {
-      _streamingWindowRef!.postMessage(message, '*');
+      _streamingWindowRef!.postMessage(message.toJS, '*'.toJS);
     }
   }
 

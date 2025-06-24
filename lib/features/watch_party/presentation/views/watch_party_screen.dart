@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_native_app_mode.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_web_sync_overlay.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_webview.dart';
-import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
 class WatchPartyScreen extends StatefulWidget {
   const WatchPartyScreen({

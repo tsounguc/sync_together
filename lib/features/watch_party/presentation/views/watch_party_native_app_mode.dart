@@ -28,7 +28,9 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
   }
 
   Future<void> _launchStreamingApp() async {
-    final isInstalled = await NativeAppLauncher.isAppInstalled(widget.platform.packageName ?? '');
+    final isInstalled = await NativeAppLauncher.isAppInstalled(
+      widget.platform.packageName ?? '',
+    );
 
     final package = widget.platform.packageName ?? '';
     final deepLink = widget.platform.deeplinkUrl ?? '';
@@ -39,8 +41,13 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
     if (!isGranted) {
       final granted = await FlutterOverlayWindow.requestPermission() ?? false;
       if (!granted) {
-        CoreUtils.showSnackBar(context, 'Overlay permission not granted.');
-        Navigator.of(context).pop();
+        if (mounted) {
+          CoreUtils.showSnackBar(
+            context,
+            'Overlay permission not granted.',
+          );
+        }
+        if (mounted) Navigator.of(context).pop();
         return;
       }
     }
@@ -57,8 +64,8 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
     final overlayIsActive = await FlutterOverlayWindow.isActive();
 
     if (!overlayIsActive) {
-      CoreUtils.showSnackBar(context, 'Overlay failed to open.');
-      Navigator.of(context).pop();
+      if (mounted) CoreUtils.showSnackBar(context, 'Overlay failed to open.');
+      if (mounted) Navigator.of(context).pop();
       return;
     }
 
@@ -78,11 +85,16 @@ class _WatchPartyNativeAppModeState extends State<WatchPartyNativeAppMode> {
           debugPrint('launchUri: $storeUrl');
         } else {
           debugPrint('launchUri not working: $storeUrl');
-          CoreUtils.showSnackBar(context, 'Cannot open app or store.');
+          if (mounted) {
+            CoreUtils.showSnackBar(
+              context,
+              'Cannot open app or store.',
+            );
+          }
         }
       }
     } catch (e) {
-      CoreUtils.showSnackBar(context, 'Error launching app: $e');
+      if (mounted) CoreUtils.showSnackBar(context, 'Error launching app: $e');
     }
   }
 

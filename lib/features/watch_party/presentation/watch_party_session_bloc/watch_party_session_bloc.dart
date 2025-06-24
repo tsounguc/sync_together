@@ -27,8 +27,7 @@ part 'watch_party_session_event.dart';
 
 part 'watch_party_session_state.dart';
 
-class WatchPartySessionBloc
-    extends Bloc<WatchPartyEvent, WatchPartySessionState> {
+class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState> {
   WatchPartySessionBloc({
     required this.createWatchParty,
     required this.joinWatchParty,
@@ -220,7 +219,7 @@ class WatchPartySessionBloc
           },
         );
       },
-      onError: (error) {
+      onError: (dynamic error) {
         add(_ParticipantsErrorReceived(error.toString()));
       },
       onDone: () => _participantsSubscription?.cancel(),
@@ -320,8 +319,8 @@ class WatchPartySessionBloc
           (failure) {
             emit(WatchPartyError(failure.message));
             subscription?.cancel();
-            debugPrint(
-                '[WatchPartySessionBloc] Firestore sync failure: ${failure.message}');
+            debugPrint('[WatchPartySessionBloc] '
+                'Firestore sync failure: ${failure.message}');
           },
           (data) {
             add(_SyncedDataReceived(data));
@@ -353,8 +352,8 @@ class WatchPartySessionBloc
           (failure) {
             emit(WatchPartyError(failure.message));
             partyExistenceSubscription?.cancel();
-            debugPrint(
-                '[WatchPartySessionBloc] Firestore sync failure: ${failure.message}');
+            debugPrint('[WatchPartySessionBloc] '
+                'Firestore sync failure: ${failure.message}');
           },
           (existence) {
             if (existence == false) {
