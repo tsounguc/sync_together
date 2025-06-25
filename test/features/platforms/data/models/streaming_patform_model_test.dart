@@ -4,7 +4,7 @@ import 'package:sync_together/features/platforms/data/models/streaming_platform_
 void main() {
   const testModel = StreamingPlatformModel(
     name: 'YouTube',
-    logoPath: 'assets/logos/yt_logo_dark.png',
+    logoPath: 'assets/logos/yt_logo_light.png',
     logoDarkPath: 'assets/logos/yt_logo_dark.png',
     isDRMProtected: false,
     defaultUrl: 'https://www.youtube.com',
@@ -20,9 +20,13 @@ void main() {
 
   final testMap = {
     'name': 'YouTube',
-    'logoPath': 'assets/logos/yt_logo_dark.png',
+    'logoPath': 'assets/logos/yt_logo_light.png',
+    'logoDarkPath': 'assets/logos/yt_logo_dark.png',
     'isDRMProtected': false,
     'defaultUrl': 'https://www.youtube.com',
+    'playScript': "document.querySelector('video')?.play()",
+    'pauseScript': "document.querySelector('video')?.pause()",
+    'currentTimeScript': "document.querySelector('video')?.currentTime",
     'packageName': 'com.google.android.youtube',
     'deeplinkUrl': 'vnd.youtube://',
     'appstoreUrl': 'https://apps.apple.com/app/youtube/id544007664',

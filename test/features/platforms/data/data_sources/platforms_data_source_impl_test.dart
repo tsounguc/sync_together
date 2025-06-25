@@ -21,7 +21,7 @@ void main() {
         "pauseScript": "document.querySelector('video')?.pause()",
         "currentTimeScript": "document.querySelector('video')?.currentTime",
         "packageName": "com.google.android.youtube",
-        "deepLinkUrl": "vnd.youtube://",
+        "deeplinkUrl": "vnd.youtube://",
         "appstoreUrl": "",
         "playStoreUrl": ""
       }
@@ -30,8 +30,8 @@ void main() {
 
   const testPlatform = StreamingPlatformModel(
     name: 'YouTube',
-    logoPath: 'assets/logos/yt_logo_dark.png',
-    logoDarkPath: 'assets/logos/yt_logo_light.png',
+    logoPath: 'assets/logos/yt_logo_light.png',
+    logoDarkPath: 'assets/logos/yt_logo_dark.png',
     isDRMProtected: false,
     defaultUrl: 'https://www.youtube.com',
     playScript: "document.querySelector('video')?.play()",
@@ -39,9 +39,8 @@ void main() {
     currentTimeScript: "document.querySelector('video')?.currentTime",
     packageName: 'com.google.android.youtube',
     deeplinkUrl: 'vnd.youtube://',
-    appstoreUrl: 'https://apps.apple.com/app/youtube/id544007664',
-    playStoreUrl:
-        'https://play.google.com/store/apps/details?id=com.google.android.youtube',
+    appstoreUrl: '',
+    playStoreUrl: '',
   );
 
   setUp(() {

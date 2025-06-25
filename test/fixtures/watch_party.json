@@ -5,8 +5,12 @@
   "platform": {
     "name": "_empty.name",
     "logoPath": "_empty.logoPath",
+    "logoDarkPath": "_empty.logoDarkPath",
     "isDRMProtected": false,
     "defaultUrl": "_empty.defaultUrl",
+    "playScript": "_empty.playScript",
+    "pauseScript": "_empty.pauseScript",
+    "currentTimeScript": "_empty.currentTimeScript",
     "packageName": null,
     "deeplinkUrl": null,
     "appstoreUrl": null,

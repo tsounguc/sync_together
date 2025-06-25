@@ -29,7 +29,7 @@ class StreamingPlatformModel extends StreamingPlatform {
       : this(
           name: '_empty.name',
           logoPath: '_empty.logoPath',
-          logoDarkPath: '_emptylogoDarkPath',
+          logoDarkPath: '_empty.logoDarkPath',
           isDRMProtected: false,
           defaultUrl: '_empty.defaultUrl',
           playScript: '_empty.playScript',
