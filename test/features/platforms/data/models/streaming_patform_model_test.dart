@@ -1,17 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sync_together/features/platforms/data/models/streaming_platform_model.dart';
 
-
 void main() {
   const testModel = StreamingPlatformModel(
     name: 'YouTube',
     logoPath: 'assets/logos/yt_logo_dark.png',
+    logoDarkPath: 'assets/logos/yt_logo_dark.png',
     isDRMProtected: false,
     defaultUrl: 'https://www.youtube.com',
+    playScript: "document.querySelector('video')?.play()",
+    pauseScript: "document.querySelector('video')?.pause()",
+    currentTimeScript: "document.querySelector('video')?.currentTime",
     packageName: 'com.google.android.youtube',
     deeplinkUrl: 'vnd.youtube://',
     appstoreUrl: 'https://apps.apple.com/app/youtube/id544007664',
-    playStoreUrl: 'https://play.google.com/store/apps/details?id=com.google.android.youtube',
+    playStoreUrl:
+        'https://play.google.com/store/apps/details?id=com.google.android.youtube',
   );
 
   final testMap = {
@@ -22,7 +26,8 @@ void main() {
     'packageName': 'com.google.android.youtube',
     'deeplinkUrl': 'vnd.youtube://',
     'appstoreUrl': 'https://apps.apple.com/app/youtube/id544007664',
-    'playStoreUrl': 'https://play.google.com/store/apps/details?id=com.google.android.youtube',
+    'playStoreUrl':
+        'https://play.google.com/store/apps/details?id=com.google.android.youtube',
   };
 
   test(

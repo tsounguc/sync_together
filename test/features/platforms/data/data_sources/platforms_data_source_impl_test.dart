@@ -13,13 +13,17 @@ void main() {
     [
       {
         "name": "YouTube",
-        "logoPath": "assets/logos/yt_logo_dark.png",
+        "logoPath": "assets/logos/yt_logo_light.png",
+        "logoDarkPath": "assets/logos/yt_logo_dark.png",
         "isDRMProtected": false,
         "defaultUrl": "https://www.youtube.com",
+        "playScript": "document.querySelector('video')?.play()",
+        "pauseScript": "document.querySelector('video')?.pause()",
+        "currentTimeScript": "document.querySelector('video')?.currentTime",
         "packageName": "com.google.android.youtube",
-        "deeplinkUrl": "vnd.youtube://",
-        "appstoreUrl": "https://apps.apple.com/app/youtube/id544007664",
-        "playStoreUrl": "https://play.google.com/store/apps/details?id=com.google.android.youtube"
+        "deepLinkUrl": "vnd.youtube://",
+        "appstoreUrl": "",
+        "playStoreUrl": ""
       }
     ]
   ''';
@@ -27,12 +31,17 @@ void main() {
   const testPlatform = StreamingPlatformModel(
     name: 'YouTube',
     logoPath: 'assets/logos/yt_logo_dark.png',
+    logoDarkPath: 'assets/logos/yt_logo_light.png',
     isDRMProtected: false,
     defaultUrl: 'https://www.youtube.com',
+    playScript: "document.querySelector('video')?.play()",
+    pauseScript: "document.querySelector('video')?.pause()",
+    currentTimeScript: "document.querySelector('video')?.currentTime",
     packageName: 'com.google.android.youtube',
     deeplinkUrl: 'vnd.youtube://',
     appstoreUrl: 'https://apps.apple.com/app/youtube/id544007664',
-    playStoreUrl: 'https://play.google.com/store/apps/details?id=com.google.android.youtube',
+    playStoreUrl:
+        'https://play.google.com/store/apps/details?id=com.google.android.youtube',
   );
 
   setUp(() {
@@ -50,7 +59,8 @@ void main() {
       const assetPath = MediaResources.platFormsData;
       final assetBundle = rootBundle;
 
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMessageHandler(
         'flutter/assets',
         (message) async {
           final key = utf8.decoder.convert(message!.buffer.asUint8List());

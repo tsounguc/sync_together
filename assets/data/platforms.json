@@ -2,8 +2,12 @@
   {
     "name": "Netflix",
     "logoPath": "assets/logos/netflix_logo.png",
+    "logoDarkPath": "assets/logos/netflix_logo.png",
     "isDRMProtected": true,
     "defaultUrl": "https://www.netflix.com",
+    "playScript": "",
+    "pauseScript": "",
+    "currentTimeScript": "",
     "packageName": "com.netflix.ninja",
     "deepLinkUrl": "nflx://www.netflix.com",
     "appstoreUrl": "https://apps.apple.com/us/app/netflix/id363590051",
@@ -12,8 +16,12 @@
   {
     "name": "Hulu",
     "logoPath": "assets/logos/hulu_green_logo.png",
+    "logoDarkPath": "assets/logos/hulu_green_logo.png",
     "isDRMProtected": true,
     "defaultUrl": "https://www.hulu.com",
+    "playScript": "",
+    "pauseScript": "",
+    "currentTimeScript": "",
     "packageName": "com.hulu.plus",
     "deepLinkUrl": "nflx://www.hulu.com",
     "appstoreUrl": "https://apps.apple.com/us/app/hulu-stream-tv-shows-movies/id376510438",
@@ -22,8 +30,12 @@
   {
     "name": "Disney+",
     "logoPath": "assets/logos/disney_logo_black.png",
+    "logoDarkPath": "assets/logos/disney_logo.png",
     "isDRMProtected": true,
     "defaultUrl": "https://www.disneyplus.com/",
+    "playScript": "",
+    "pauseScript": "",
+    "currentTimeScript": "",
     "packageName": "com.disney.disneyplus",
     "deepLinkUrl": "nflx://www.disneyplus.com",
     "appstoreUrl": "https://apps.apple.com/us/app/disney/id1446075923",
@@ -31,14 +43,16 @@
   },
   {
     "name": "YouTube",
-    "logoPath": "assets/logos/yt_logo_dark.png",
+    "logoPath": "assets/logos/yt_logo_light.png",
+    "logoDarkPath": "assets/logos/yt_logo_dark.png",
     "isDRMProtected": false,
     "defaultUrl": "https://www.youtube.com",
+    "playScript": "document.querySelector('video')?.play()",
+    "pauseScript": "document.querySelector('video')?.pause()",
+    "currentTimeScript": "document.querySelector('video')?.currentTime",
     "packageName": "com.google.android.youtube",
     "deepLinkUrl": "vnd.youtube://",
     "appstoreUrl": "",
     "playStoreUrl": ""
-
-
   }
 ]

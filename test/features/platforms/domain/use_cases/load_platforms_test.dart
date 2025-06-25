@@ -21,14 +21,22 @@ void main() {
     const StreamingPlatform(
       name: 'Netflix',
       logoPath: 'assets/logos/netflix_logo.png',
+      logoDarkPath: 'assets/logos/netflix_logo.png',
       isDRMProtected: true,
       defaultUrl: 'https://www.netflix.com',
+      playScript: '',
+      pauseScript: '',
+      currentTimeScript: '',
     ),
     const StreamingPlatform(
       name: 'YouTube',
       logoPath: 'assets/logos/yt_logo_dark.png',
+      logoDarkPath: 'assets/logos/yt_logo_light.png',
       isDRMProtected: false,
       defaultUrl: 'https://www.youtube.com',
+      playScript: "document.querySelector('video')?.play()",
+      pauseScript: "document.querySelector('video')?.pause()",
+      currentTimeScript: "document.querySelector('video')?.currentTime",
     ),
   ];
 

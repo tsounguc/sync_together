@@ -6,6 +6,7 @@ import 'package:sync_together/core/enums/sync_status.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
+import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
@@ -45,9 +46,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   bool _showSyncBadge = true;
   Timer? _syncBadgeTimer;
 
+  late final StreamingPlatform streamingPlatform;
+
   @override
   void initState() {
     super.initState();
+    streamingPlatform = widget.watchParty.platform;
     _initializeWebView();
 
     if (_isHost) {
@@ -86,15 +90,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             ? widget.watchParty.videoUrl
             : 'https://${widget.watchParty.videoUrl}';
 
-    late final PlatformWebViewControllerCreationParams params;
-    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-      params = WebKitWebViewControllerCreationParams(
-        allowsInlineMediaPlayback: true,
-        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
-      );
-    } else {
-      params = const PlatformWebViewControllerCreationParams();
-    }
+    late final params = WebViewPlatform.instance is WebKitWebViewPlatform
+        ? WebKitWebViewControllerCreationParams(
+            allowsInlineMediaPlayback: true,
+            mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+          )
+        : const PlatformWebViewControllerCreationParams();
 
     final controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -124,13 +125,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         debugPrint('has video: $hasVideo');
 
         if (hasVideo.toString() != 'true') return;
-        final result = await _webViewController?.runJavaScriptReturningResult(
-          "document.querySelector('video')?.currentTime",
-        );
+
+        final result = await _webViewController
+            ?.runJavaScriptReturningResult(streamingPlatform.currentTimeScript);
         final position = double.tryParse(result.toString()) ?? 0;
 
-        final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
-          "document.querySelector('video')?.paused === false",
+        final isPlayingResult =
+            await _webViewController?.runJavaScriptReturningResult(
+          streamingPlatform.pauseScript
+              .replaceAll('.pause()', '.paused === false'),
         );
         final isPlaying = isPlayingResult.toString() == 'true';
 
@@ -155,39 +158,26 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   Future<void> _seekToPosition(double seconds) async {
-    final jsCommand = """
-      var video = document.querySelector('video');
-      if (video) {
-        video.currentTime = $seconds;
-      }
-    """;
-
-    try {
-      await _webViewController?.runJavaScript(jsCommand);
-    } catch (e) {
-      debugPrint('Error running JavaScript to seek video: $e');
-    }
+    final jsCommand = "document.querySelector('video').currentTime = $seconds;";
+    await _webViewController?.runJavaScript(jsCommand);
   }
 
   Future<void> _playVideo() async {
-    try {
-      await _webViewController?.runJavaScript("""
-          var video = document.querySelector('video');
-          if (video) {
-            video.muted = false;
-            video.volume = 1.0;
-            video.play();
-          }
-          """);
-    } catch (e) {
-      debugPrint('Error running JS to play video: $e');
-    }
+    // await _webViewController?.runJavaScript("""
+    //     var video = document.querySelector('video');
+    //     if (video) {
+    //       video.muted = false;
+    //       video.volume = 1.0;
+    //       video.play();
+    //     }
+    //     """);
+    await _webViewController?.runJavaScript(streamingPlatform.playScript);
     _startAutoSyncLoop();
   }
 
   Future<void> _pauseVideo() async {
     try {
-      await _webViewController?.runJavaScript("""document.querySelector('video')?.pause();""");
+      await _webViewController?.runJavaScript(streamingPlatform.pauseScript);
     } catch (e) {
       debugPrint('Error running JS to pause video: $e');
     }
@@ -219,25 +209,19 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     const maxAttempts = 10;
     for (var i = 0; i < maxAttempts; i++) {
       try {
-        final result = await _webViewController?.runJavaScriptReturningResult(
+        final hasVideo = await _webViewController?.runJavaScriptReturningResult(
           "document.querySelector('video') !== null",
         );
-        if (result.toString() == 'true') {
+        if (hasVideo.toString() == 'true') {
           await _disableGuestVideoControls();
           await _seekToPosition(_latestPlaybackPosition!);
 
-          await _webViewController?.runJavaScript("""
-            var video = document.querySelector('video');
-            if (video) {
-              video.muted = false;
-              video.volume = 1.0;
-            }
-          """);
-
-          if (_latestIsPlaying == true) {
+          if (_latestIsPlaying) {
             await _playVideo();
-            final confirmedPlay = await _webViewController?.runJavaScriptReturningResult(
-              "document.querySelector('video')?.paused === false",
+            final confirmedPlay =
+                await _webViewController?.runJavaScriptReturningResult(
+              streamingPlatform.pauseScript
+                  .replaceAll('.pause()', '.paused === false'),
             );
             if (confirmedPlay.toString() == 'true') {
               _hasInitialSynced = true;
@@ -245,12 +229,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             }
           } else {
             await _pauseVideo();
-            final confirmedPause = await _webViewController?.runJavaScriptReturningResult(
-              "document.querySelector('video')?.paused === true",
+            final confirmedPause =
+                await _webViewController?.runJavaScriptReturningResult(
+              streamingPlatform.pauseScript
+                  .replaceAll('.pause()', '.paused === true'),
             );
 
             if (confirmedPause.toString() == 'true') {
               _hasInitialSynced = true;
+              return;
             }
           }
         }
@@ -408,28 +395,31 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
 
           try {
-            final hasVideo = await _webViewController?.runJavaScriptReturningResult(
+            final hasVideo =
+                await _webViewController?.runJavaScriptReturningResult(
               "document.querySelector('video') !== null",
             );
 
             if (hasVideo.toString() != 'true') return;
 
-            final result = await _webViewController?.runJavaScriptReturningResult(
-              "document.querySelector('video')?.currentTime",
-            );
+            final result =
+                await _webViewController?.runJavaScriptReturningResult(
+                    streamingPlatform.currentTimeScript);
             final localPosition = double.tryParse(result.toString()) ?? 0;
 
             final drift = (state.playbackPosition - localPosition).abs();
 
             // Update sync badge status (for guest only)
-            final newStatus = drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
+            final newStatus =
+                drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
             if (newStatus != _syncStatus) {
               _updateSyncBadge(newStatus);
             }
 
             // Do not sync if already synced
             if (drift < 1.5) {
-              final playState = await _webViewController?.runJavaScriptReturningResult(
+              final playState =
+                  await _webViewController?.runJavaScriptReturningResult(
                 "document.querySelector('video')?.paused === false",
               );
               final isActuallyPlaying = playState.toString() == 'true';
@@ -449,8 +439,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             await _seekToPosition(state.playbackPosition);
 
             // Ensure play/pause is correct after seeking
-            final playState = await _webViewController?.runJavaScriptReturningResult(
-              "document.querySelector('video')?.paused === false",
+            final playState =
+                await _webViewController?.runJavaScriptReturningResult(
+              streamingPlatform.pauseScript.replaceAll(
+                '.pause()',
+                '.paused === false',
+              ),
             );
             final isActuallyPlaying = playState.toString() == 'true';
 

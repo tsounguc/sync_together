@@ -3,7 +3,9 @@ import 'package:sync_together/features/platforms/domain/entities/streaming_platf
 
 class PlatformCard extends StatelessWidget {
   const PlatformCard({
-    required this.platform, required this.onTap, super.key,
+    required this.platform,
+    required this.onTap,
+    super.key,
   });
 
   final StreamingPlatform platform;
@@ -21,7 +23,15 @@ class PlatformCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                platform.logoPath,
+                !platform.logoPath.contains(
+                          'disney',
+                        ) &&
+                        Theme.of(
+                              context,
+                            ).brightness ==
+                            Brightness.dark
+                    ? platform.logoDarkPath
+                    : platform.logoPath,
                 height: 50,
                 color: platform.logoPath.contains(
                           'disney',

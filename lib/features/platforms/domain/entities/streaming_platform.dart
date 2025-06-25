@@ -5,8 +5,12 @@ class StreamingPlatform extends Equatable {
   const StreamingPlatform({
     required this.name,
     required this.logoPath,
+    required this.logoDarkPath,
     required this.isDRMProtected,
     required this.defaultUrl,
+    required this.playScript,
+    required this.pauseScript,
+    required this.currentTimeScript,
     this.packageName,
     this.deeplinkUrl,
     this.appstoreUrl,
@@ -20,8 +24,12 @@ class StreamingPlatform extends Equatable {
       : this(
           name: '',
           logoPath: '',
+          logoDarkPath: '',
           isDRMProtected: false,
           defaultUrl: '',
+          playScript: '',
+          pauseScript: '',
+          currentTimeScript: '',
         );
 
   /// The display name of the platform (e.g., Netflix, Hulu).
@@ -30,11 +38,20 @@ class StreamingPlatform extends Equatable {
   /// The asset path for the platform's logo image.
   final String logoPath;
 
+  /// The asset path for the platform's darkmode logo image.
+  final String logoDarkPath;
+
   /// Whether the platform uses DRM protection (e.g., Netflix, Disney+).
   final bool isDRMProtected;
 
   /// Default fallback URL for accessing the platform via browser.
   final String defaultUrl;
+
+  final String playScript;
+
+  final String pauseScript;
+
+  final String currentTimeScript;
 
   /// Android package name (used to check installation or launch the app).
   final String? packageName;
