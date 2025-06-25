@@ -88,7 +88,15 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             Row(
               children: [
                 Image.asset(
-                  widget.selectedPlatform.logoPath,
+                  !widget.selectedPlatform.logoPath.contains(
+                            'disney',
+                          ) &&
+                          Theme.of(
+                                context,
+                              ).brightness ==
+                              Brightness.dark
+                      ? widget.selectedPlatform.logoDarkPath
+                      : widget.selectedPlatform.logoPath,
                   width: 32,
                   height: 32,
                   color: widget.selectedPlatform.logoPath.contains('disney') &&

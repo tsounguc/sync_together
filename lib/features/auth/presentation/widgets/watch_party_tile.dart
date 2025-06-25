@@ -26,7 +26,15 @@ class WatchPartyTile extends StatelessWidget {
       child: Row(
         children: [
           Image.asset(
-            party.platform.logoPath,
+            !party.platform.logoPath.contains(
+                      'disney',
+                    ) &&
+                    Theme.of(
+                          context,
+                        ).brightness ==
+                        Brightness.dark
+                ? party.platform.logoDarkPath
+                : party.platform.logoPath,
             width: 40,
             height: 40,
           ),

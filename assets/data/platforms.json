@@ -54,5 +54,19 @@
     "deepLinkUrl": "vnd.youtube://",
     "appstoreUrl": "",
     "playStoreUrl": ""
+  },
+  {
+    "name": "Vimeo",
+    "logoPath": "assets/logos/vimeo_wordmark_black.png",
+    "logoDarkPath": "assets/logos/vimeo_wordmark_white.png",
+    "isDRMProtected": false,
+    "defaultUrl": "https://vimeo.com",
+    "playScript": "document.querySelector('video')?.play()",
+    "pauseScript": "document.querySelector('video')?.pause()",
+    "currentTimeScript": "document.querySelector('video')?.currentTime",
+    "packageName": "com.vimeo.android.videoapp",
+    "deepLinkUrl": "vimeo://app",
+    "appstoreUrl": "https://apps.apple.com/us/app/vimeo/id425194759",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.vimeo.android.videoapp"
   }
 ]
