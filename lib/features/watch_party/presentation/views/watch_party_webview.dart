@@ -253,7 +253,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           });
         },
         onPageStarted: (_) => setState(() => loadingPercentage = 0),
-        onPageFinished: (_) async {
+        onPageFinished: (url) async {
           setState(() => loadingPercentage = 100);
           await _attemptInitialGuestSync();
           if (!_isHost) await _disableGuestVideoControls();

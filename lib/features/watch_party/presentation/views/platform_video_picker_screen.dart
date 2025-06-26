@@ -21,7 +21,8 @@ class PlatformVideoPickerScreen extends StatefulWidget {
   static const String id = '/video-picker';
 
   @override
-  State<PlatformVideoPickerScreen> createState() => _PlatformVideoPickerScreenState();
+  State<PlatformVideoPickerScreen> createState() =>
+      _PlatformVideoPickerScreenState();
 }
 
 class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
@@ -42,7 +43,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
             rawUrl,
             widget.platform.name,
           );
-
+          debugPrint('[PlatformVideoPicker] Captured URL: $rawUrl');
           bloc.add(
             UpdateVideoUrlEvent(
               partyId: widget.watchParty.id,
@@ -53,7 +54,28 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
       )
       ..setNavigationDelegate(
         NavigationDelegate(
+          onNavigationRequest: (NavigationRequest request) {
+            final url = request.url;
+            if (widget.platform.name.toLowerCase() == 'vimeo') {
+              final vimeoId = VideoUrlHelper.extractVimeoVideoId(url);
+              if (vimeoId.isNotEmpty) {
+                final embedUrl =
+                    VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
+                debugPrint(
+                    '[PlatformVideoPicker] Intercepted Vimeo ID: $vimeoId');
+                context.read<WatchPartySessionBloc>().add(
+                      UpdateVideoUrlEvent(
+                        partyId: widget.watchParty.id,
+                        newUrl: embedUrl,
+                      ),
+                    );
+                return NavigationDecision.prevent;
+              }
+            }
+            return NavigationDecision.navigate;
+          },
           onPageFinished: (url) {
+            debugPrint(url);
             if (widget.platform.name.toLowerCase() == 'youtube') {
               _webViewController?.runJavaScript('''
               (function() {
@@ -69,6 +91,22 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
               })();
             ''');
             }
+            // else if (widget.platform.name.toLowerCase() == 'vimeo') {
+            //   _webViewController?.runJavaScript(r'''
+            //   (function() {
+            //     let lastUrl = location.href;
+            //     new MutationObserver(() => {
+            //       const currentUrl = location.href;
+            //       const isVimeoVideo = /^https?:\\/\\/vimeo\\.com\\/\\d+$/.test(currentUrl);
+            //       if (currentUrl !== lastUrl && isVimeoVideo) {
+            //         lastUrl = currentUrl;
+            //         window.Flutter.postMessage(currentUrl);
+            //         history.back();
+            //       }
+            //     }).observe(document.body, { childList: true, subtree: true });
+            //   })();
+            // ''');
+            // }
           },
         ),
       )

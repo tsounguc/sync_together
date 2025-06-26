@@ -10,7 +10,7 @@ class VideoUrlHelper {
 
   static String extractVimeoVideoId(String url) {
     final regExp = RegExp(
-      r'vimeo\.com/(?:video/)?(\d+)',
+      r'vimeo\.com/(?:.*?/)?(\d+)',
       caseSensitive: false,
     );
     final match = regExp.firstMatch(url);
