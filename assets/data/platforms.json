@@ -60,7 +60,7 @@
     "logoPath": "assets/logos/vimeo_wordmark_black.png",
     "logoDarkPath": "assets/logos/vimeo_wordmark_white.png",
     "isDRMProtected": false,
-    "defaultUrl": "https://vimeo.com",
+    "defaultUrl": "https://vimeo.com/watch/all",
     "playScript": "document.querySelector('video')?.play()",
     "pauseScript": "document.querySelector('video')?.pause()",
     "currentTimeScript": "document.querySelector('video')?.currentTime",
