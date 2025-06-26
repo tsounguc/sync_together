@@ -117,6 +117,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   void _startAutoSyncLoop() {
     _playbackSyncTimer?.cancel();
     _playbackSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      if (!mounted) return;
       try {
         final hasVideo = await _webViewController?.runJavaScriptReturningResult(
           "document.querySelector('video') !== null",
@@ -254,6 +255,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         },
         onPageStarted: (_) => setState(() => loadingPercentage = 0),
         onPageFinished: (url) async {
+          if (!mounted) return;
           setState(() => loadingPercentage = 100);
           await _attemptInitialGuestSync();
           if (!_isHost) await _disableGuestVideoControls();
@@ -308,7 +310,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   void _updateSyncBadge(SyncStatus status) {
     if (_isHost || status == _syncStatus) return;
-
+    if (!mounted) return;
     setState(() {
       _syncStatus = status;
       _showSyncBadge = true;
