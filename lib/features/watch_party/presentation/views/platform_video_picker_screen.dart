@@ -71,6 +71,22 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                     );
                 return NavigationDecision.prevent;
               }
+            } else if (widget.platform.name.toLowerCase() == 'dailymotion') {
+              final dailymotionId =
+                  VideoUrlHelper.extractDailymotionVideoId(url);
+              if (dailymotionId.isNotEmpty) {
+                final embedUrl =
+                    VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
+                debugPrint(
+                    '[PlatformVideoPicker] Intercepted Dailymotion ID: $dailymotionId');
+                context.read<WatchPartySessionBloc>().add(
+                      UpdateVideoUrlEvent(
+                        partyId: widget.watchParty.id,
+                        newUrl: embedUrl,
+                      ),
+                    );
+                return NavigationDecision.prevent;
+              }
             }
             return NavigationDecision.navigate;
           },
@@ -91,22 +107,6 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
               })();
             ''');
             }
-            // else if (widget.platform.name.toLowerCase() == 'vimeo') {
-            //   _webViewController?.runJavaScript(r'''
-            //   (function() {
-            //     let lastUrl = location.href;
-            //     new MutationObserver(() => {
-            //       const currentUrl = location.href;
-            //       const isVimeoVideo = /^https?:\\/\\/vimeo\\.com\\/\\d+$/.test(currentUrl);
-            //       if (currentUrl !== lastUrl && isVimeoVideo) {
-            //         lastUrl = currentUrl;
-            //         window.Flutter.postMessage(currentUrl);
-            //         history.back();
-            //       }
-            //     }).observe(document.body, { childList: true, subtree: true });
-            //   })();
-            // ''');
-            // }
           },
         ),
       )

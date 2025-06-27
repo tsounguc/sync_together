@@ -17,6 +17,12 @@ class VideoUrlHelper {
     return match?.group(1) ?? '';
   }
 
+  static String extractDailymotionVideoId(String url) {
+    final regExp = RegExp(r'dailymotion\.com\/video\/([^_?&#/]+)');
+    final match = regExp.firstMatch(url);
+    return match?.group(1) ?? '';
+  }
+
   static String getEmbedUrl(String url, String platformName) {
     if (platformName.toLowerCase().contains('youtube')) {
       final id = extractYoutubeVideoId(url);
@@ -24,6 +30,9 @@ class VideoUrlHelper {
     } else if (platformName.toLowerCase().contains('vimeo')) {
       final id = extractVimeoVideoId(url);
       return 'https://player.vimeo.com/video/$id';
+    } else if (platformName.toLowerCase().contains('dailymotion')) {
+      final id = extractDailymotionVideoId(url);
+      return 'https://www.dailymotion.com/embed/video/$id';
     }
 
     // fallback: return original if no match
