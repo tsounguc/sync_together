@@ -127,14 +127,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
         if (hasVideo.toString() != 'true') return;
 
-        final result = await _webViewController
-            ?.runJavaScriptReturningResult(streamingPlatform.currentTimeScript);
+        final result = await _webViewController?.runJavaScriptReturningResult(streamingPlatform.currentTimeScript);
         final position = double.tryParse(result.toString()) ?? 0;
 
-        final isPlayingResult =
-            await _webViewController?.runJavaScriptReturningResult(
-          streamingPlatform.pauseScript
-              .replaceAll('.pause()', '.paused === false'),
+        final isPlayingResult = await _webViewController?.runJavaScriptReturningResult(
+          streamingPlatform.pauseScript.replaceAll('.pause()', '.paused === false'),
         );
         final isPlaying = isPlayingResult.toString() == 'true';
 
@@ -213,38 +210,50 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         final hasVideo = await _webViewController?.runJavaScriptReturningResult(
           "document.querySelector('video') !== null",
         );
-        if (hasVideo.toString() == 'true') {
-          await _disableGuestVideoControls();
-          await _seekToPosition(_latestPlaybackPosition!);
+        if (hasVideo.toString() != 'true') {
+          debugPrint('[GuestSync] No video tag found on attempt $i');
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+          continue;
+        }
 
-          if (_latestIsPlaying) {
-            await _playVideo();
-            final confirmedPlay =
-                await _webViewController?.runJavaScriptReturningResult(
-              streamingPlatform.pauseScript
-                  .replaceAll('.pause()', '.paused === false'),
-            );
-            if (confirmedPlay.toString() == 'true') {
-              _hasInitialSynced = true;
-              return;
-            }
-          } else {
-            await _pauseVideo();
-            final confirmedPause =
-                await _webViewController?.runJavaScriptReturningResult(
-              streamingPlatform.pauseScript
-                  .replaceAll('.pause()', '.paused === true'),
-            );
+        await _disableGuestVideoControls();
+        await _seekToPosition(_latestPlaybackPosition!);
 
-            if (confirmedPause.toString() == 'true') {
-              _hasInitialSynced = true;
-              return;
-            }
+        final confirmedPause = await _webViewController?.runJavaScriptReturningResult(
+          streamingPlatform.pauseScript.replaceAll('.pause()', '.paused === true'),
+        );
+
+        if (_latestIsPlaying) {
+          if (_latestPlaybackPosition! > 0) {
+            await _seekToPosition(_latestPlaybackPosition!);
+          }
+
+          await _playVideo();
+          final confirmedPlay = await _webViewController?.runJavaScriptReturningResult(
+            streamingPlatform.pauseScript.replaceAll('.pause()', '.paused === false'),
+          );
+          if (confirmedPlay.toString() == 'true') {
+            _hasInitialSynced = true;
+            debugPrint('[GuestSync] Initial sync successful (playing)');
+            return;
+          }
+        } else {
+          if (_latestPlaybackPosition! > 0) {
+            await _seekToPosition(_latestPlaybackPosition!);
+          }
+          await _pauseVideo();
+          if (confirmedPause.toString() == 'true') {
+            _hasInitialSynced = true;
+            debugPrint('[GuestSync] Initial sync successful (paused)');
+            return;
           }
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('[GuestSync] Error syncing guest: $e');
+      }
       await Future<void>.delayed(const Duration(milliseconds: 300));
     }
+    debugPrint('[Guestsync] Initial Sync failied after $maxAttempts attempts');
   }
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
@@ -397,31 +406,27 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
 
           try {
-            final hasVideo =
-                await _webViewController?.runJavaScriptReturningResult(
+            final hasVideo = await _webViewController?.runJavaScriptReturningResult(
               "document.querySelector('video') !== null",
             );
 
             if (hasVideo.toString() != 'true') return;
 
             final result =
-                await _webViewController?.runJavaScriptReturningResult(
-                    streamingPlatform.currentTimeScript);
+                await _webViewController?.runJavaScriptReturningResult(streamingPlatform.currentTimeScript);
             final localPosition = double.tryParse(result.toString()) ?? 0;
 
             final drift = (state.playbackPosition - localPosition).abs();
 
             // Update sync badge status (for guest only)
-            final newStatus =
-                drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
+            final newStatus = drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
             if (newStatus != _syncStatus) {
               _updateSyncBadge(newStatus);
             }
 
             // Do not sync if already synced
             if (drift < 1.5) {
-              final playState =
-                  await _webViewController?.runJavaScriptReturningResult(
+              final playState = await _webViewController?.runJavaScriptReturningResult(
                 "document.querySelector('video')?.paused === false",
               );
               final isActuallyPlaying = playState.toString() == 'true';
@@ -441,8 +446,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             await _seekToPosition(state.playbackPosition);
 
             // Ensure play/pause is correct after seeking
-            final playState =
-                await _webViewController?.runJavaScriptReturningResult(
+            final playState = await _webViewController?.runJavaScriptReturningResult(
               streamingPlatform.pauseScript.replaceAll(
                 '.pause()',
                 '.paused === false',
