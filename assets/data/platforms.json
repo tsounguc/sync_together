@@ -82,5 +82,19 @@
     "deepLinkUrl": null,
     "appstoreUrl": "",
     "playStoreUrl": ""
+  },
+  {
+    "name": "TED",
+    "logoPath": "assets/logos/ted_logo.png",
+    "logoDarkPath": "assets/logos/ted_logo.png",
+    "defaultUrl": "https://www.ted.com/talks",
+    "isDRMProtected": false,
+    "playScript": "document.querySelector('video')?.play()",
+    "pauseScript": "document.querySelector('video')?.pause()",
+    "currentTimeScript": "document.querySelector('video')?.currentTime",
+    "packageName": null,
+    "deepLinkUrl": null,
+    "appstoreUrl": "",
+    "playStoreUrl": ""
   }
 ]

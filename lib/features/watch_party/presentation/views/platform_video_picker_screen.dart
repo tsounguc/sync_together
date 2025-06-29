@@ -41,12 +41,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           debugPrint('[PlatformVideoPicker] onMessageReceived: $rawUrl');
 
           String? embedUrl;
-          if (platformName == 'peertube') {
-            final id = VideoUrlHelper.extractPeerTubeVideoId(rawUrl);
-            if (id.isNotEmpty) {
-              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
-            }
-          } else if (platformName == 'vimeo') {
+          if (platformName == 'vimeo') {
             final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
             if (id.isNotEmpty) {
               embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
@@ -76,26 +71,6 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           }
         },
       )
-
-      // ..addJavaScriptChannel(
-      //   'Flutter',
-      //   onMessageReceived: (message) {
-      //     final rawUrl = message.message;
-      //     debugPrint('[PlatformVideoPicker] onMessageReceived: $rawUrl');
-      //     final bloc = context.read<WatchPartySessionBloc>();
-      //     final embedUrl = VideoUrlHelper.getEmbedUrl(
-      //       rawUrl,
-      //       widget.platform.name,
-      //     );
-      //     debugPrint('[PlatformVideoPicker] Generated embed URL: $embedUrl');
-      //     bloc.add(
-      //       UpdateVideoUrlEvent(
-      //         partyId: widget.watchParty.id,
-      //         newUrl: embedUrl,
-      //       ),
-      //     );
-      //   },
-      // )
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (NavigationRequest request) {
@@ -147,6 +122,20 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                 }).observe(document.body, { childList: true, subtree: true });
               })();
             ''');
+            } else if (widget.platform.name.toLowerCase() == 'ted') {
+              _webViewController?.runJavaScript('''
+    (function() {
+      let lastUrl = location.href;
+      new MutationObserver(() => {
+        const currentUrl = location.href;
+        if (currentUrl !== lastUrl && currentUrl.includes('/talks/')) {
+          lastUrl = currentUrl;
+          window.Flutter.postMessage(currentUrl);
+          history.back();
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    })();
+  ''');
             }
           },
         ),

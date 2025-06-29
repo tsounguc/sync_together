@@ -25,10 +25,17 @@ class VideoUrlHelper {
     return match?.group(1) ?? '';
   }
 
-  static String extractPeerTubeVideoId(String url) {
-    final regExp = RegExp('/videos/watch/([a-zA-Z0-9-]+)');
-    final match = regExp.firstMatch(url);
-    return match?.group(1) ?? '';
+  static String extractTedVideoId(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return '';
+
+    // Matches URLs like: https://www.ted.com/talks/sir_ken_robinson_do_schools_kill_creativity
+    final segments = uri.pathSegments;
+    if (segments.length >= 2 && segments[0] == 'talks') {
+      return segments[1];
+    }
+
+    return '';
   }
 
   static String getEmbedUrl(String url, String platformName) {
@@ -42,6 +49,11 @@ class VideoUrlHelper {
     } else if (platformName.toLowerCase().contains('dailymotion')) {
       final id = extractDailymotionVideoId(url);
       return 'https://www.dailymotion.com/embed/video/$id';
+    } else if (platformName == 'ted') {
+      final id = extractTedVideoId(url);
+      if (id.isNotEmpty) {
+        return 'https://embed.ted.com/talks/$id';
+      }
     }
 
     // fallback: return original if no match
