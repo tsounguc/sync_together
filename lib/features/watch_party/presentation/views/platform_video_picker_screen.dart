@@ -21,8 +21,7 @@ class PlatformVideoPickerScreen extends StatefulWidget {
   static const String id = '/video-picker';
 
   @override
-  State<PlatformVideoPickerScreen> createState() =>
-      _PlatformVideoPickerScreenState();
+  State<PlatformVideoPickerScreen> createState() => _PlatformVideoPickerScreenState();
 }
 
 class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
@@ -45,26 +44,22 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           if (platformName == 'peertube') {
             final id = VideoUrlHelper.extractPeerTubeVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl =
-                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           } else if (platformName == 'vimeo') {
             final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl =
-                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           } else if (platformName == 'dailymotion') {
             final id = VideoUrlHelper.extractDailymotionVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl =
-                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           } else if (platformName == 'youtube') {
             final id = VideoUrlHelper.extractYoutubeVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl =
-                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           }
 
@@ -77,8 +72,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                   ),
                 );
           } else {
-            debugPrint(
-                '[PlatformVideoPicker] No video ID could be extracted from: $rawUrl');
+            debugPrint('[PlatformVideoPicker] No video ID could be extracted from: $rawUrl');
           }
         },
       )
@@ -109,10 +103,8 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
             if (widget.platform.name.toLowerCase() == 'vimeo') {
               final vimeoId = VideoUrlHelper.extractVimeoVideoId(url);
               if (vimeoId.isNotEmpty) {
-                final embedUrl =
-                    VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
-                debugPrint(
-                    '[PlatformVideoPicker] Intercepted Vimeo ID: $vimeoId');
+                final embedUrl = VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
+                debugPrint('[PlatformVideoPicker] Intercepted Vimeo ID: $vimeoId');
                 context.read<WatchPartySessionBloc>().add(
                       UpdateVideoUrlEvent(
                         partyId: widget.watchParty.id,
@@ -122,39 +114,6 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                 return NavigationDecision.prevent;
               }
             }
-            // else if (widget.platform.name.toLowerCase() == 'peertube') {
-            //   final id = VideoUrlHelper.extractPeerTubeVideoId(url);
-            //   if (id.isNotEmpty) {
-            //     final embedUrl =
-            //         VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
-            //     debugPrint(
-            //         '[PlatformVideoPicker] Intercepted PeerTube ID: $id');
-            //     context.read<WatchPartySessionBloc>().add(
-            //           UpdateVideoUrlEvent(
-            //             partyId: widget.watchParty.id,
-            //             newUrl: embedUrl,
-            //           ),
-            //         );
-            //     return NavigationDecision.prevent;
-            //   }
-            // }
-            // else if (widget.platform.name.toLowerCase() == 'dailymotion') {
-            //   final dailymotionId =
-            //       VideoUrlHelper.extractDailymotionVideoId(url);
-            //   if (dailymotionId.isNotEmpty) {
-            //     final embedUrl =
-            //         VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
-            //     debugPrint(
-            //         '[PlatformVideoPicker] Intercepted Dailymotion ID: $dailymotionId');
-            //     context.read<WatchPartySessionBloc>().add(
-            //           UpdateVideoUrlEvent(
-            //             partyId: widget.watchParty.id,
-            //             newUrl: embedUrl,
-            //           ),
-            //         );
-            //     return NavigationDecision.prevent;
-            //   }
-            // }
             return NavigationDecision.navigate;
           },
           onPageFinished: (url) {
@@ -188,37 +147,6 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                 }).observe(document.body, { childList: true, subtree: true });
               })();
             ''');
-            } else if (widget.platform.name.toLowerCase() == 'peertube') {
-              _webViewController?.runJavaScript(r'''
-                (function() {
-                  function extractAndPost() {
-                    const currentUrl = location.href;
-                    const match = currentUrl.match(/\/videos\/watch\/([a-zA-Z0-9-]+)/);
-                    if (match && window.Flutter) {
-                      window.Flutter.postMessage(currentUrl);
-                    }
-                  }
-                
-                  // Use setTimeout to wait for navigation to settle
-                  setTimeout(() => {
-                    extractAndPost();
-                  }, 1500);
-                
-                  const observer = new MutationObserver(() => {
-                    extractAndPost();
-                  });
-                
-                  observer.observe(document.body, { childList: true, subtree: true });
-                
-                  const pushState = history.pushState;
-                  history.pushState = function () {
-                    pushState.apply(this, arguments);
-                    extractAndPost();
-                  };
-                
-                  window.addEventListener('popstate', extractAndPost);
-                })();
-              ''');
             }
           },
         ),

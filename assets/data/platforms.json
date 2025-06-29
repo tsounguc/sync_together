@@ -82,19 +82,5 @@
     "deepLinkUrl": null,
     "appstoreUrl": "",
     "playStoreUrl": ""
-  },
-  {
-    "name": "PeerTube",
-    "logoPath": "assets/logos/peertube_logo.png",
-    "logoDarkPath": "assets/logos/peertube_logo.png",
-    "defaultUrl": "https://tilvids.com/videos",
-    "isDRMProtected": false,
-    "playScript": "document.querySelector('video').play();",
-    "pauseScript": "document.querySelector('video').pause();",
-    "currentTimeScript": "document.querySelector('video').currentTime",
-    "packageName": null,
-    "deepLinkUrl": null,
-    "appstoreUrl": "",
-    "playStoreUrl": ""
   }
 ]

@@ -42,10 +42,6 @@ class VideoUrlHelper {
     } else if (platformName.toLowerCase().contains('dailymotion')) {
       final id = extractDailymotionVideoId(url);
       return 'https://www.dailymotion.com/embed/video/$id';
-    } else if (platformName.toLowerCase().contains('peertube')) {
-      final videoId = extractPeerTubeVideoId(url);
-      final domain = Uri.parse(url).origin;
-      return '$domain/videos/embed/$videoId';
     }
 
     // fallback: return original if no match
