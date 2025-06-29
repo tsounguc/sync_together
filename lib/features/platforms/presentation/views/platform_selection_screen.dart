@@ -11,7 +11,8 @@ class PlatformSelectionScreen extends StatefulWidget {
   static const String id = '/platform-selection-screen';
 
   @override
-  State<PlatformSelectionScreen> createState() => _PlatformSelectionScreenState();
+  State<PlatformSelectionScreen> createState() =>
+      _PlatformSelectionScreenState();
 }
 
 class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
@@ -36,7 +37,9 @@ class _PlatformSelectionScreenState extends State<PlatformSelectionScreen> {
               child: Text(state.message),
             );
           } else if (state is PlatformsLoaded) {
-            final platforms = state.platforms;
+            final platforms = state.platforms
+                .where((platform) => !platform.isDRMProtected)
+                .toList();
 
             return LayoutBuilder(
               builder: (context, constraints) {

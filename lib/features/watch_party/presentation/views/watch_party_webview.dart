@@ -80,6 +80,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
     _playbackSyncTimer?.cancel();
     _playbackSyncTimer = null;
+    _webViewController = null;
     super.dispose();
   }
 
@@ -90,7 +91,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             ? widget.watchParty.videoUrl
             : 'https://${widget.watchParty.videoUrl}';
 
-    const params = PlatformWebViewControllerCreationParams();
+    late final params = WebViewPlatform.instance is WebKitWebViewPlatform
+        ? WebKitWebViewControllerCreationParams(
+            allowsInlineMediaPlayback: true,
+            mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+          )
+        : const PlatformWebViewControllerCreationParams();
 
     final controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)

@@ -38,20 +38,70 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
         'Flutter',
         onMessageReceived: (message) {
           final rawUrl = message.message;
-          final bloc = context.read<WatchPartySessionBloc>();
-          final embedUrl = VideoUrlHelper.getEmbedUrl(
-            rawUrl,
-            widget.platform.name,
-          );
-          debugPrint('[PlatformVideoPicker] Captured URL: $rawUrl');
-          bloc.add(
-            UpdateVideoUrlEvent(
-              partyId: widget.watchParty.id,
-              newUrl: embedUrl,
-            ),
-          );
+          final platformName = widget.platform.name.toLowerCase();
+          debugPrint('[PlatformVideoPicker] onMessageReceived: $rawUrl');
+
+          String? embedUrl;
+          if (platformName == 'peertube') {
+            final id = VideoUrlHelper.extractPeerTubeVideoId(rawUrl);
+            if (id.isNotEmpty) {
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+            }
+          } else if (platformName == 'vimeo') {
+            final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
+            if (id.isNotEmpty) {
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+            }
+          } else if (platformName == 'dailymotion') {
+            final id = VideoUrlHelper.extractDailymotionVideoId(rawUrl);
+            if (id.isNotEmpty) {
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+            }
+          } else if (platformName == 'youtube') {
+            final id = VideoUrlHelper.extractYoutubeVideoId(rawUrl);
+            if (id.isNotEmpty) {
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+            }
+          }
+
+          if (embedUrl != null) {
+            debugPrint('[PlatformVideoPicker] Posting embed URL: $embedUrl');
+            context.read<WatchPartySessionBloc>().add(
+                  UpdateVideoUrlEvent(
+                    partyId: widget.watchParty.id,
+                    newUrl: embedUrl,
+                  ),
+                );
+          } else {
+            debugPrint(
+                '[PlatformVideoPicker] No video ID could be extracted from: $rawUrl');
+          }
         },
       )
+
+      // ..addJavaScriptChannel(
+      //   'Flutter',
+      //   onMessageReceived: (message) {
+      //     final rawUrl = message.message;
+      //     debugPrint('[PlatformVideoPicker] onMessageReceived: $rawUrl');
+      //     final bloc = context.read<WatchPartySessionBloc>();
+      //     final embedUrl = VideoUrlHelper.getEmbedUrl(
+      //       rawUrl,
+      //       widget.platform.name,
+      //     );
+      //     debugPrint('[PlatformVideoPicker] Generated embed URL: $embedUrl');
+      //     bloc.add(
+      //       UpdateVideoUrlEvent(
+      //         partyId: widget.watchParty.id,
+      //         newUrl: embedUrl,
+      //       ),
+      //     );
+      //   },
+      // )
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (NavigationRequest request) {
@@ -72,6 +122,22 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                 return NavigationDecision.prevent;
               }
             }
+            // else if (widget.platform.name.toLowerCase() == 'peertube') {
+            //   final id = VideoUrlHelper.extractPeerTubeVideoId(url);
+            //   if (id.isNotEmpty) {
+            //     final embedUrl =
+            //         VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
+            //     debugPrint(
+            //         '[PlatformVideoPicker] Intercepted PeerTube ID: $id');
+            //     context.read<WatchPartySessionBloc>().add(
+            //           UpdateVideoUrlEvent(
+            //             partyId: widget.watchParty.id,
+            //             newUrl: embedUrl,
+            //           ),
+            //         );
+            //     return NavigationDecision.prevent;
+            //   }
+            // }
             // else if (widget.platform.name.toLowerCase() == 'dailymotion') {
             //   final dailymotionId =
             //       VideoUrlHelper.extractDailymotionVideoId(url);
@@ -109,19 +175,50 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
             ''');
             } else if (widget.platform.name.toLowerCase() == 'dailymotion') {
               _webViewController?.runJavaScript(r'''
-    (function() {
-      let lastUrl = location.href;
-      new MutationObserver(() => {
-        const currentUrl = location.href;
-        const match = currentUrl.match(/dailymotion\.com\/video\/([^_?&#\/]+)/);
-        if (currentUrl !== lastUrl && match) {
-          lastUrl = currentUrl;
-          window.Flutter.postMessage(currentUrl);
-          history.back();
-        }
-      }).observe(document.body, { childList: true, subtree: true });
-    })();
-  ''');
+              (function() {
+                let lastUrl = location.href;
+                new MutationObserver(() => {
+                  const currentUrl = location.href;
+                  const match = currentUrl.match(/dailymotion\.com\/video\/([^_?&#\/]+)/);
+                  if (currentUrl !== lastUrl && match) {
+                    lastUrl = currentUrl;
+                    window.Flutter.postMessage(currentUrl);
+                    history.back();
+                  }
+                }).observe(document.body, { childList: true, subtree: true });
+              })();
+            ''');
+            } else if (widget.platform.name.toLowerCase() == 'peertube') {
+              _webViewController?.runJavaScript(r'''
+                (function() {
+                  function extractAndPost() {
+                    const currentUrl = location.href;
+                    const match = currentUrl.match(/\/videos\/watch\/([a-zA-Z0-9-]+)/);
+                    if (match && window.Flutter) {
+                      window.Flutter.postMessage(currentUrl);
+                    }
+                  }
+                
+                  // Use setTimeout to wait for navigation to settle
+                  setTimeout(() => {
+                    extractAndPost();
+                  }, 1500);
+                
+                  const observer = new MutationObserver(() => {
+                    extractAndPost();
+                  });
+                
+                  observer.observe(document.body, { childList: true, subtree: true });
+                
+                  const pushState = history.pushState;
+                  history.pushState = function () {
+                    pushState.apply(this, arguments);
+                    extractAndPost();
+                  };
+                
+                  window.addEventListener('popstate', extractAndPost);
+                })();
+              ''');
             }
           },
         ),
