@@ -21,7 +21,8 @@ class PlatformVideoPickerScreen extends StatefulWidget {
   static const String id = '/video-picker';
 
   @override
-  State<PlatformVideoPickerScreen> createState() => _PlatformVideoPickerScreenState();
+  State<PlatformVideoPickerScreen> createState() =>
+      _PlatformVideoPickerScreenState();
 }
 
 class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
@@ -44,17 +45,26 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           if (platformName == 'vimeo') {
             final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           } else if (platformName == 'dailymotion') {
             final id = VideoUrlHelper.extractDailymotionVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           } else if (platformName == 'youtube') {
             final id = VideoUrlHelper.extractYoutubeVideoId(rawUrl);
             if (id.isNotEmpty) {
-              embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+            }
+          } else if (platformName == 'ted') {
+            final id = VideoUrlHelper.extractTedVideoId(rawUrl);
+            if (id.isNotEmpty) {
+              embedUrl =
+                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           }
 
@@ -67,7 +77,8 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                   ),
                 );
           } else {
-            debugPrint('[PlatformVideoPicker] No video ID could be extracted from: $rawUrl');
+            debugPrint(
+                '[PlatformVideoPicker] No video ID could be extracted from: $rawUrl');
           }
         },
       )
@@ -78,8 +89,10 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
             if (widget.platform.name.toLowerCase() == 'vimeo') {
               final vimeoId = VideoUrlHelper.extractVimeoVideoId(url);
               if (vimeoId.isNotEmpty) {
-                final embedUrl = VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
-                debugPrint('[PlatformVideoPicker] Intercepted Vimeo ID: $vimeoId');
+                final embedUrl =
+                    VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
+                debugPrint(
+                    '[PlatformVideoPicker] Intercepted Vimeo ID: $vimeoId');
                 context.read<WatchPartySessionBloc>().add(
                       UpdateVideoUrlEvent(
                         partyId: widget.watchParty.id,

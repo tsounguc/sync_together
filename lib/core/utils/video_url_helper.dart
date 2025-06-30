@@ -26,16 +26,9 @@ class VideoUrlHelper {
   }
 
   static String extractTedVideoId(String url) {
-    final uri = Uri.tryParse(url);
-    if (uri == null) return '';
-
-    // Matches URLs like: https://www.ted.com/talks/sir_ken_robinson_do_schools_kill_creativity
-    final segments = uri.pathSegments;
-    if (segments.length >= 2 && segments[0] == 'talks') {
-      return segments[1];
-    }
-
-    return '';
+    final regex = RegExp(r'ted\.com/talks/([^/?#]+)');
+    final match = regex.firstMatch(url);
+    return match != null ? match.group(1) ?? '' : '';
   }
 
   static String getEmbedUrl(String url, String platformName) {
