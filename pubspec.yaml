@@ -118,7 +118,7 @@ flutter:
     - assets/data/platforms.json
     - assets/logos/
     - assets/icon/
-    - assets/html/youtube_player.html
+    - assets/html/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

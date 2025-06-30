@@ -45,7 +45,7 @@ class VideoUrlHelper {
     } else if (platformName == 'ted') {
       final id = extractTedVideoId(url);
       if (id.isNotEmpty) {
-        return 'https://embed.ted.com/talks/$id';
+        return 'assets/html/ted_embed.html?id=$id';
       }
     }
 

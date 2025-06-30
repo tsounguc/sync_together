@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/enums/sync_status.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/core/utils/video_url_helper.dart'
+    show VideoUrlHelper;
 import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
@@ -85,11 +89,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   Future<void> _initializeWebView() async {
-    final validUrl = widget.watchParty.videoUrl.isEmpty
+    final rawUrl = widget.watchParty.videoUrl.isEmpty
         ? widget.watchParty.platform.defaultUrl
-        : widget.watchParty.videoUrl.startsWith('http')
-            ? widget.watchParty.videoUrl
-            : 'https://${widget.watchParty.videoUrl}';
+        : widget.watchParty.videoUrl;
+
+    final embedUrl =
+        VideoUrlHelper.getEmbedUrl(rawUrl, widget.watchParty.platform.name);
 
     late final params = WebViewPlatform.instance is WebKitWebViewPlatform
         ? WebKitWebViewControllerCreationParams(
@@ -101,18 +106,33 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     final controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(_navigationDelegate)
-      ..loadRequest(Uri.parse(validUrl));
+      ..setNavigationDelegate(_navigationDelegate);
+
+    if (!mounted) return;
+
+    if (embedUrl.startsWith('assets/')) {
+      final assetUri = Uri.dataFromString(
+        await rootBundle.loadString(embedUrl.split('?')[0]),
+        mimeType: 'text/html',
+        encoding: Encoding.getByName('utf-8'),
+      );
+      final idParam =
+          embedUrl.contains('?') ? '?${embedUrl.split('?')[1]}' : '';
+      await controller.loadRequest(Uri.parse('${assetUri.toString()}$idParam'));
+    } else {
+      await controller.loadRequest(Uri.parse(embedUrl));
+    }
 
     if (controller.platform is AndroidWebViewController) {
       await AndroidWebViewController.enableDebugging(true);
       final platform = controller.platform as AndroidWebViewController;
       await platform.setMediaPlaybackRequiresUserGesture(false);
     }
-
-    setState(() {
-      _webViewController = controller;
-    });
+    if (mounted) {
+      setState(() {
+        _webViewController = controller;
+      });
+    }
   }
 
   void _startAutoSyncLoop() {

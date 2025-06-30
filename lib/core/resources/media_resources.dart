@@ -14,6 +14,7 @@ class MediaResources {
 
   // HTML
   static const youtubePlayer = '$_baseHtml/youtube_player.html';
+  static const tedPlayer = '$_baseHtml/ted_embed.html';
 
   // Icons
   static const appLogo = '$_baseIcon/app_icon.png';
