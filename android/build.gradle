@@ -1,3 +1,9 @@
+buildScript {
+    dependencies {
+        classpath 'com.google.firebase:firebase-appdistribution-gradle:5.1.1'
+    }
+}
+
 allprojects {
     repositories {
         google()
