@@ -1,4 +1,8 @@
-buildScript {
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
         classpath 'com.google.firebase:firebase-appdistribution-gradle:5.1.1'
     }
