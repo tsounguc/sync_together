@@ -4,9 +4,10 @@ buildscript {
         mavenCentral()
     }
 
-    ext.kotlin_version = '2.0.0'
+    ext.kotlin_version = '2.1.0'
 
     dependencies {
+        classpath "com.android.tools.build:gradle:8.4.2"  // ✅ latest AGP
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.firebase:firebase-appdistribution-gradle:5.1.1'
     }
