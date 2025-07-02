@@ -70,20 +70,6 @@
     "playStoreUrl": "https://play.google.com/store/apps/details?id=com.vimeo.android.videoapp"
   },
   {
-    "name": "Dailymotion",
-    "logoPath": "assets/logos/dailymotion_logo.png",
-    "logoDarkPath": "assets/logos/dailymotion_logo_dark.png",
-    "defaultUrl": "https://www.dailymotion.com/us",
-    "isDRMProtected": false,
-    "playScript": "window.playVideo()",
-    "pauseScript": "window.pauseVideo()",
-    "currentTimeScript": "window.getCurrentTime()",
-    "packageName": null,
-    "deepLinkUrl": null,
-    "appstoreUrl": "",
-    "playStoreUrl": ""
-  },
-  {
     "name": "TED",
     "logoPath": "assets/logos/ted_logo.png",
     "logoDarkPath": "assets/logos/ted_logo.png",

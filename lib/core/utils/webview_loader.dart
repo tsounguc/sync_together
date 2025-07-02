@@ -10,11 +10,9 @@ class WebviewLoader {
     required String embedUrl,
     required NavigationDelegate navigationDelegate,
   }) async {
-    final isAsset = embedUrl.startsWith('assets/');
-    final uri = Uri.parse(embedUrl);
-    final videoId = uri.queryParameters['id'];
-
     late final PlatformWebViewControllerCreationParams params;
+
+    // Choose correct WebView implementation based on platform
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(
         allowsInlineMediaPlayback: true,
@@ -27,22 +25,10 @@ class WebviewLoader {
     final controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(navigationDelegate);
+      ..setNavigationDelegate(navigationDelegate)
+      ..loadRequest(Uri.parse(embedUrl));
 
-    if (isAsset) {
-      final assetPath = embedUrl.split('?')[0];
-      final htmlString = await rootBundle.loadString(assetPath);
-      final assetUrl = Uri.dataFromString(
-        htmlString,
-        mimeType: 'text/html',
-        encoding: Encoding.getByName('utf-8'),
-      ).toString();
-      final idParam = videoId != null ? '?id=$videoId' : '';
-      await controller.loadRequest(Uri.parse('$assetUrl$idParam'));
-    } else {
-      await controller.loadRequest(Uri.parse(embedUrl));
-    }
-
+    // Enable autoplay for Android
     if (controller.platform is AndroidWebViewController) {
       await AndroidWebViewController.enableDebugging(true);
       final androidController = controller.platform as AndroidWebViewController;

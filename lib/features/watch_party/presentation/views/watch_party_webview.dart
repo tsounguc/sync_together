@@ -69,6 +69,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         ? widget.watchParty.platform.defaultUrl
         : widget.watchParty.videoUrl;
 
+    debugPrint('_intializeWebView: $rawUrl');
     final embedUrl =
         VideoUrlHelper.getEmbedUrl(rawUrl, widget.watchParty.platform.name);
 

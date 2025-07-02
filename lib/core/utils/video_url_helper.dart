@@ -41,8 +41,8 @@ class VideoUrlHelper {
       return 'https://player.vimeo.com/video/$id';
     } else if (platformName.toLowerCase().contains('dailymotion')) {
       final id = extractDailymotionVideoId(url);
-      // return 'https://www.dailymotion.com/embed/video/$id';
-      return 'assets/html/dailymotion_player.html?id=$id';
+      return 'https://www.dailymotion.com/embed/video/$id';
+      // return 'assets/html/dailymotion_player.html?id=$id';
     } else if (platformName == 'ted') {
       final id = extractTedVideoId(url);
       if (id.isNotEmpty) {

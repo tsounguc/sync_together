@@ -42,20 +42,14 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           debugPrint('[PlatformVideoPicker] onMessageReceived: $rawUrl');
 
           String? embedUrl;
-          if (platformName == 'vimeo') {
-            final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
-            if (id.isNotEmpty) {
-              embedUrl =
-                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
-            }
-          } else if (platformName == 'dailymotion') {
-            debugPrint('[onMessageReceived]: dailymotion raw url: $rawUrl');
-            final id = VideoUrlHelper.extractDailymotionVideoId(rawUrl);
-            if (id.isNotEmpty) {
-              embedUrl =
-                  VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
-            }
-          } else if (platformName == 'youtube') {
+          // if (platformName == 'vimeo') {
+          //   final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
+          //   if (id.isNotEmpty) {
+          //     embedUrl =
+          //         VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
+          //   }
+          // } else
+          if (platformName == 'youtube') {
             final id = VideoUrlHelper.extractYoutubeVideoId(rawUrl);
             if (id.isNotEmpty) {
               embedUrl =
@@ -121,14 +115,13 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                 }).observe(document.body, { childList: true, subtree: true });
               })();
             ''');
-            } else if (widget.platform.name.toLowerCase() == 'dailymotion') {
-              _webViewController?.runJavaScript(r'''
+            } else if (widget.platform.name.toLowerCase() == 'ted') {
+              _webViewController?.runJavaScript('''
               (function() {
                 let lastUrl = location.href;
                 new MutationObserver(() => {
                   const currentUrl = location.href;
-                  const match = currentUrl.match(/dailymotion\.com\/video\/([^_?&#\/]+)/);
-                  if (currentUrl !== lastUrl && match) {
+                  if (currentUrl !== lastUrl && currentUrl.includes('/talks/')) {
                     lastUrl = currentUrl;
                     window.Flutter.postMessage(currentUrl);
                     history.back();
@@ -136,20 +129,6 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                 }).observe(document.body, { childList: true, subtree: true });
               })();
             ''');
-            } else if (widget.platform.name.toLowerCase() == 'ted') {
-              _webViewController?.runJavaScript('''
-    (function() {
-      let lastUrl = location.href;
-      new MutationObserver(() => {
-        const currentUrl = location.href;
-        if (currentUrl !== lastUrl && currentUrl.includes('/talks/')) {
-          lastUrl = currentUrl;
-          window.Flutter.postMessage(currentUrl);
-          history.back();
-        }
-      }).observe(document.body, { childList: true, subtree: true });
-    })();
-  ''');
             }
           },
         ),
