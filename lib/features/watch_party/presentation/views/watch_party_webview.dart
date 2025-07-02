@@ -59,6 +59,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   void dispose() {
     syncManager.stop();
     _syncBadgeTimer?.cancel();
+    _webViewController = null;
     super.dispose();
   }
 
@@ -288,6 +289,13 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
           if (mounted) {
             CoreUtils.showSnackBar(context, 'The host ended the watch party');
+
+            try {
+              await playback.pause();
+            } catch (_) {
+              debugPrint('Failed to pause playback before navigating away.');
+            }
+
             await Future<void>.delayed(const Duration(seconds: 2));
             if (mounted) {
               await Navigator.pushNamedAndRemoveUntil(
