@@ -13,7 +13,7 @@ import 'package:sync_together/features/watch_party/presentation/helpers/guest_sy
 import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
-import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
+import 'package:sync_together/features/watch_party/presentation/widgets/web_playback_controls.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
