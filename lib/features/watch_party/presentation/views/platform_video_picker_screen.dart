@@ -49,6 +49,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                   VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
             }
           } else if (platformName == 'dailymotion') {
+            debugPrint('[onMessageReceived]: dailymotion raw url: $rawUrl');
             final id = VideoUrlHelper.extractDailymotionVideoId(rawUrl);
             if (id.isNotEmpty) {
               embedUrl =

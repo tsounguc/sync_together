@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0; background-color:black;">
+<div id="player"></div>
+<script src="https://api.dmcdn.net/all.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const videoId = params.get('id');
+
+    const player = DM.player(document.getElementById("player"), {
+      video: videoId,
+      width: "100%",
+      height: "100%",
+      params: {
+        autoplay: true,
+        controls: true,
+        mute: false,
+        origin: window.location.origin
+      }
+    });
+
+    window.getCurrentTime = function() {
+      return player.currentTime;
+    };
+
+    window.playVideo = function() {
+      player.play();
+    };
+
+    window.pauseVideo = function() {
+      player.pause();
+    };
+</script>
+</body>
+</html>

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -11,7 +14,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class WebPlaybackControls extends StatefulWidget {
   const WebPlaybackControls({
     required this.controller,
-    required this.watchPartyId,
+    required this.watchParty,
     super.key,
   });
 
@@ -19,53 +22,45 @@ class WebPlaybackControls extends StatefulWidget {
   final WebViewController controller;
 
   /// The ID of the watch party.
-  final String watchPartyId;
+  final WatchParty watchParty;
 
   @override
   State<WebPlaybackControls> createState() => _WebPlaybackControlsState();
 }
 
 class _WebPlaybackControlsState extends State<WebPlaybackControls> {
+  late final PlaybackController playback;
   var _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    playback = PlaybackController(
+      controller: widget.controller,
+      platform: widget.watchParty.platform,
+    );
+  }
 
   /// **Play the void and sync position**
   Future<void> _playVideo(BuildContext context) async {
-    const playScript = "document.querySelector('video')?.play();";
-    await widget.controller.runJavaScript(playScript);
-    _isPlaying = true;
-    await _syncPlayback(context, true);
-
-    CoreUtils.showSnackBar(context, 'You started playing the video.');
+    try {
+      await playback.play();
+      _isPlaying = true;
+      // await _syncPlayback(context, isPlaying)
+      CoreUtils.showSnackBar(context, 'You started playing the video.');
+    } catch (e) {
+      CoreUtils.showSnackBar(context, 'Failed to play video.');
+    }
   }
 
   /// **Pause the video and sync position**
   Future<void> _pauseVideo(BuildContext context) async {
-    const pauseScript = "document.querySelector('video')?.pause();";
-    await widget.controller.runJavaScript(pauseScript);
-    _isPlaying = false;
-    await _syncPlayback(context, false);
-
-    CoreUtils.showSnackBar(context, 'You paused the video');
-  }
-
-  /// **Fetches the current playback position & syncs it across users.**
-  Future<void> _syncPlayback(BuildContext context, bool isPlaying) async {
-    const script = "document.querySelector('video')?.currentTime";
-    final result = await widget.controller.runJavaScriptReturningResult(script);
-
-    if (result != null) {
-      final position = double.tryParse(result.toString()) ?? 0;
-      context.read<WatchPartySessionBloc>().add(
-            SendSyncDataEvent(
-              partyId: widget.watchPartyId,
-              playbackPosition: position,
-              isPlaying: isPlaying,
-            ),
-          );
-      CoreUtils.showSnackBar(
-        context,
-        'Playback synchronized!',
-      );
+    try {
+      await playback.play();
+      _isPlaying = false;
+      CoreUtils.showSnackBar(context, 'You paused the video.');
+    } catch (e) {
+      CoreUtils.showSnackBar(context, 'Failed to pause video');
     }
   }
 
@@ -81,10 +76,6 @@ class _WebPlaybackControlsState extends State<WebPlaybackControls> {
         IconButton(
           icon: const Icon(Icons.pause),
           onPressed: () async => _pauseVideo(context),
-        ),
-        IconButton(
-          icon: const Icon(Icons.sync),
-          onPressed: () => _syncPlayback(context, _isPlaying),
         ),
       ],
     );

@@ -1,24 +1,22 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/enums/sync_status.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
-import 'package:sync_together/core/utils/video_url_helper.dart'
-    show VideoUrlHelper;
+import 'package:sync_together/core/utils/video_url_helper.dart';
+import 'package:sync_together/core/utils/webview_loader.dart';
 import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/guest_sync_helper.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/playback_controls.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class WatchPartyWebView extends StatefulWidget {
   const WatchPartyWebView({
@@ -34,61 +32,39 @@ class WatchPartyWebView extends StatefulWidget {
 
 class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   WebViewController? _webViewController;
-  int loadingPercentage = 0;
-
-  Timer? _playbackSyncTimer;
-  bool _showChat = true;
-  SyncStatus _syncStatus = SyncStatus.synced;
+  late final PlaybackController playback;
+  late final SyncManager syncManager;
+  late final StreamingPlatform streamingPlatform;
 
   bool get _isHost => context.currentUser?.uid == widget.watchParty.hostId;
 
-  // New: Local memory of latest sync state
-  double? _latestPlaybackPosition;
-  bool _latestIsPlaying = false;
-  bool _hasInitialSynced = false;
-
+  int loadingPercentage = 0;
+  bool _showChat = true;
+  SyncStatus _syncStatus = SyncStatus.synced;
   bool _showSyncBadge = true;
   Timer? _syncBadgeTimer;
 
-  late final StreamingPlatform streamingPlatform;
+  // Guest sync memory
+  double? _latestPlaybackPosition;
+  bool _latestIsPlaying = false;
+  bool _hasSynced = false;
 
   @override
   void initState() {
     super.initState();
-    streamingPlatform = widget.watchParty.platform;
     _initializeWebView();
-
-    if (_isHost) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _startAutoSyncLoop();
-      });
-    } else {
-      context.read<WatchPartySessionBloc>().add(
-            GetSyncedDataEvent(
-              partyId: widget.watchParty.id,
-            ),
-          );
-    }
-
-    context.read<WatchPartySessionBloc>().add(
-          ListenToPartyExistenceEvent(
-            widget.watchParty.id,
-          ),
-        );
   }
 
   @override
   void dispose() {
+    syncManager.stop();
     _syncBadgeTimer?.cancel();
-    _syncBadgeTimer = null;
-
-    _playbackSyncTimer?.cancel();
-    _playbackSyncTimer = null;
-    _webViewController = null;
     super.dispose();
   }
 
   Future<void> _initializeWebView() async {
+    streamingPlatform = widget.watchParty.platform;
+    final bloc = context.read<WatchPartySessionBloc>();
     final rawUrl = widget.watchParty.videoUrl.isEmpty
         ? widget.watchParty.platform.defaultUrl
         : widget.watchParty.videoUrl;
@@ -96,248 +72,93 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     final embedUrl =
         VideoUrlHelper.getEmbedUrl(rawUrl, widget.watchParty.platform.name);
 
-    late final params = WebViewPlatform.instance is WebKitWebViewPlatform
-        ? WebKitWebViewControllerCreationParams(
-            allowsInlineMediaPlayback: true,
-            mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
-          )
-        : const PlatformWebViewControllerCreationParams();
+    final controller = await WebviewLoader.create(
+      embedUrl: embedUrl,
+      navigationDelegate: _navigationDelegate,
+    );
 
-    final controller = WebViewController.fromPlatformCreationParams(params)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(_navigationDelegate);
+    playback = PlaybackController(
+      controller: controller,
+      platform: streamingPlatform,
+    );
+    syncManager = SyncManager(
+      playback: playback,
+      watchPartyId: widget.watchParty.id,
+      currentTimeScript: streamingPlatform.currentTimeScript,
+      bloc: bloc,
+    );
 
     if (!mounted) return;
 
-    if (embedUrl.startsWith('assets/')) {
-      final assetUri = Uri.dataFromString(
-        await rootBundle.loadString(embedUrl.split('?')[0]),
-        mimeType: 'text/html',
-        encoding: Encoding.getByName('utf-8'),
-      );
-      final idParam =
-          embedUrl.contains('?') ? '?${embedUrl.split('?')[1]}' : '';
-      await controller.loadRequest(Uri.parse('${assetUri.toString()}$idParam'));
-    } else {
-      await controller.loadRequest(Uri.parse(embedUrl));
-    }
-
-    if (controller.platform is AndroidWebViewController) {
-      await AndroidWebViewController.enableDebugging(true);
-      final platform = controller.platform as AndroidWebViewController;
-      await platform.setMediaPlaybackRequiresUserGesture(false);
-    }
     if (mounted) {
       setState(() {
         _webViewController = controller;
       });
     }
-  }
 
-  void _startAutoSyncLoop() {
-    _playbackSyncTimer?.cancel();
-    _playbackSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
-      if (!mounted) return;
-      try {
-        final hasVideo = await _webViewController?.runJavaScriptReturningResult(
-          "document.querySelector('video') !== null",
-        );
-
-        debugPrint('has video: $hasVideo');
-
-        if (hasVideo.toString() != 'true') return;
-
-        final result = await _webViewController
-            ?.runJavaScriptReturningResult(streamingPlatform.currentTimeScript);
-        final position = double.tryParse(result.toString()) ?? 0;
-
-        final isPlayingResult =
-            await _webViewController?.runJavaScriptReturningResult(
-          streamingPlatform.pauseScript
-              .replaceAll('.pause()', '.paused === false'),
-        );
-        final isPlaying = isPlayingResult.toString() == 'true';
-
-        if (mounted) {
-          context.read<WatchPartySessionBloc>().add(
-                SendSyncDataEvent(
-                  partyId: widget.watchParty.id,
-                  playbackPosition: position,
-                  isPlaying: isPlaying,
-                ),
-              );
-        }
-      } catch (e) {
-        debugPrint('Sync timer error: $e');
-      }
-    });
-  }
-
-  void _stopAutoSyncLoop() {
-    _playbackSyncTimer?.cancel();
-    _playbackSyncTimer = null;
-  }
-
-  Future<void> _seekToPosition(double seconds) async {
-    final jsCommand = "document.querySelector('video').currentTime = $seconds;";
-    await _webViewController?.runJavaScript(jsCommand);
-  }
-
-  Future<void> _playVideo() async {
-    // await _webViewController?.runJavaScript("""
-    //     var video = document.querySelector('video');
-    //     if (video) {
-    //       video.muted = false;
-    //       video.volume = 1.0;
-    //       video.play();
-    //     }
-    //     """);
-    await _webViewController?.runJavaScript(streamingPlatform.playScript);
-    _startAutoSyncLoop();
-  }
-
-  Future<void> _pauseVideo() async {
-    try {
-      await _webViewController?.runJavaScript(streamingPlatform.pauseScript);
-    } catch (e) {
-      debugPrint('Error running JS to pause video: $e');
-    }
-    _stopAutoSyncLoop();
-  }
-
-  Future<void> _disableGuestVideoControls() async {
-    const js = '''
-    var video = document.querySelector('video');
-    if (video) {
-      video.removeAttribute('controls');
-      video.style.pointerEvents = 'none'; // Disable user interactions
-      
-      video.muted = false;
-      video.volume = 1.0;
-    }
-  ''';
-
-    try {
-      await _webViewController?.runJavaScript(js);
-    } catch (e) {
-      debugPrint('[GuestSync] Failed to disable playback functions: $e');
-    }
-  }
-
-  Future<void> _attemptInitialGuestSync() async {
-    if (_hasInitialSynced || _isHost || _latestPlaybackPosition == null) return;
-
-    const maxAttempts = 10;
-    for (var i = 0; i < maxAttempts; i++) {
-      try {
-        final hasVideo = await _webViewController?.runJavaScriptReturningResult(
-          "document.querySelector('video') !== null",
-        );
-        if (hasVideo.toString() != 'true') {
-          debugPrint('[GuestSync] No video tag found on attempt $i');
-          await Future<void>.delayed(const Duration(milliseconds: 300));
-          continue;
-        }
-
-        final pos = _latestPlaybackPosition!;
-        if (pos < 1.0) {
-          debugPrint(
-              '[GuestSync] Host likely watching ad (position = $pos), waiting...');
-          await Future<void>.delayed(const Duration(seconds: 1));
-          continue;
-        }
-
-        await _disableGuestVideoControls();
-        await _pauseVideo();
-        await _seekToPosition(pos);
-
-        if (_latestIsPlaying) {
-          await _playVideo();
-          final confirmedPlay =
-              await _webViewController?.runJavaScriptReturningResult(
-            streamingPlatform.pauseScript
-                .replaceAll('.pause()', '.paused === false'),
-          );
-          if (confirmedPlay.toString() == 'true') {
-            _hasInitialSynced = true;
-            debugPrint('[GuestSync] Synced during host video (playing)');
-            return;
-          }
-        } else {
-          final confirmedPause =
-              await _webViewController?.runJavaScriptReturningResult(
-            streamingPlatform.pauseScript
-                .replaceAll('.pause()', '.paused === true'),
-          );
-          if (confirmedPause.toString() == 'true') {
-            _hasInitialSynced = true;
-            debugPrint('[GuestSync] Synced during host video (paused)');
-            return;
-          }
-        }
-      } catch (e) {
-        debugPrint('[GuestSync] Error syncing: $e');
-      }
-
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (_isHost) {
+      syncManager.start();
+    } else {
+      bloc.add(
+        GetSyncedDataEvent(
+          partyId: widget.watchParty.id,
+        ),
+      );
     }
 
-    debugPrint('[GuestSync] Failed to sync after $maxAttempts');
+    bloc.add(
+      ListenToPartyExistenceEvent(
+        widget.watchParty.id,
+      ),
+    );
   }
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
         onProgress: (progress) {
-          setState(() {
-            loadingPercentage = progress;
-          });
+          if (!mounted) return;
+          setState(() => loadingPercentage = progress);
         },
-        onPageStarted: (_) => setState(() => loadingPercentage = 0),
+        onPageStarted: (_) {
+          if (!mounted) return;
+          setState(() => loadingPercentage = 0);
+        },
         onPageFinished: (url) async {
           if (!mounted) return;
           setState(() => loadingPercentage = 100);
-          await _attemptInitialGuestSync();
-          if (!_isHost) await _disableGuestVideoControls();
+
+          if (!_isHost) {
+            final synced = await GuestSyncHelper(
+              playback: playback,
+              targetPosition: _latestPlaybackPosition ?? 0,
+              shouldPlay: _latestIsPlaying,
+            ).attemptInitialSync();
+
+            if (synced) _hasSynced = true;
+          }
         },
         onNavigationRequest: (request) {
-          if (_isExternalLink(request.url)) {
-            _handleExternalLink(request.url);
+          if (_isExternal(request.url)) {
+            _launchUrl(request.url);
             return NavigationDecision.prevent;
           }
           return NavigationDecision.navigate;
         },
       );
 
-  bool _isExternalLink(String url) {
+  bool _isExternal(String url) {
     return url.startsWith('tel') ||
         url.contains('play.google.com') ||
         url.contains('apps.apple.com') ||
         url.startsWith('mailto');
   }
 
-  Future<void> _handleExternalLink(String url) async {
+  Future<void> _launchUrl(String url) async {
     try {
-      if (url.startsWith('tel')) {
-        await launchUrl(Uri(scheme: 'tel', path: url.substring(4)));
-      } else if (url.contains('play.google.com') && Platform.isAndroid) {
-        await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-      } else if (url.contains('apps.apple.com') && Platform.isIOS) {
-        await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-      } else if (url.startsWith('mailto')) {
-        await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-      } else {
-        await launchUrl(Uri.parse(url));
-      }
-    } catch (e) {
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalNonBrowserApplication,
+      );
+    } catch (_) {
       if (mounted) {
         CoreUtils.showSnackBar(
           context,
@@ -349,6 +170,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   void _updateSyncBadge(SyncStatus status) {
     if (_isHost || status == _syncStatus) return;
+
     if (!mounted) return;
     setState(() {
       _syncStatus = status;
@@ -356,13 +178,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     });
 
     _syncBadgeTimer?.cancel();
-
     if (status == SyncStatus.synced) {
       _syncBadgeTimer = Timer(const Duration(seconds: 3), () {
         if (!mounted) return;
-        if (_syncStatus == SyncStatus.synced) {
-          setState(() => _showSyncBadge = false);
-        }
+        setState(() => _showSyncBadge = false);
       });
     }
   }
@@ -372,7 +191,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('End Watch Party?'),
-        content: const Text('This will disconnect all guests from the party.'),
+        content: const Text('This will disconnect all guests.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -429,73 +248,31 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
           if (_isHost) return;
 
-          if (!_hasInitialSynced && _webViewController != null) {
-            // wait for WebView to settle
-            await Future<void>.delayed(const Duration(milliseconds: 500));
-            await _attemptInitialGuestSync();
+          if (!_hasSynced) {
+            final synced = await GuestSyncHelper(
+              playback: playback,
+              targetPosition: _latestPlaybackPosition ?? 0,
+              shouldPlay: _latestIsPlaying,
+            ).attemptInitialSync();
+            if (!mounted) return;
+            if (synced) _hasSynced = true;
           }
 
-          try {
-            final hasVideo =
-                await _webViewController?.runJavaScriptReturningResult(
-              "document.querySelector('video') !== null",
-            );
+          final localPosition = await playback.getCurrentTime(
+            streamingPlatform.currentTimeScript,
+          );
+          final drift = (_latestPlaybackPosition! - localPosition).abs();
 
-            if (hasVideo.toString() != 'true') return;
+          _updateSyncBadge(
+              drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
 
-            final result =
-                await _webViewController?.runJavaScriptReturningResult(
-                    streamingPlatform.currentTimeScript);
-            final localPosition = double.tryParse(result.toString()) ?? 0;
+          if (drift >= 1.5) {
+            await playback.seek(_latestPlaybackPosition!);
+          }
 
-            final drift = (state.playbackPosition - localPosition).abs();
-
-            // Update sync badge status (for guest only)
-            final newStatus =
-                drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing;
-            if (newStatus != _syncStatus) {
-              _updateSyncBadge(newStatus);
-            }
-
-            // Do not sync if already synced
-            if (drift < 1.5) {
-              final playState =
-                  await _webViewController?.runJavaScriptReturningResult(
-                "document.querySelector('video')?.paused === false",
-              );
-              final isActuallyPlaying = playState.toString() == 'true';
-
-              if (state.isPlaying != isActuallyPlaying) {
-                if (state.isPlaying) {
-                  await _playVideo();
-                } else {
-                  await _pauseVideo();
-                }
-              }
-
-              return; // Already in sync — skip further actions
-            }
-
-            // Drift too high → seek
-            await _seekToPosition(state.playbackPosition);
-
-            // Ensure play/pause is correct after seeking
-            final playState =
-                await _webViewController?.runJavaScriptReturningResult(
-              streamingPlatform.pauseScript.replaceAll(
-                '.pause()',
-                '.paused === false',
-              ),
-            );
-            final isActuallyPlaying = playState.toString() == 'true';
-
-            if (state.isPlaying && !isActuallyPlaying) {
-              await _playVideo();
-            } else if (!state.isPlaying && isActuallyPlaying) {
-              await _pauseVideo();
-            }
-          } catch (e) {
-            debugPrint('Sync update error: $e');
+          final playing = await playback.isPlaying();
+          if (state.isPlaying != playing) {
+            state.isPlaying ? await playback.play() : await playback.pause();
           }
         }
         if (state is WatchPartyLeft) {
@@ -609,7 +386,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             bottomNavigationBar: _isHost
                 ? WebPlaybackControls(
                     controller: _webViewController!,
-                    watchPartyId: widget.watchParty.id,
+                    watchParty: widget.watchParty,
                   )
                 : null,
           ),

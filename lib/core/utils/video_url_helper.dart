@@ -32,7 +32,7 @@ class VideoUrlHelper {
   }
 
   static String getEmbedUrl(String url, String platformName) {
-    debugPrint('[] getEmbedUrl called for $platformName -> $url');
+    debugPrint('getEmbedUrl called for $platformName -> $url');
     if (platformName.toLowerCase().contains('youtube')) {
       final id = extractYoutubeVideoId(url);
       return 'https://www.youtube.com/embed/$id?modestbranding=1&controls=1&rel=0';
@@ -42,6 +42,7 @@ class VideoUrlHelper {
     } else if (platformName.toLowerCase().contains('dailymotion')) {
       final id = extractDailymotionVideoId(url);
       return 'https://www.dailymotion.com/embed/video/$id';
+      // return 'assets/html/dailymotion_player.html?id=$id';
     } else if (platformName == 'ted') {
       final id = extractTedVideoId(url);
       if (id.isNotEmpty) {
