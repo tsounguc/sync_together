@@ -1,8 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
+import 'package:sync_together/core/resources/media_resources.dart';
 import 'package:sync_together/core/resources/strings.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
+import 'package:sync_together/features/auth/data/models/user_model.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
 import 'package:sync_together/features/auth/presentation/views/forgot_password_screen.dart';
 import 'package:sync_together/features/auth/presentation/views/sign_up_screen.dart';
@@ -12,10 +15,10 @@ import 'package:sync_together/features/auth/presentation/widgets/login_form.dart
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
+  static const String id = '/login';
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
-
-  static const String id = '/login';
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -34,18 +37,20 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // void _signInWithGoogle(BuildContext context) {
-  //   context.read<AuthBloc>().add(const SignInWithGoogleEvent());
-  // }
-
   void _signInAnonymously(BuildContext context) {
-    context.read<AuthBloc>().add(
-          const SignInAnonymouslyEvent(),
-        );
+    context.read<AuthBloc>().add(const SignInAnonymouslyEvent());
   }
 
   @override
   Widget build(BuildContext context) {
+    final name = context.name;
+    final greetingTop = name != null ? 'Welcome Back\n' : 'Welcome 👋\n';
+    final greetingBottom =
+        name != null ? _randomGreeting(name) : 'Let’s get you signed in.';
+
+    final colorScheme = context.theme.colorScheme;
+    final textColor = colorScheme.onSurface;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -53,14 +58,38 @@ class _LoginScreenState extends State<LoginScreen> {
             shrinkWrap: true,
             padding: const EdgeInsets.all(24),
             children: [
-              const Text(
-                'Welcome Back',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+              Center(
+                child: Image.asset(
+                  MediaResources.appLogo,
+                  height: 120,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 25,
+              ),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: greetingTop,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    TextSpan(
+                      text: greetingBottom,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
               LoginForm(
                 formKey: _formKey,
                 emailController: _emailController,
@@ -68,22 +97,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPasswordFieldSubmitted: (_) => _signIn(context),
               ),
               BlocConsumer<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  debugPrint('LoginScreen Current state: $state');
+                listener: (context, state) async {
                   if (state is Authenticated) {
-                    Navigator.pushReplacementNamed(context, SplashScreen.id);
-                  }
-                  if (state is AuthError) {
+                    if (mounted) {
+                      await Navigator.pushReplacementNamed(
+                        context,
+                        SplashScreen.id,
+                      );
+                    }
+                  } else if (state is AuthError) {
                     CoreUtils.showSnackBar(context, state.message);
                   }
                 },
                 builder: (context, state) {
                   return state is AuthLoading
-                      ? const Column(
-                          children: [
-                            CircularProgressIndicator(),
-                          ],
-                        )
+                      ? const Center(child: CircularProgressIndicator())
                       : Column(
                           children: [
                             Align(
@@ -100,37 +128,47 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: context.theme.textTheme.bodyMedium?.color,
+                                    color: colorScheme.primary,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 50,
-                            ),
-                            ElevatedButton(
-                              onPressed: state is AuthLoading
-                                  ? null
-                                  : () => _signIn(
-                                        context,
+                            const SizedBox(height: 100),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () => _signIn(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorScheme.primary,
+                                  foregroundColor: colorScheme.onPrimary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                    horizontal: 25,
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.login,
+                                      color: colorScheme.onPrimary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Sign In',
+                                      style: TextStyle(
+                                        color: colorScheme.onPrimary,
                                       ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ],
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                  horizontal: 25,
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              child: const Text(
-                                'Sign In',
-                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                             const SizedBox(height: 30),
@@ -146,16 +184,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                   text: Strings.dontHaveAccountText,
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: context.theme.textTheme.bodyMedium?.color,
+                                    color: textColor,
                                   ),
-                                  children: const [
+                                  children: [
                                     TextSpan(
                                       text: Strings.registerTextButtonText,
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.blueAccent,
-                                        decorationThickness: 2,
+                                        color: colorScheme.primary,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: colorScheme.primary,
                                       ),
                                     ),
                                   ],
@@ -165,9 +204,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 12),
                             TextButton(
                               onPressed: () => _signInAnonymously(context),
-                              child: const Text(
+                              child: Text(
                                 'Continue as Guest',
-                                style: TextStyle(color: Colors.grey),
+                                style: TextStyle(
+                                  color: colorScheme.outline,
+                                  fontStyle: FontStyle.italic,
+                                ),
                               ),
                             ),
                           ],
@@ -179,5 +221,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  String _randomGreeting(String name) {
+    final greetings = [
+      'Good to see you again, $name 👋',
+      'Glad to see you again, $name 👋',
+      'Let’s jump back in, $name!',
+    ];
+    return greetings[Random().nextInt(greetings.length)];
   }
 }

@@ -142,6 +142,7 @@ Future<void> _initFriend() async {
 }
 
 Future<void> _initAuth() async {
+  final prefs = await SharedPreferences.getInstance();
   serviceLocator
     // App Logic
     ..registerFactory(
@@ -184,5 +185,6 @@ Future<void> _initAuth() async {
     ..registerLazySingleton(() => FirebaseAuth.instance)
     ..registerLazySingleton(() => FirebaseFirestore.instance)
     ..registerLazySingleton(() => FirebaseStorage.instance)
-    ..registerLazySingleton(GoogleSignIn.new);
+    ..registerLazySingleton(GoogleSignIn.new)
+    ..registerLazySingleton(() => prefs);
 }

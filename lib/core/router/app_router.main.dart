@@ -21,10 +21,12 @@ class AppRouter {
               );
 
               context.userProvider.initUser(localUser);
+              context.greetingProvider.cacheName(user.displayName!);
               return MultiBlocProvider(
                 providers: [
                   BlocProvider(
-                    create: (context) => serviceLocator<WatchPartySessionBloc>(),
+                    create: (context) =>
+                        serviceLocator<WatchPartySessionBloc>(),
                   ),
                   BlocProvider(
                     create: (context) => serviceLocator<PublicPartiesCubit>(),
@@ -198,6 +200,7 @@ PageRouteBuilder<dynamic> _pageBuilder(
 
 class WatchPartyScreenArguments {
   const WatchPartyScreenArguments(this.watchParty, this.platform);
+
   final WatchParty watchParty;
   final StreamingPlatform platform;
 }
@@ -207,6 +210,7 @@ class PlatformVideoPickerScreenArgument {
     required this.watchParty,
     required this.platform,
   });
+
   final WatchParty watchParty;
   final StreamingPlatform platform;
 }
