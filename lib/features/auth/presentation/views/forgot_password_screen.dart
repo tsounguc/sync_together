@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/i_field.dart';
+import 'package:sync_together/core/resources/media_resources.dart';
 import 'package:sync_together/core/resources/strings.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/auth/presentation/auth_bloc/auth_bloc.dart';
@@ -26,17 +28,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+  void _submit(BuildContext context) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    FirebaseAuth.instance.currentUser?.reload();
+    if (formKey.currentState!.validate()) {
+      context.read<AuthBloc>().add(
+            ForgotPasswordEvent(
+              email: emailController.text.trim(),
+            ),
+          );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.theme.colorScheme;
+    final textColor = colorScheme.onSurface;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text(
-          'Reset Password',
-          style: TextStyle(
-              // color: Colors.white,
-              ),
-        ),
+        title: const Text('Reset Password'),
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (_, state) {
@@ -54,79 +66,65 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           }
         },
         builder: (context, state) {
+          final isSent = state is ForgotPasswordSent;
           return SafeArea(
-            child: Padding(
+            child: ListView(
+              shrinkWrap: true,
               padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          state is ForgotPasswordSent ? Strings.passwordSentText : Strings.passwordNotSentText,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
+              children: [
+                Center(
+                  child: Image.asset(
+                    MediaResources.appLogo,
+                    height: 100,
                   ),
-                  const SizedBox(height: 20),
-                  Visibility(
-                    visible: state is! ForgotPasswordSent,
-                    child: Form(
-                      key: formKey,
-                      child: IField(
-                        controller: emailController,
-                        hintText: Strings.emailHintText,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  isSent
+                      ? Strings.passwordSentText
+                      : Strings.passwordNotSentText,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: colorScheme.outline,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                if (!isSent)
+                  Form(
+                    key: formKey,
+                    child: IField(
+                      controller: emailController,
+                      hintText: Strings.emailHintText,
+                      keyboardType: TextInputType.emailAddress,
                     ),
                   ),
-                  const SizedBox(height: 50),
-                  if (state is AuthLoading)
-                    const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  else if (state is! ForgotPasswordSent)
-                    ElevatedButton(
-                      onPressed: () {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        FirebaseAuth.instance.currentUser?.reload();
-                        if (formKey.currentState!.validate()) {
-                          context.read<AuthBloc>().add(
-                                ForgotPasswordEvent(
-                                  email: emailController.text.trim(),
-                                ),
-                              );
-                        }
-                      },
+                const SizedBox(height: 40),
+                if (state is AuthLoading)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                else if (!isSent)
+                  SizedBox(
+                    child: ElevatedButton(
+                      onPressed: () => _submit(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           vertical: 14,
-                          horizontal: 20,
                         ),
                         textStyle: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
                         ),
                       ),
                       child: const Text(
                         Strings.resetPasswordButtonText,
-                        style: TextStyle(color: Colors.white),
                       ),
                     ),
-                  const SizedBox(height: 30),
-                ],
-              ),
+                  ),
+                const SizedBox(height: 30),
+              ],
             ),
           );
         },
