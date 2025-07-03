@@ -133,14 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 100),
+                            const SizedBox(height: 80),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () => _signIn(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: colorScheme.primary,
-                                  foregroundColor: colorScheme.onPrimary,
+                                  foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -153,19 +153,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
                                       Icons.login,
-                                      color: colorScheme.onPrimary,
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: 8),
                                     Text(
                                       'Sign In',
-                                      style: TextStyle(
-                                        color: colorScheme.onPrimary,
-                                      ),
                                     ),
                                   ],
                                 ),
@@ -193,8 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: colorScheme.primary,
-                                        decoration: TextDecoration.underline,
+                                        // decoration: TextDecoration.underline,
                                         decorationColor: colorScheme.primary,
+                                        decorationThickness: 3,
                                       ),
                                     ),
                                   ],

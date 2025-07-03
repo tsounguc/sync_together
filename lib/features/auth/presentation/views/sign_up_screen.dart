@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
+import 'package:sync_together/core/resources/media_resources.dart';
 import 'package:sync_together/core/resources/strings.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/auth/data/models/user_model.dart';
@@ -11,6 +12,7 @@ import 'package:sync_together/features/auth/presentation/widgets/sign_up_form.da
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
+
   static const String id = '/signup';
 
   @override
@@ -38,21 +40,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.theme.colorScheme;
+    final textColor = colorScheme.onSurface;
+
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: Center(
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            shrinkWrap: true,
             children: [
+              Center(
+                child: Image.asset(
+                  MediaResources.appLogo,
+                  height: 120,
+                ),
+              ),
+              const SizedBox(height: 25),
               const Text(
                 'Create an Account',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
+              Text(
+                'Start your synced watch party experience.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: colorScheme.outline,
+                ),
+              ),
+              const SizedBox(height: 30),
               SignUpForm(
                 formKey: _formKey,
                 nameController: _nameController,
@@ -60,7 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 passwordController: _passwordController,
                 confirmPasswordController: _confirmPasswordController,
               ),
-              const SizedBox(height: 35),
+              const SizedBox(height: 40),
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
                   if (state is Authenticated) {
@@ -75,30 +95,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ? const CircularProgressIndicator()
                       : Column(
                           children: [
-                            ElevatedButton(
-                              onPressed: state is AuthLoading
-                                  ? null
-                                  : () => _signUp(
-                                        context,
-                                      ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: state is AuthLoading
+                                    ? null
+                                    : () => _signUp(
+                                          context,
+                                        ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorScheme.primary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                  horizontal: 25,
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              child: const Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  color: Colors.white,
+                                child: const Text(
+                                  'Sign Up',
                                 ),
                               ),
                             ),
@@ -115,16 +135,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   text: Strings.alreadyHaveAccountText,
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: context.theme.textTheme.bodyMedium?.color,
+                                    color: textColor,
                                   ),
-                                  children: const [
+                                  children: [
                                     TextSpan(
                                       text: Strings.loginTextButtonText,
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.blueAccent,
-                                        decorationThickness: 2,
+                                        color: colorScheme.primary,
+                                        // decoration: TextDecoration.underline,
+                                        decorationColor: colorScheme.primary,
+                                        decorationThickness: 3,
                                       ),
                                     ),
                                   ],
