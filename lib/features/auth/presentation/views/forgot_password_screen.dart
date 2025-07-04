@@ -85,7 +85,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       : Strings.passwordNotSentText,
                   style: TextStyle(
                     fontSize: 16,
-                    color: colorScheme.outline,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 24),

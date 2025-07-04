@@ -56,6 +56,16 @@ class WatchPartyFetched extends WatchPartySessionState {
   List<Object?> get props => [watchParty];
 }
 
+/// Success state for getting getting user by id
+class UserLoaded extends WatchPartySessionState {
+  const UserLoaded(this.user);
+
+  final UserEntity user;
+
+  @override
+  List<Object?> get props => [user];
+}
+
 /// Success state for getting watch party
 class WatchPartyLeft extends WatchPartySessionState {
   const WatchPartyLeft();

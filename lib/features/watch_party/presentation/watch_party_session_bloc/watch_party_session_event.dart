@@ -78,6 +78,18 @@ class UpdateVideoUrlEvent extends WatchPartyEvent {
   List<Object?> get props => [partyId, newUrl];
 }
 
+/// Event to get user by Id
+class GetUserByIdEvent extends WatchPartyEvent {
+  const GetUserByIdEvent({
+    required this.userId,
+  });
+
+  final String userId;
+
+  @override
+  List<Object?> get props => [userId];
+}
+
 /// Event to get watch party state
 class GetWatchPartyEvent extends WatchPartyEvent {
   const GetWatchPartyEvent(

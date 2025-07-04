@@ -67,20 +67,50 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {},
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              _buildWelcomeBanner(name, colorScheme),
-              const SizedBox(height: 20),
-              _buildQuickActions(name, colorScheme),
-              const SizedBox(height: 30),
-              _buildFriendsSummary(context),
-              const SizedBox(height: 30),
-              _buildPublicPartiesSection(context),
-            ],
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              debugPrint('HomeScreen Current state: $state');
+              if (state is AuthError) {
+                CoreUtils.showSnackBar(context, state.message);
+              }
+              if (state is Unauthenticated) {
+                debugPrint('Navigating back to login');
+                context.userProvider.user = null;
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  SplashScreen.id,
+                  (route) => false,
+                );
+              }
+            },
+          ),
+          BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
+            listener: (context, state) {
+              if (state is WatchPartyError) {
+                CoreUtils.showSnackBar(
+                  context,
+                  state.message,
+                );
+              }
+            },
+          ),
+        ],
+        child: RefreshIndicator(
+          onRefresh: () async {},
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _buildWelcomeBanner(name, colorScheme),
+                const SizedBox(height: 35),
+                _buildFriendsSummary(context),
+                const SizedBox(height: 30),
+                _buildQuickActions(name, colorScheme),
+                const SizedBox(height: 30),
+                _buildPublicPartiesSection(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -204,18 +234,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildWelcomeBanner(String name, ColorScheme colorScheme) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         '👋 Welcome back, $name!\nStart or join a party and stay connected.',
-        style: TextStyle(
-          fontSize: 18,
-          color: colorScheme.onPrimaryContainer,
+        style: theme.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -232,8 +261,6 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             Navigator.pushNamed(context, PlatformSelectionScreen.id);
           },
-          color: colorScheme.primary,
-          iconColor: colorScheme.onPrimary,
         ),
         _quickActionButton(
           icon: Icons.person_add_alt_1,
@@ -241,8 +268,6 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             Navigator.pushNamed(context, FriendsScreen.id);
           },
-          color: colorScheme.secondary,
-          iconColor: colorScheme.onSecondary,
         ),
       ],
     );
@@ -252,20 +277,25 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String label,
     required Null Function() onTap,
-    required Color color,
-    required Color iconColor,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final bgColor = colorScheme.surfaceContainerHighest;
+    final iconColor = colorScheme.primary;
+    final textColor = colorScheme.onSurface;
     return GestureDetector(
-      onDoubleTap: onTap,
+      onTap: onTap,
       child: Column(
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: color,
+            backgroundColor: bgColor,
             child: Icon(icon, color: iconColor, size: 28),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: textColor),
+          ),
         ],
       ),
     );
@@ -317,24 +347,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-              ...state.parties.take(3).map((party) => Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: state.parties.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final party = state.parties[index];
+
+                  // Dispatch to load host name (WatchPartyTile will read it)
+                  context
+                      .read<WatchPartySessionBloc>()
+                      .add(GetUserByIdEvent(userId: party.hostId));
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: WatchPartyTile(
+                      party: party,
+                      onPressed: () => _joinRoom(party),
                     ),
-                    child: ListTile(
-                      title: Text(party.title),
-                      subtitle: Text('Host: ${party.hostId}'),
-                      trailing: const Icon(Icons.arrow_forward),
-                      onTap: () => _joinRoom(party),
-                    ),
-                  )),
-              if (state.parties.length > 3)
-                TextButton(
-                  onPressed: () {
-                    context.read<PublicPartiesCubit>().fetchPublicParties();
-                  },
-                  child: const Text('See More'),
-                ),
+                  );
+                },
+              ),
             ],
           );
         }

@@ -27,7 +27,8 @@ part 'watch_party_session_event.dart';
 
 part 'watch_party_session_state.dart';
 
-class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState> {
+class WatchPartySessionBloc
+    extends Bloc<WatchPartyEvent, WatchPartySessionState> {
   WatchPartySessionBloc({
     required this.createWatchParty,
     required this.joinWatchParty,
@@ -63,6 +64,7 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
       _onGetSyncedData,
       transformer: restartable(),
     );
+    on<GetUserByIdEvent>(_onGetUserById);
     on<ListenToPartyExistenceEvent>(
       _onWatchPartyEnded,
       transformer: restartable(),
@@ -334,6 +336,17 @@ class WatchPartySessionBloc extends Bloc<WatchPartyEvent, WatchPartySessionState
       onDone: () {
         subscription?.cancel();
       },
+    );
+  }
+
+  Future<void> _onGetUserById(
+    GetUserByIdEvent event,
+    Emitter<WatchPartySessionState> emit,
+  ) async {
+    final result = await getUserById(event.userId);
+    result.fold(
+      (failure) => emit(WatchPartyError(failure.message)),
+      (user) => emit(UserLoaded(user)),
     );
   }
 

@@ -69,7 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 'Start your synced watch party experience.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: colorScheme.outline,
+                  color: textColor,
                 ),
               ),
               const SizedBox(height: 30),
