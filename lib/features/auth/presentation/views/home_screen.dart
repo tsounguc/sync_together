@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final bgColor = colorScheme.surfaceContainerHighest;
-    final iconColor = colorScheme.primary;
+    final iconColor = colorScheme.onSurface;
     final textColor = colorScheme.onSurface;
     return GestureDetector(
       onTap: onTap,
@@ -356,9 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final party = state.parties[index];
 
                   // Dispatch to load host name (WatchPartyTile will read it)
-                  context
-                      .read<WatchPartySessionBloc>()
-                      .add(GetUserByIdEvent(userId: party.hostId));
+                  context.read<WatchPartySessionBloc>().add(GetUserByIdEvent(userId: party.hostId));
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
