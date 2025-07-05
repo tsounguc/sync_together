@@ -25,7 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   File? _selectedImage;
 
-  bool get nameChanged => context.currentUser?.displayName?.trim() != _displayNameController.text.trim();
+  bool get nameChanged =>
+      context.currentUser?.displayName?.trim() !=
+      _displayNameController.text.trim();
 
   bool get emailChanged => _emailController.text.trim().isNotEmpty;
 
@@ -88,70 +90,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     // Fetch updated user profile when entering the screen
-    _displayNameController.text = context.currentUser?.displayName?.trim() ?? '';
+    _displayNameController.text =
+        context.currentUser?.displayName?.trim() ?? '';
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Profile Settings')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: _selectedImage != null
-                    ? FileImage(_selectedImage!)
-                    : context.currentUser?.photoUrl != null
-                        ? NetworkImage(context.currentUser!.photoUrl!)
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is Authenticated) {
+            context.userProvider.user = state.user as UserModel?;
+          }
+          if (state is UserProfileUpdated) {
+            CoreUtils.showSnackBar(
+              context,
+              'Profile Updated Successfully',
+            );
+            context.read<AuthBloc>().add(const GetCurrentUserEvent());
+          } else if (state is AuthError) {
+            CoreUtils.showSnackBar(context, state.message);
+          }
+        },
+        builder: (context, state) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: _selectedImage != null
+                        ? FileImage(_selectedImage!)
+                        : context.currentUser?.photoUrl != null
+                            ? NetworkImage(context.currentUser!.photoUrl!)
+                            : null,
+                    child: _selectedImage == null &&
+                            context.currentUser?.photoUrl == null
+                        ? const Icon(Icons.camera_alt, size: 40)
                         : null,
-                child: _selectedImage == null && context.currentUser?.photoUrl == null
-                    ? const Icon(Icons.camera_alt, size: 40)
-                    : null,
-              ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                IField(
+                  controller: _displayNameController,
+                  hintText: context.currentUser?.displayName,
+                  borderColor: Colors.transparent,
+                ),
+                IField(
+                  controller: _emailController,
+                  hintText: context.currentUser?.email?.obscureEmail,
+                  borderColor: Colors.transparent,
+                ),
+                const SizedBox(height: 30),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.dividerColor),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Dark Mode'),
+                      Switch(
+                        value: context.themeMode == ThemeMode.dark,
+                        onChanged: (value) {
+                          context.themeModeProvider.setThemeMode(
+                            value ? ThemeMode.dark : ThemeMode.light,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+                if (state is AuthLoading)
+                  const CircularProgressIndicator()
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _updateProfile,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Save Changes'),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 20),
-            IField(
-              controller: _displayNameController,
-              hintText: context.currentUser?.displayName,
-              borderColor: Colors.transparent,
-            ),
-            IField(
-              controller: _emailController,
-              hintText: context.currentUser?.email?.obscureEmail,
-              borderColor: Colors.transparent,
-            ),
-            const SizedBox(height: 20),
-            BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is Authenticated) {
-                  context.userProvider.user = state.user as UserModel?;
-                }
-                if (state is UserProfileUpdated) {
-                  CoreUtils.showSnackBar(
-                    context,
-                    'Profile Updated Successfully',
-                  );
-                  context.read<AuthBloc>().add(const GetCurrentUserEvent());
-                } else if (state is AuthError) {
-                  CoreUtils.showSnackBar(context, state.message);
-                }
-              },
-              builder: (context, state) {
-                return state is AuthLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _updateProfile,
-                        child: const Text('Save Changes'),
-                      );
-              },
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

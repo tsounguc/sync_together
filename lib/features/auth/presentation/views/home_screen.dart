@@ -115,122 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-    // return MultiBlocListener(
-    //   listeners: [
-    //     BlocListener<AuthBloc, AuthState>(
-    //       listener: (context, state) {
-    //         debugPrint('HomeScreen Current state: $state');
-    //         if (state is AuthError) {
-    //           CoreUtils.showSnackBar(context, state.message);
-    //         }
-    //         if (state is Unauthenticated) {
-    //           debugPrint('Navigating back to login');
-    //           context.userProvider.user = null;
-    //           Navigator.of(context).pushNamedAndRemoveUntil(
-    //             SplashScreen.id,
-    //             (route) => false,
-    //           );
-    //         }
-    //       },
-    //     ),
-    //     BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
-    //       listener: (context, state) {
-    //         if (state is WatchPartyError) {
-    //           CoreUtils.showSnackBar(
-    //             context,
-    //             state.message,
-    //           );
-    //         }
-    //       },
-    //     ),
-    //   ],
-    //   child: Scaffold(
-    //     appBar: AppBar(
-    //       title: const Text('SyncTogether'),
-    //       actions: [
-    //         IconButton(
-    //           icon: const Icon(Icons.group),
-    //           tooltip: 'Friends',
-    //           onPressed: () {
-    //             Navigator.pushNamed(context, FriendsScreen.id);
-    //           },
-    //         ),
-    //         IconButton(
-    //           icon: const Icon(Icons.person),
-    //           tooltip: 'Profile Settings',
-    //           onPressed: () {
-    //             Navigator.pushNamed(context, ProfileScreen.id);
-    //           },
-    //         ),
-    //         IconButton(
-    //           icon: const Icon(Icons.logout),
-    //           tooltip: 'Logout',
-    //           onPressed: () {
-    //             context.read<AuthBloc>().add(const SignOutEvent());
-    //           },
-    //         ),
-    //       ],
-    //     ),
-    //     body: BlocBuilder<PublicPartiesCubit, WatchPartyListState>(
-    //       builder: (context, state) {
-    //         if (state is WatchPartyListLoading) {
-    //           return const ShimmerPartyList();
-    //         } else if (state is WatchPartyListLoaded) {
-    //           if (state.parties.isEmpty) {
-    //             return const Center(child: Text('No public watch parties.'));
-    //           }
-    //
-    //           return LayoutBuilder(
-    //             builder: (context, constraints) {
-    //               final isWideScreen = constraints.maxWidth > 800;
-    //               return isWideScreen
-    //                   ? GridView.builder(
-    //                       padding: const EdgeInsets.all(16),
-    //                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    //                         crossAxisCount: 3,
-    //                         mainAxisSpacing: 12,
-    //                         crossAxisSpacing: 12,
-    //                         childAspectRatio: 3,
-    //                       ),
-    //                       itemCount: state.parties.length,
-    //                       itemBuilder: (context, index) => WatchPartyTile(
-    //                         party: state.parties[index],
-    //                         onPressed: () => _joinRoom(state.parties[index]),
-    //                       ),
-    //                     )
-    //                   : ListView.separated(
-    //                       shrinkWrap: true,
-    //                       padding: const EdgeInsets.all(16),
-    //                       itemCount: state.parties.length,
-    //                       separatorBuilder: (_, __) => const SizedBox(
-    //                         height: 12,
-    //                       ),
-    //                       itemBuilder: (context, index) => WatchPartyTile(
-    //                         party: state.parties[index],
-    //                         onPressed: () => _joinRoom(state.parties[index]),
-    //                       ),
-    //                     );
-    //             },
-    //           );
-    //         } else if (state is WatchPartyListError) {
-    //           return Center(
-    //             child: Text(state.message),
-    //           );
-    //         }
-    //         return const SizedBox();
-    //       },
-    //     ),
-    //     floatingActionButton: FloatingActionButton.extended(
-    //       onPressed: () {
-    //         Navigator.pushNamed(
-    //           context,
-    //           PlatformSelectionScreen.id,
-    //         );
-    //       },
-    //       label: const Text('Create Room'),
-    //     ),
-    //   ),
-    // );
   }
 
   Widget _buildWelcomeBanner(String name, ColorScheme colorScheme) {
@@ -356,14 +240,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   final party = state.parties[index];
 
                   // Dispatch to load host name (WatchPartyTile will read it)
-                  context.read<WatchPartySessionBloc>().add(GetUserByIdEvent(userId: party.hostId));
+                  context
+                      .read<WatchPartySessionBloc>()
+                      .add(GetUserByIdEvent(userId: party.hostId));
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: WatchPartyTile(
-                      party: party,
-                      onPressed: () => _joinRoom(party),
-                    ),
+                  return WatchPartyTile(
+                    party: party,
+                    onPressed: () => _joinRoom(party),
                   );
                 },
               ),
