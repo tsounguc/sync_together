@@ -41,7 +41,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           children: [
             // 📌 Navigation Buttons
             _buildActionButtons(context),
-
+            SizedBox(height: 25),
             // 📌 Friends List
             Expanded(child: _buildFriendsList(context)),
           ],
@@ -104,13 +104,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
           return Center(
             child: Text(
               '⚠️ ${state.message}',
-              style: context.theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
+              style: context.theme.textTheme.bodyLarge
+                  ?.copyWith(color: Colors.red),
             ),
           );
         } else if (state is FriendsLoaded) {
           final friends = state.friends;
           if (friends.isEmpty) {
-            return const Center(child: Text('You haven’t added any friends yet.'));
+            return const Center(
+                child: Text('You haven’t added any friends yet.'));
           }
 
           return ListView.separated(

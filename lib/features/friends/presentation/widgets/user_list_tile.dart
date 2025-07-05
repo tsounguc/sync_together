@@ -3,15 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/features/auth/domain/entities/user.dart';
 import 'package:sync_together/features/friends/data/models/friend_request_model.dart';
+import 'package:sync_together/features/friends/domain/entities/friend.dart';
 import 'package:sync_together/features/friends/presentation/friends_bloc/friends_bloc.dart';
 
 class UserListTile extends StatelessWidget {
   const UserListTile({
     required this.user,
+    required this.alreadyFriends,
     super.key,
   });
 
   final UserEntity user;
+  final bool alreadyFriends;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,7 @@ class UserListTile extends StatelessWidget {
             // User info
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.only(right: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -67,16 +70,27 @@ class UserListTile extends StatelessWidget {
             // Add friend button
             ElevatedButton(
               onPressed: () {
-                context.read<FriendsBloc>().add(
-                      SendFriendRequestEvent(
-                        FriendRequestModel.empty().copyWith(
-                          senderId: context.currentUser!.uid,
-                          senderName: context.currentUser!.displayName,
-                          receiverId: user.uid,
-                          receiverName: user.displayName,
-                        ),
+                final bloc = context.read<FriendsBloc>();
+
+                if (!alreadyFriends) {
+                  bloc.add(
+                    SendFriendRequestEvent(
+                      FriendRequestModel.empty().copyWith(
+                        senderId: context.currentUser!.uid,
+                        senderName: context.currentUser!.displayName,
+                        receiverId: user.uid,
+                        receiverName: user.displayName,
                       ),
-                    );
+                    ),
+                  );
+                } else if (alreadyFriends) {
+                  bloc.add(
+                    RemoveFriendEvent(
+                      senderId: context.currentUser!.uid,
+                      receiverId: user.uid,
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 padding:
@@ -85,7 +99,7 @@ class UserListTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text('Add'),
+              child: Text(alreadyFriends ? 'Remove' : 'Add'),
             ),
           ],
         ),
