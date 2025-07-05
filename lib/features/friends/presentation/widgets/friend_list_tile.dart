@@ -72,14 +72,57 @@ class FriendListTile extends StatelessWidget {
             ),
 
             // Remove icon
-            IconButton(
-              icon: const Icon(Icons.remove_circle),
-              color: Colors.redAccent,
-              tooltip: 'Remove Friend',
-              onPressed: () => _removeFriend(context),
+            ElevatedButton(
+              onPressed: () => _showRemoveConfirmationDialog(context, () {
+                _removeFriend(context);
+              }),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.remove_circle,
+                    size: 18,
+                  ),
+                  SizedBox(width: 6),
+                  Text('Remove'),
+                ],
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showRemoveConfirmationDialog(
+      BuildContext context, VoidCallback onConfirm) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Friend'),
+        content: const Text(
+          'Are you sure you want to remove this friend?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cancel
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              onConfirm(); // Execute removal
+            },
+            child: const Text('Remove'),
+          ),
+        ],
       ),
     );
   }

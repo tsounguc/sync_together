@@ -16,6 +16,32 @@ class UserListTile extends StatelessWidget {
   final UserEntity user;
   final bool alreadyFriends;
 
+  void _showRemoveConfirmationDialog(
+      BuildContext context, VoidCallback onConfirm) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Friend'),
+        content: const Text(
+          'Are you sure you want to remove this friend?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cancel
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              onConfirm(); // Execute removal
+            },
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -87,12 +113,14 @@ class UserListTile extends StatelessWidget {
                           ),
                         );
                       } else if (alreadyFriends) {
-                        bloc.add(
-                          RemoveFriendEvent(
-                            senderId: context.currentUser!.uid,
-                            receiverId: user.uid,
-                          ),
-                        );
+                        _showRemoveConfirmationDialog(context, () {
+                          bloc.add(
+                            RemoveFriendEvent(
+                              senderId: context.currentUser!.uid,
+                              receiverId: user.uid,
+                            ),
+                          );
+                        });
                       }
                     },
               style: ElevatedButton.styleFrom(

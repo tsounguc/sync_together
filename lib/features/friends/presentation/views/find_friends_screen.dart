@@ -42,7 +42,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Find Friends')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // 🔍 Search Bar

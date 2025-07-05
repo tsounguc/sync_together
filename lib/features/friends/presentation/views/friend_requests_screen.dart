@@ -34,10 +34,11 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Friend Requests')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: BlocConsumer<FriendsBloc, FriendsState>(
           listener: (listener, state) {
-            if (state is FriendRequestRejected || state is FriendRequestAccepted) {
+            if (state is FriendRequestRejected ||
+                state is FriendRequestAccepted) {
               _loadFriendRequests();
             }
           },

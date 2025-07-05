@@ -115,9 +115,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 child: Text('You haven’t added any friends yet.'));
           }
 
-          return ListView.separated(
+          return ListView.builder(
             itemCount: friends.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final friend = friends[index];
               return FriendListTile(friend: friend);
