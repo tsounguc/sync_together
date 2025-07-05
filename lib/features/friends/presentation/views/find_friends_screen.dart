@@ -89,15 +89,12 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final user = state.users[index];
-                        var alreadyFriends = false;
-                        for (final friends in friendsList) {
-                          print(friends);
-                          if (friends.friendship
-                                  .contains(context.currentUser!.uid) &&
-                              friends.friendship.contains(user.uid)) {
-                            alreadyFriends = true;
-                          }
-                        }
+                        final currentUserId = context.currentUser!.uid;
+                        final alreadyFriends = friendsList.any(
+                          (f) =>
+                              f.friendship.contains(currentUserId) &&
+                              f.friendship.contains(user.uid),
+                        );
                         return UserListTile(
                           user: state.users[index],
                           alreadyFriends: alreadyFriends,

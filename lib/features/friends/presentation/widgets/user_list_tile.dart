@@ -20,6 +20,7 @@ class UserListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isSelf = user.uid == context.currentUser!.uid;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -69,29 +70,31 @@ class UserListTile extends StatelessWidget {
 
             // Add friend button
             ElevatedButton(
-              onPressed: () {
-                final bloc = context.read<FriendsBloc>();
+              onPressed: isSelf
+                  ? null
+                  : () {
+                      final bloc = context.read<FriendsBloc>();
 
-                if (!alreadyFriends) {
-                  bloc.add(
-                    SendFriendRequestEvent(
-                      FriendRequestModel.empty().copyWith(
-                        senderId: context.currentUser!.uid,
-                        senderName: context.currentUser!.displayName,
-                        receiverId: user.uid,
-                        receiverName: user.displayName,
-                      ),
-                    ),
-                  );
-                } else if (alreadyFriends) {
-                  bloc.add(
-                    RemoveFriendEvent(
-                      senderId: context.currentUser!.uid,
-                      receiverId: user.uid,
-                    ),
-                  );
-                }
-              },
+                      if (!alreadyFriends) {
+                        bloc.add(
+                          SendFriendRequestEvent(
+                            FriendRequestModel.empty().copyWith(
+                              senderId: context.currentUser!.uid,
+                              senderName: context.currentUser!.displayName,
+                              receiverId: user.uid,
+                              receiverName: user.displayName,
+                            ),
+                          ),
+                        );
+                      } else if (alreadyFriends) {
+                        bloc.add(
+                          RemoveFriendEvent(
+                            senderId: context.currentUser!.uid,
+                            receiverId: user.uid,
+                          ),
+                        );
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -99,7 +102,22 @@ class UserListTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text(alreadyFriends ? 'Remove' : 'Add'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isSelf)
+                    Icon(
+                      alreadyFriends ? Icons.remove_circle : Icons.person_add,
+                      size: 18,
+                    ),
+                  if (!isSelf) const SizedBox(width: 6),
+                  Text(isSelf
+                      ? 'You'
+                      : alreadyFriends
+                          ? 'Remove'
+                          : 'Add'),
+                ],
+              ),
             ),
           ],
         ),
