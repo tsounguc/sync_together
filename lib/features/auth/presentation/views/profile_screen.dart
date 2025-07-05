@@ -98,7 +98,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile Settings')),
@@ -137,42 +136,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : null,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 35),
                 IField(
                   controller: _displayNameController,
                   hintText: context.currentUser?.displayName,
-                  borderColor: Colors.transparent,
+                  // borderColor: Colors.transparent,
                 ),
+                const SizedBox(height: 15),
                 IField(
                   controller: _emailController,
                   hintText: context.currentUser?.email?.obscureEmail,
-                  borderColor: Colors.transparent,
+                  // borderColor: Colors.transparent,
                 ),
                 const SizedBox(height: 30),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: theme.dividerColor),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Dark Mode'),
-                      Switch(
-                        value: context.themeMode == ThemeMode.dark,
-                        onChanged: (value) {
-                          context.themeModeProvider.setThemeMode(
-                            value ? ThemeMode.dark : ThemeMode.light,
-                          );
-                        },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<ThemeMode>(
+                      value: context.themeMode,
+                      items: const [
+                        DropdownMenuItem(
+                          value: ThemeMode.system,
+                          child: Text('System Default'),
+                        ),
+                        DropdownMenuItem(
+                          value: ThemeMode.light,
+                          child: Text('Light Mode'),
+                        ),
+                        DropdownMenuItem(
+                          value: ThemeMode.dark,
+                          child: Text('Dark Mode'),
+                        ),
+                      ],
+                      onChanged: (mode) {
+                        if (mode != null) {
+                          context.themeModeProvider.setThemeMode(mode);
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(borderSide: BorderSide.none),
+                        filled: true,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 35),
                 if (state is AuthLoading)
                   const CircularProgressIndicator()
                 else
