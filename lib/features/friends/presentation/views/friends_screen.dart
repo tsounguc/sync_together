@@ -17,6 +17,7 @@ class FriendsScreen extends StatefulWidget {
 
 class _FriendsScreenState extends State<FriendsScreen> {
   late String? userId;
+
   @override
   void initState() {
     super.initState();
@@ -30,73 +31,98 @@ class _FriendsScreenState extends State<FriendsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Friends')),
-      body: Column(
-        children: [
-          // 📌 Navigation Buttons
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('Friend Requests'),
-                  onPressed: () {
-                    Navigator.pushNamed(context, FriendRequestsScreen.id);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(45),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.search),
-                  label: const Text('Find Friends'),
-                  onPressed: () {
-                    Navigator.pushNamed(context, FindFriendsScreen.id);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(45),
-                  ),
-                ),
-              ],
-            ),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // 📌 Navigation Buttons
+            _buildActionButtons(context),
 
-          // 📌 Friends List
-          Expanded(
-            child: BlocConsumer<FriendsBloc, FriendsState>(
-              listener: (context, state) {
-                if (state is FriendRemoved) {
-                  context.read<FriendsBloc>().add(
-                        GetFriendsEvent(userId: userId!),
-                      );
-                }
-              },
-              builder: (context, state) {
-                debugPrint('FriendState: $state');
-                if (state is FriendsLoadingState) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is FriendsLoaded) {
-                  final friends = state.friends;
-                  if (friends.isEmpty) {
-                    return const Center(child: Text('No friends yet.'));
-                  }
-                  return ListView.builder(
-                    itemCount: friends.length,
-                    itemBuilder: (context, index) {
-                      final friend = friends[index];
-                      return FriendListTile(friend: friend);
-                    },
-                  );
-                } else if (state is FriendsError) {
-                  return Center(child: Text('Error: ${state.message}'));
-                }
-                return const Center(child: Text('Loading...'));
-              },
+            // 📌 Friends List
+            Expanded(child: _buildFriendsList(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.person_add),
+            label: const Text('Friend Requests'),
+            onPressed: () {
+              Navigator.pushNamed(context, FriendRequestsScreen.id);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.search),
+            label: const Text('Find Friends'),
+            onPressed: () {
+              Navigator.pushNamed(context, FindFriendsScreen.id);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFriendsList(BuildContext context) {
+    return BlocConsumer<FriendsBloc, FriendsState>(
+      listener: (context, state) {
+        if (state is FriendRemoved && userId != null) {
+          context.read<FriendsBloc>().add(GetFriendsEvent(userId: userId!));
+        }
+      },
+      builder: (context, state) {
+        if (state is FriendsLoadingState) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is FriendsError) {
+          return Center(
+            child: Text(
+              '⚠️ ${state.message}',
+              style: context.theme.textTheme.bodyLarge
+                  ?.copyWith(color: Colors.red),
+            ),
+          );
+        } else if (state is FriendsLoaded) {
+          final friends = state.friends;
+          if (friends.isEmpty) {
+            return const Center(
+                child: Text('You haven’t added any friends yet.'));
+          }
+
+          return ListView.separated(
+            itemCount: friends.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final friend = friends[index];
+              return FriendListTile(friend: friend);
+            },
+          );
+        }
+
+        return const Center(child: Text('Loading...'));
+      },
     );
   }
 }

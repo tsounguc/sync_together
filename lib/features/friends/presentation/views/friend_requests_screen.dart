@@ -25,30 +25,48 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Friend Requests')),
-      body: BlocBuilder<FriendsBloc, FriendsState>(
-        builder: (context, state) {
-          debugPrint('FriendRequestScreen: $state');
-          if (state is FriendsLoadingState) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is FriendRequestsLoaded) {
-            final requests = state.requests;
-            if (requests.isEmpty) {
-              return const Center(child: Text('No incoming friend requests.'));
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: BlocBuilder<FriendsBloc, FriendsState>(
+          builder: (context, state) {
+            if (state is FriendsLoadingState) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is FriendRequestsLoaded) {
+              final requests = state.requests;
+
+              if (requests.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No incoming friend requests.',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                itemCount: requests.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final request = requests[index];
+                  return FriendRequestTile(request: request);
+                },
+              );
+            } else if (state is FriendsError) {
+              return Center(
+                child: Text(
+                  '⚠️ ${state.message}',
+                  style: theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
+                ),
+              );
             }
-            return ListView.builder(
-              itemCount: requests.length,
-              itemBuilder: (context, index) {
-                final request = requests[index];
-                return FriendRequestTile(request: request);
-              },
-            );
-          } else if (state is FriendsError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
-          return const Center(child: Text('Loading...'));
-        },
+
+            return const Center(child: Text('Loading...'));
+          },
+        ),
       ),
     );
   }

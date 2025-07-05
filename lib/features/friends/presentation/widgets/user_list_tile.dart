@@ -15,31 +15,80 @@ class UserListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: user.photoUrl != null
-            ? NetworkImage(
-                user.photoUrl!,
-              )
-            : null,
-        child: user.photoUrl == null ? const Icon(Icons.person) : null,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: theme.cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      title: Text(user.displayName ?? 'Unknown'),
-      subtitle: Text(user.email ?? ''),
-      trailing: ElevatedButton(
-        onPressed: () {
-          context.read<FriendsBloc>().add(
-                SendFriendRequestEvent(
-                  FriendRequestModel.empty().copyWith(
-                    senderId: context.currentUser!.uid,
-                    senderName: context.currentUser!.displayName,
-                    receiverId: user.uid,
-                    receiverName: user.displayName,
-                  ),
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundImage:
+                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+              child: user.photoUrl == null
+                  ? const Icon(Icons.person, size: 24)
+                  : null,
+            ),
+            const SizedBox(width: 16),
+
+            // User info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.displayName ?? 'Unknown',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      user.email ?? '',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.outline,
+                      ),
+                    ),
+                  ],
                 ),
-              );
-        },
-        child: const Text('Add Friend'),
+              ),
+            ),
+
+            // Add friend button
+            ElevatedButton(
+              onPressed: () {
+                context.read<FriendsBloc>().add(
+                      SendFriendRequestEvent(
+                        FriendRequestModel.empty().copyWith(
+                          senderId: context.currentUser!.uid,
+                          senderName: context.currentUser!.displayName,
+                          receiverId: user.uid,
+                          receiverName: user.displayName,
+                        ),
+                      ),
+                    );
+              },
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text('Add'),
+            ),
+          ],
+        ),
       ),
     );
   }
