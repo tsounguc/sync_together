@@ -17,6 +17,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadFriendRequests();
+  }
+
+  void _loadFriendRequests() {
     final userId = context.currentUser?.uid;
     if (userId != null) {
       context.read<FriendsBloc>().add(GetFriendRequestsEvent(userId: userId));
@@ -31,7 +35,12 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
       appBar: AppBar(title: const Text('Friend Requests')),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: BlocBuilder<FriendsBloc, FriendsState>(
+        child: BlocConsumer<FriendsBloc, FriendsState>(
+          listener: (listener, state) {
+            if (state is FriendRequestRejected || state is FriendRequestAccepted) {
+              _loadFriendRequests();
+            }
+          },
           builder: (context, state) {
             if (state is FriendsLoadingState) {
               return const Center(child: CircularProgressIndicator());
@@ -59,7 +68,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
               return Center(
                 child: Text(
                   '⚠️ ${state.message}',
-                  style: theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
+                  style: theme.textTheme.bodyLarge!,
                 ),
               );
             }

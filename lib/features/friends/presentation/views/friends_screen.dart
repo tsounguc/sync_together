@@ -21,6 +21,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadFriends();
+  }
+
+  void _loadFriends() {
     userId = context.currentUser?.uid;
     if (userId != null) {
       context.read<FriendsBloc>().add(GetFriendsEvent(userId: userId!));
@@ -90,7 +94,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return BlocConsumer<FriendsBloc, FriendsState>(
       listener: (context, state) {
         if (state is FriendRemoved && userId != null) {
-          context.read<FriendsBloc>().add(GetFriendsEvent(userId: userId!));
+          _loadFriends();
         }
       },
       builder: (context, state) {
@@ -100,15 +104,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
           return Center(
             child: Text(
               '⚠️ ${state.message}',
-              style: context.theme.textTheme.bodyLarge
-                  ?.copyWith(color: Colors.red),
+              style: context.theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
             ),
           );
         } else if (state is FriendsLoaded) {
           final friends = state.friends;
           if (friends.isEmpty) {
-            return const Center(
-                child: Text('You haven’t added any friends yet.'));
+            return const Center(child: Text('You haven’t added any friends yet.'));
           }
 
           return ListView.separated(
