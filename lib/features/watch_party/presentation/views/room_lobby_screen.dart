@@ -23,7 +23,6 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
   @override
   void initState() {
     super.initState();
-    // Start listening to live playback sync updates
     context.read<WatchPartySessionBloc>()
       ..add(ListenToPartyStartEvent(widget.watchParty.id))
       ..add(ListenToParticipantsEvent(widget.watchParty.id));
@@ -41,9 +40,9 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
       return;
     }
 
-    context.read<WatchPartySessionBloc>().add(
-          StartPartyEvent(widget.watchParty.id),
-        );
+    context
+        .read<WatchPartySessionBloc>()
+        .add(StartPartyEvent(widget.watchParty.id));
   }
 
   void _goToWatchParty() {
@@ -70,152 +69,164 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
+    final isHost = context.currentUser!.uid == widget.watchParty.hostId;
+    final isDRMProtected = widget.watchParty.platform.isDRMProtected;
+    final hasVideoUrl = widget.watchParty.videoUrl.isNotEmpty;
+
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) {
-        if (state is WatchPartyStarted && context.currentUser!.uid == widget.watchParty.hostId) {
+        if (state is WatchPartyStarted && isHost) {
           _goToWatchParty();
-        }
-
-        if (state is PartyStartedRealtime) {
+        } else if (state is PartyStartedRealtime) {
           _goToWatchParty();
-        }
-        if (state is WatchPartyError) {
+        } else if (state is WatchPartyError) {
           CoreUtils.showSnackBar(context, state.message);
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.watchParty.title),
-        ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 600;
-            final isHost = context.currentUser!.uid == widget.watchParty.hostId;
-            final isDRMProtected = widget.watchParty.platform.isDRMProtected;
-            final hasVideoUrl = widget.watchParty.videoUrl.isNotEmpty;
-
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Room Lobby',
-                    style: Theme.of(context).textTheme.headlineSmall,
+        appBar: AppBar(title: Text(widget.watchParty.title)),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Room Lobby', style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 16),
+              Card(
+                color: theme.colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  leading: Image.asset(
+                    context.themeMode == ThemeMode.dark &&
+                            !widget.watchParty.platform.logoPath
+                                .contains('disney')
+                        ? widget.watchParty.platform.logoDarkPath
+                        : widget.watchParty.platform.logoPath,
+                    width: 40,
                   ),
+                  title: Text(widget.watchParty.platform.name,
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  subtitle: hasVideoUrl
+                      ? Text('Video selected ✅',
+                          style: theme.textTheme.bodySmall)
+                      : Text('No video selected',
+                          style: theme.textTheme.bodySmall),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              if (isHost) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Start Party'),
+                    onPressed: _startParty,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                if (!isDRMProtected && !hasVideoUrl) ...[
                   const SizedBox(height: 12),
-                  Text(
-                    'Platform: ${widget.watchParty.platform.name}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 32),
-                  // Host: Start Party + Pick Video button
-                  if (isHost) ...[
-                    ElevatedButton.icon(
-                      onPressed: _startParty,
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text('Start Party'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(isWide ? 300 : double.infinity, 50),
-                      ),
-                    ),
-                    if (!isDRMProtected && !hasVideoUrl)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: OutlinedButton.icon(
-                          onPressed: _goToPickVideo,
-                          icon: const Icon(Icons.search),
-                          label: const Text('Pick Video'),
-                        ),
-                      ),
-                  ]
-                  // Guest: waiting state
-                  else ...[
-                    const Text(
-                      'Waiting for host to start the party...',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 24),
-                    const CircularProgressIndicator.adaptive(),
-                  ],
-                  const SizedBox(height: 32),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey.withValues(alpha: 0.3),
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Participants',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: BlocBuilder<WatchPartySessionBloc, WatchPartySessionState>(
-                              builder: (context, state) {
-                                if (state is ParticipantsProfilesUpdated) {
-                                  final participants = state.profiles;
-                                  if (participants.isEmpty) {
-                                    return const Center(
-                                      child: Text('No Participants yet.'),
-                                    );
-                                  }
-
-                                  return ListView.separated(
-                                    itemCount: participants.length,
-                                    itemBuilder: (context, index) {
-                                      final user = participants[index];
-                                      final isYou = user.uid == context.currentUser!.uid;
-                                      return Row(
-                                        children: [
-                                          const CircleAvatar(
-                                            radius: 16,
-                                            child: Icon(Icons.person, size: 18),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              isYou
-                                                  ? '${user.displayName} (You)'
-                                                  : user.displayName ?? 'Anonymous',
-                                              style: Theme.of(
-                                                context,
-                                              ).textTheme.bodyMedium,
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                    separatorBuilder: (_, __) => const Divider(
-                                      height: 16,
-                                    ),
-                                  );
-                                }
-
-                                return const Center(
-                                  child: CircularProgressIndicator.adaptive(),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.video_library),
+                      label: const Text('Pick Video'),
+                      onPressed: _goToPickVideo,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
                 ],
+              ] else ...[
+                const Text(
+                  'Waiting for host to start the party...',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                const Center(child: CircularProgressIndicator.adaptive()),
+              ],
+              const SizedBox(height: 32),
+
+              // 👥 Participants Section
+              Expanded(
+                child: Card(
+                  elevation: 0,
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Participants',
+                            style: theme.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: BlocBuilder<WatchPartySessionBloc,
+                              WatchPartySessionState>(
+                            builder: (context, state) {
+                              if (state is ParticipantsProfilesUpdated) {
+                                final participants = state.profiles;
+                                if (participants.isEmpty) {
+                                  return const Center(
+                                      child: Text('No participants yet.'));
+                                }
+
+                                return ListView.separated(
+                                  itemCount: participants.length,
+                                  separatorBuilder: (_, __) =>
+                                      const Divider(height: 16),
+                                  itemBuilder: (context, index) {
+                                    final user = participants[index];
+                                    final isYou =
+                                        user.uid == context.currentUser!.uid;
+                                    return Row(
+                                      children: [
+                                        const CircleAvatar(
+                                          radius: 18,
+                                          child: Icon(Icons.person, size: 20),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            isYou
+                                                ? '${user.displayName} (You)'
+                                                : user.displayName ??
+                                                    'Anonymous',
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                              return const Center(
+                                  child: CircularProgressIndicator.adaptive());
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );

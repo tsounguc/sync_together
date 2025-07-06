@@ -45,6 +45,7 @@ dependencies:
   flutter_overlay_window: ^0.4.5
   flutter_webrtc: ^0.12.12+hotfix.1
   get_it: ^8.0.3
+  google_fonts: ^6.2.1
   google_sign_in: ^6.2.2
   iconly: ^1.0.1
   image: ^4.5.3

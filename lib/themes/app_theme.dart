@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
@@ -22,6 +23,15 @@ class AppTheme {
       onSurface: Colors.black87,
       outline: Colors.black45,
     ),
+    textTheme: GoogleFonts.interTextTheme().copyWith(
+      displayLarge:
+          GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold),
+      titleLarge: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold),
+      titleMedium: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+      bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
+      bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400),
+      labelLarge: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+    ),
     cardColor: const Color(0xFFECECEC),
     iconTheme: const IconThemeData(color: Colors.black87),
     inputDecorationTheme: InputDecorationTheme(
@@ -31,9 +41,6 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
-    ),
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.black87),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -67,6 +74,15 @@ class AppTheme {
       onSurface: Colors.white,
       outline: Colors.grey,
     ),
+    textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
+      displayLarge:
+          GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold),
+      titleLarge: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold),
+      titleMedium: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+      bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
+      bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400),
+      labelLarge: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+    ),
     cardColor: const Color(0xFF2A2A2A),
     iconTheme: const IconThemeData(color: Colors.white70),
     inputDecorationTheme: InputDecorationTheme(
@@ -76,9 +92,6 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
-    ),
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.white70),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
