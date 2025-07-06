@@ -13,16 +13,13 @@ import 'package:sync_together/features/watch_party/presentation/helpers/guest_sy
 import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
-import 'package:sync_together/features/watch_party/presentation/widgets/web_playback_controls.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
+import 'package:sync_together/features/watch_party/presentation/widgets/web_playback_controls.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WatchPartyWebView extends StatefulWidget {
-  const WatchPartyWebView({
-    required this.watchParty,
-    super.key,
-  });
+  const WatchPartyWebView({super.key, required this.watchParty});
 
   final WatchParty watchParty;
 
@@ -40,11 +37,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   int loadingPercentage = 0;
   bool _showChat = true;
-  SyncStatus _syncStatus = SyncStatus.synced;
   bool _showSyncBadge = true;
+  SyncStatus _syncStatus = SyncStatus.synced;
   Timer? _syncBadgeTimer;
 
-  // Guest sync memory
   double? _latestPlaybackPosition;
   bool _latestIsPlaying = false;
   bool _hasSynced = false;
@@ -70,10 +66,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         ? widget.watchParty.platform.defaultUrl
         : widget.watchParty.videoUrl;
 
-    debugPrint('_intializeWebView: $rawUrl');
-    final embedUrl =
-        VideoUrlHelper.getEmbedUrl(rawUrl, widget.watchParty.platform.name);
-
+    final embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, streamingPlatform.name);
     final controller = await WebviewLoader.create(
       embedUrl: embedUrl,
       navigationDelegate: _navigationDelegate,
@@ -91,50 +84,28 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     );
 
     if (!mounted) return;
-
-    if (mounted) {
-      setState(() {
-        _webViewController = controller;
-      });
-    }
+    setState(() => _webViewController = controller);
 
     if (_isHost) {
       syncManager.start();
     } else {
-      bloc.add(
-        GetSyncedDataEvent(
-          partyId: widget.watchParty.id,
-        ),
-      );
+      bloc.add(GetSyncedDataEvent(partyId: widget.watchParty.id));
     }
 
-    bloc.add(
-      ListenToPartyExistenceEvent(
-        widget.watchParty.id,
-      ),
-    );
+    bloc.add(ListenToPartyExistenceEvent(widget.watchParty.id));
   }
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
-        onProgress: (progress) {
-          if (!mounted) return;
-          setState(() => loadingPercentage = progress);
-        },
-        onPageStarted: (_) {
-          if (!mounted) return;
-          setState(() => loadingPercentage = 0);
-        },
-        onPageFinished: (url) async {
-          if (!mounted) return;
+        onProgress: (progress) => setState(() => loadingPercentage = progress),
+        onPageStarted: (_) => setState(() => loadingPercentage = 0),
+        onPageFinished: (_) async {
           setState(() => loadingPercentage = 100);
-
-          if (!_isHost) {
+          if (!_isHost && !_hasSynced) {
             final synced = await GuestSyncHelper(
               playback: playback,
               targetPosition: _latestPlaybackPosition ?? 0,
               shouldPlay: _latestIsPlaying,
             ).attemptInitialSync();
-
             if (synced) _hasSynced = true;
           }
         },
@@ -147,12 +118,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         },
       );
 
-  bool _isExternal(String url) {
-    return url.startsWith('tel') ||
-        url.contains('play.google.com') ||
-        url.contains('apps.apple.com') ||
-        url.startsWith('mailto');
-  }
+  bool _isExternal(String url) =>
+      url.startsWith('tel') ||
+      url.contains('play.google.com') ||
+      url.contains('apps.apple.com') ||
+      url.startsWith('mailto');
 
   Future<void> _launchUrl(String url) async {
     try {
@@ -161,19 +131,13 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         mode: LaunchMode.externalNonBrowserApplication,
       );
     } catch (_) {
-      if (mounted) {
-        CoreUtils.showSnackBar(
-          context,
-          'Failed to open external link.',
-        );
-      }
+      CoreUtils.showSnackBar(context, 'Failed to open external link.');
     }
   }
 
   void _updateSyncBadge(SyncStatus status) {
-    if (_isHost || status == _syncStatus) return;
+    if (_isHost || _syncStatus == status) return;
 
-    if (!mounted) return;
     setState(() {
       _syncStatus = status;
       _showSyncBadge = true;
@@ -182,26 +146,25 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     _syncBadgeTimer?.cancel();
     if (status == SyncStatus.synced) {
       _syncBadgeTimer = Timer(const Duration(seconds: 3), () {
-        if (!mounted) return;
-        setState(() => _showSyncBadge = false);
+        if (mounted) setState(() => _showSyncBadge = false);
       });
     }
   }
 
-  void _confirmEndParty(BuildContext context) {
-    showDialog<void>(
+  void _confirmEndParty() {
+    showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('End Watch Party?'),
         content: const Text('This will disconnect all guests.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.pop(context);
               context.read<WatchPartySessionBloc>().add(
                     EndWatchPartyEvent(widget.watchParty.id),
                   );
@@ -213,7 +176,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     );
   }
 
-  void _leaveParty(BuildContext context) {
+  void _leaveParty() {
     context.read<WatchPartySessionBloc>().add(
           LeaveWatchPartyEvent(
             partyId: widget.watchParty.id,
@@ -228,94 +191,64 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    String? lastGuestNotice;
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) async {
         if (state is SyncUpdated) {
           _latestPlaybackPosition = state.playbackPosition;
 
-          if (!_isHost) {
-            // Show guest SnackBar if play/pause changed
-            if (_latestIsPlaying != state.isPlaying) {
-              if (state.isPlaying) {
-                lastGuestNotice = 'The host started the video';
-              } else {
-                lastGuestNotice = 'The host paused the video';
-              }
-              CoreUtils.showSnackBar(context, lastGuestNotice!);
-            }
+          if (!_isHost && _latestIsPlaying != state.isPlaying) {
+            CoreUtils.showSnackBar(
+              context,
+              state.isPlaying
+                  ? 'The host started the video'
+                  : 'The host paused the video',
+            );
           }
 
           _latestIsPlaying = state.isPlaying;
 
-          if (_isHost) return;
-
-          if (!_hasSynced) {
+          if (!_isHost && !_hasSynced) {
             final synced = await GuestSyncHelper(
               playback: playback,
               targetPosition: _latestPlaybackPosition ?? 0,
               shouldPlay: _latestIsPlaying,
             ).attemptInitialSync();
-            if (!mounted) return;
             if (synced) _hasSynced = true;
           }
 
-          final localPosition = await playback.getCurrentTime(
-            streamingPlatform.currentTimeScript,
-          );
+          final localPosition = await playback
+              .getCurrentTime(streamingPlatform.currentTimeScript);
           final drift = (_latestPlaybackPosition! - localPosition).abs();
-
           _updateSyncBadge(
               drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
 
-          if (drift >= 1.5) {
-            await playback.seek(_latestPlaybackPosition!);
-          }
-
+          if (drift >= 1.5) await playback.seek(_latestPlaybackPosition!);
           final playing = await playback.isPlaying();
           if (state.isPlaying != playing) {
             state.isPlaying ? await playback.play() : await playback.pause();
           }
         }
-        if (state is WatchPartyLeft) {
-          if (mounted) {
-            await Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/',
-              (route) => false,
-            );
+
+        if (state is WatchPartyLeft ||
+            state is WatchPartyEnded ||
+            state is WatchPartyEndedByHost) {
+          CoreUtils.showSnackBar(context, 'The host ended the watch party');
+          try {
+            await playback.pause();
+          } catch (_) {
+            debugPrint('Could not pause playback.');
           }
-        }
-        if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
+          await Future.delayed(const Duration(seconds: 2));
           if (mounted) {
-            CoreUtils.showSnackBar(context, 'The host ended the watch party');
-
-            try {
-              await playback.pause();
-            } catch (_) {
-              debugPrint('Failed to pause playback before navigating away.');
-            }
-
-            await Future<void>.delayed(const Duration(seconds: 2));
-            if (mounted) {
-              await Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/',
-                (route) => false,
-              );
-            }
+            Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
           }
         }
       },
       child: PopScope(
         canPop: false,
-        onPopInvokedWithResult: (bool didPop, Object? result) {
+        onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          if (_isHost) {
-            _confirmEndParty(context);
-          } else {
-            _leaveParty(context);
-          }
+          _isHost ? _confirmEndParty() : _leaveParty();
         },
         child: SafeArea(
           child: Scaffold(
@@ -325,14 +258,13 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                   ? IconButton(
                       icon: const Icon(Icons.close),
                       tooltip: 'End Watch Party',
-                      onPressed: () => _confirmEndParty(context),
+                      onPressed: _confirmEndParty,
                     )
                   : null,
               actions: [
                 IconButton(
-                  icon: Icon(
-                    _showChat ? Icons.chat : Icons.chat_bubble_outline,
-                  ),
+                  icon:
+                      Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
                   onPressed: () => setState(() => _showChat = !_showChat),
                 ),
               ],
@@ -347,9 +279,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircularProgressIndicator(
-                                value: loadingPercentage / 100,
-                              ),
-                              const SizedBox(height: 16),
+                                  value: loadingPercentage / 100),
+                              const SizedBox(height: 12),
                               Text('Loading... $loadingPercentage%'),
                             ],
                           ),
@@ -357,21 +288,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                       : Stack(
                           children: [
                             WebViewWidget(controller: _webViewController!),
-                            Positioned(
-                              top: 12,
-                              right: 12,
-                              child: !_isHost
-                                  ? AnimatedOpacity(
-                                      opacity: _showSyncBadge ? 1.0 : 0.0,
-                                      duration: const Duration(
-                                        milliseconds: 300,
-                                      ),
-                                      child: SyncStatusBadge(
-                                        status: _syncStatus,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
+                            if (!_isHost && _showSyncBadge)
+                              Positioned(
+                                top: 12,
+                                right: 12,
+                                child: SyncStatusBadge(status: _syncStatus),
+                              ),
                           ],
                         ),
                 ),
@@ -382,9 +304,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).scaffoldBackgroundColor,
                         border: Border(
-                          top: BorderSide(
-                            color: Colors.grey.withValues(alpha: 0.3),
-                          ),
+                          top: BorderSide(color: Colors.grey.withOpacity(0.3)),
                         ),
                       ),
                       child: WatchPartyChat(partyId: widget.watchParty.id),
