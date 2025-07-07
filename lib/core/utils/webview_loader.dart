@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -30,6 +31,7 @@ class WebviewLoader {
       ..addJavaScriptChannel(
         'PlayerEvent',
         onMessageReceived: (JavaScriptMessage message) {
+          debugPrint('[PlayerEvent]: ${message.message}');
           if (message.message == 'userPlayed') {
             onUserTappedPlay?.call();
           }

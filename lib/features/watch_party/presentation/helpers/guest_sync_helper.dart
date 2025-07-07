@@ -30,7 +30,13 @@ class GuestSyncHelper {
         await playback.pause();
         await playback.seek(targetPosition);
 
-        if (shouldPlay && await playback.isPlaying()) return true;
+        if (shouldPlay && await playback.isPlaying()) {
+          return true;
+        }
+        if (shouldPlay && !(await playback.isPlaying())) {
+          await playback.play();
+          return true;
+        }
         if (!shouldPlay && !(await playback.isPlaying())) return true;
       } catch (_) {}
 

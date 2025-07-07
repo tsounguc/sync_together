@@ -40,7 +40,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   int loadingPercentage = 0;
   bool _showChat = true;
-  bool _showSyncBadge = true;
+  bool _showSyncBadge = false;
   SyncStatus _syncStatus = SyncStatus.synced;
   Timer? _syncBadgeTimer;
 
@@ -111,9 +111,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       targetPosition: _latestPlaybackPosition ?? 0,
       shouldPlay: _latestIsPlaying,
     ).attemptInitialSync();
-
+    if (!mounted) return;
     if (synced) {
       debugPrint('Guest manually tapped play and synced successfully.');
+
       setState(() => _hasSynced = true);
     }
   }
