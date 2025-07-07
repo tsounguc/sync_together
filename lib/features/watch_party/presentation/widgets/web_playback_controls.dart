@@ -3,14 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
-import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-/// **PlaybackControls Widget**
+/// **WebPlaybackControls Widget**
 ///
-/// Provides UI controls for controlling video playback inside the WebView.
-/// This includes **Play, Pause, and Sync** functionality.
+/// Provides clean UI controls for host to control video playback inside the WebView.
+/// Includes **Play**, **Pause**, and optional **Sync** feedback.
 class WebPlaybackControls extends StatefulWidget {
   const WebPlaybackControls({
     required this.controller,
@@ -18,10 +17,7 @@ class WebPlaybackControls extends StatefulWidget {
     super.key,
   });
 
-  /// The WebView controller that loads the streaming service.
   final WebViewController controller;
-
-  /// The ID of the watch party.
   final WatchParty watchParty;
 
   @override
@@ -41,41 +37,81 @@ class _WebPlaybackControlsState extends State<WebPlaybackControls> {
     );
   }
 
-  /// **Play the void and sync position**
   Future<void> _playVideo(BuildContext context) async {
     try {
       await playback.play();
-      _isPlaying = true;
-      // await _syncPlayback(context, isPlaying)
-      CoreUtils.showSnackBar(context, 'You started playing the video.');
-    } catch (e) {
-      CoreUtils.showSnackBar(context, 'Failed to play video.');
+      setState(() => _isPlaying = true);
+      CoreUtils.showSnackBar(context, 'You started the video.');
+    } catch (_) {
+      CoreUtils.showSnackBar(context, '❌ Failed to play video.');
     }
   }
 
-  /// **Pause the video and sync position**
   Future<void> _pauseVideo(BuildContext context) async {
     try {
       await playback.pause();
-      _isPlaying = false;
+      setState(() => _isPlaying = false);
       CoreUtils.showSnackBar(context, 'You paused the video.');
-    } catch (e) {
-      CoreUtils.showSnackBar(context, 'Failed to pause video');
+    } catch (_) {
+      CoreUtils.showSnackBar(context, '❌ Failed to pause video.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: theme.dividerColor)),
+        color: theme.scaffoldBackgroundColor,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildControlButton(
+            icon: Icons.play_arrow_rounded,
+            label: 'Play',
+            onTap: () => _playVideo(context),
+            isActive: _isPlaying,
+          ),
+          const SizedBox(width: 20),
+          _buildControlButton(
+            icon: Icons.pause_rounded,
+            label: 'Pause',
+            onTap: () => _pauseVideo(context),
+            isActive: !_isPlaying,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControlButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool isActive,
+  }) {
+    final theme = Theme.of(context);
+    final color = isActive ? theme.colorScheme.primary : theme.iconTheme.color;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.play_arrow),
-          onPressed: () async => _playVideo(context),
+          icon: Icon(icon, size: 28, color: color),
+          onPressed: onTap,
+          tooltip: label,
         ),
-        IconButton(
-          icon: const Icon(Icons.pause),
-          onPressed: () async => _pauseVideo(context),
+        Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

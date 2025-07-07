@@ -19,7 +19,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WatchPartyWebView extends StatefulWidget {
-  const WatchPartyWebView({super.key, required this.watchParty});
+  const WatchPartyWebView({
+    required this.watchParty,
+    super.key,
+  });
 
   final WatchParty watchParty;
 
@@ -60,8 +63,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   Future<void> _initializeWebView() async {
+    // initialize and instantiate variables
     streamingPlatform = widget.watchParty.platform;
+
     final bloc = context.read<WatchPartySessionBloc>();
+
     final rawUrl = widget.watchParty.videoUrl.isEmpty
         ? widget.watchParty.platform.defaultUrl
         : widget.watchParty.videoUrl;
@@ -70,12 +76,14 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     final controller = await WebviewLoader.create(
       embedUrl: embedUrl,
       navigationDelegate: _navigationDelegate,
+      onUserTappedPlay: _onGuestTappedPlay,
     );
 
     playback = PlaybackController(
       controller: controller,
       platform: streamingPlatform,
     );
+
     syncManager = SyncManager(
       playback: playback,
       watchPartyId: widget.watchParty.id,
@@ -93,6 +101,21 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
     }
 
     bloc.add(ListenToPartyExistenceEvent(widget.watchParty.id));
+  }
+
+  Future<void> _onGuestTappedPlay() async {
+    if (_isHost || _hasSynced) return;
+
+    final synced = await GuestSyncHelper(
+      playback: playback,
+      targetPosition: _latestPlaybackPosition ?? 0,
+      shouldPlay: _latestIsPlaying,
+    ).attemptInitialSync();
+
+    if (synced) {
+      debugPrint('Guest manually tapped play and synced successfully.');
+      setState(() => _hasSynced = true);
+    }
   }
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
@@ -137,11 +160,12 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   void _updateSyncBadge(SyncStatus status) {
     if (_isHost || _syncStatus == status) return;
-
-    setState(() {
-      _syncStatus = status;
-      _showSyncBadge = true;
-    });
+    if (mounted) {
+      setState(() {
+        _syncStatus = status;
+        _showSyncBadge = true;
+      });
+    }
 
     _syncBadgeTimer?.cancel();
     if (status == SyncStatus.synced) {
@@ -152,7 +176,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   void _confirmEndParty() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('End Watch Party?'),
@@ -196,6 +220,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         if (state is SyncUpdated) {
           _latestPlaybackPosition = state.playbackPosition;
 
+          // Update guests about host video playing status
           if (!_isHost && _latestIsPlaying != state.isPlaying) {
             CoreUtils.showSnackBar(
               context,
@@ -205,9 +230,20 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             );
           }
 
+          // get video playing status
+          var playing = await playback.isPlaying();
+
+          // if host playing status is different from guest
+          if (state.isPlaying != playing) {
+            state.isPlaying ? await playback.play() : await playback.pause();
+          }
+
+          // update saved playing status
           _latestIsPlaying = state.isPlaying;
 
+          // if guest not synced
           if (!_isHost && !_hasSynced) {
+            // sync guest
             final synced = await GuestSyncHelper(
               playback: playback,
               targetPosition: _latestPlaybackPosition ?? 0,
@@ -216,31 +252,49 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             if (synced) _hasSynced = true;
           }
 
+          // get the video position from device
           final localPosition = await playback
               .getCurrentTime(streamingPlatform.currentTimeScript);
+
+          // compare to saved host video positon from database (firebase)
           final drift = (_latestPlaybackPosition! - localPosition).abs();
+
+          // update sync badge if difference is less then 3
           _updateSyncBadge(
               drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
 
+          // set the video to host position if difference is greater than 1.5
           if (drift >= 1.5) await playback.seek(_latestPlaybackPosition!);
-          final playing = await playback.isPlaying();
-          if (state.isPlaying != playing) {
-            state.isPlaying ? await playback.play() : await playback.pause();
-          }
+
+          // // get video playing status
+          // playing = await playback.isPlaying();
+          //
+          // // if host is playing status is different from guest
+          // if (state.isPlaying != playing) {
+          //   state.isPlaying ? await playback.play() : await playback.pause();
+          // }
         }
 
         if (state is WatchPartyLeft ||
             state is WatchPartyEnded ||
             state is WatchPartyEndedByHost) {
-          CoreUtils.showSnackBar(context, 'The host ended the watch party');
           try {
-            await playback.pause();
-          } catch (_) {
-            debugPrint('Could not pause playback.');
-          }
-          await Future.delayed(const Duration(seconds: 2));
-          if (mounted) {
-            Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+            await syncManager.stop();
+            if (mounted) {
+              await Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/',
+                (_) => false,
+              );
+            }
+            if (state is WatchPartyEndedByHost) {
+              CoreUtils.showSnackBar(
+                context,
+                'The host ended the watch party',
+              );
+            }
+          } catch (e) {
+            debugPrint('Failure: $e');
           }
         }
       },
@@ -263,8 +317,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                   : null,
               actions: [
                 IconButton(
-                  icon:
-                      Icon(_showChat ? Icons.chat : Icons.chat_bubble_outline),
+                  icon: Icon(
+                    _showChat ? Icons.chat : Icons.chat_bubble_outline,
+                  ),
                   onPressed: () => setState(() => _showChat = !_showChat),
                 ),
               ],

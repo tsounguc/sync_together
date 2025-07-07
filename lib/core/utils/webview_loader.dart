@@ -9,6 +9,7 @@ class WebviewLoader {
   static Future<WebViewController> create({
     required String embedUrl,
     required NavigationDelegate navigationDelegate,
+    void Function()? onUserTappedPlay,
   }) async {
     late final PlatformWebViewControllerCreationParams params;
 
@@ -26,7 +27,30 @@ class WebviewLoader {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(navigationDelegate)
+      ..addJavaScriptChannel(
+        'PlayerEvent',
+        onMessageReceived: (JavaScriptMessage message) {
+          if (message.message == 'userPlayed') {
+            onUserTappedPlay?.call();
+          }
+        },
+      )
       ..loadRequest(Uri.parse(embedUrl));
+
+    controller.runJavaScript('''
+      function waitForYouTubePlayer() {
+        if (typeof YT !== 'undefined' && YT.Player && player) {
+          player.addEventListener('onStateChange', function(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+              PlayerEvent.postMessage('userPlayed');
+            }
+          });
+        } else {
+          setTimeout(waitForYouTubePlayer, 200);
+        }
+      }
+      waitForYouTubePlayer();
+    ''');
 
     // Enable autoplay for Android
     if (controller.platform is AndroidWebViewController) {

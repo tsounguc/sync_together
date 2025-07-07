@@ -35,7 +35,8 @@ class VideoUrlHelper {
     debugPrint('getEmbedUrl called for $platformName -> $url');
     if (platformName.toLowerCase().contains('youtube')) {
       final id = extractYoutubeVideoId(url);
-      return 'https://www.youtube.com/embed/$id?modestbranding=1&controls=1&rel=0';
+      return 'https://www.youtube.com/embed/$id?enablejsapi=1'
+          '&autoplay=0&controls=1&rel=0&modestbranding=1';
     } else if (platformName.toLowerCase().contains('vimeo')) {
       final id = extractVimeoVideoId(url);
       return 'https://player.vimeo.com/video/$id';

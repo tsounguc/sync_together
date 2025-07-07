@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
@@ -25,6 +26,7 @@ class SyncManager {
         final position = await playback.getCurrentTime(currentTimeScript);
         final isPlaying = await playback.isPlaying();
 
+        debugPrint('[SyncManager]: video is playing: $isPlaying');
         bloc.add(SendSyncDataEvent(
           partyId: watchPartyId,
           playbackPosition: position,
@@ -36,7 +38,8 @@ class SyncManager {
     });
   }
 
-  void stop() {
+  Future<void> stop() async {
+    await playback.pause();
     _timer?.cancel();
     _timer = null;
   }
