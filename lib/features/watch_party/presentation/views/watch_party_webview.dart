@@ -230,14 +230,6 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             );
           }
 
-          // get video playing status
-          var playing = await playback.isPlaying();
-
-          // if host playing status is different from guest
-          if (state.isPlaying != playing) {
-            state.isPlaying ? await playback.play() : await playback.pause();
-          }
-
           // update saved playing status
           _latestIsPlaying = state.isPlaying;
 
@@ -266,13 +258,13 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           // set the video to host position if difference is greater than 1.5
           if (drift >= 1.5) await playback.seek(_latestPlaybackPosition!);
 
-          // // get video playing status
-          // playing = await playback.isPlaying();
-          //
-          // // if host is playing status is different from guest
-          // if (state.isPlaying != playing) {
-          //   state.isPlaying ? await playback.play() : await playback.pause();
-          // }
+          // get video playing status
+          final playing = await playback.isPlaying();
+
+          // if host is playing status is different from guest
+          if (state.isPlaying != playing) {
+            state.isPlaying ? await playback.play() : await playback.pause();
+          }
         }
 
         if (state is WatchPartyLeft ||
