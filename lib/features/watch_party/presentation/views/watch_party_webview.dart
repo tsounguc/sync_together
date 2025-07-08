@@ -78,8 +78,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
     final bloc = context.read<WatchPartySessionBloc>();
 
-    final rawUrl =
-        widget.watchParty.videoUrl.isEmpty ? widget.watchParty.platform.defaultUrl : widget.watchParty.videoUrl;
+    final rawUrl = widget.watchParty.videoUrl.isEmpty
+        ? widget.watchParty.platform.defaultUrl
+        : widget.watchParty.videoUrl;
 
     final embedUrl = VideoUrlHelper.getEmbedUrl(rawUrl, streamingPlatform.name);
     final controller = await WebviewLoader.create(
@@ -141,16 +142,18 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           if (!mounted) return;
           setState(() => loadingPercentage = 100);
 
-          final playerReady = await _webViewController?.runJavaScriptReturningResult(
+          final embedBlocked =
+              await _webViewController?.runJavaScriptReturningResult(
             """
-            typeof document.querySelector('video') !== 'undefined ' 
-            || document.querySelector('iframe') !== null;""",
+    document.body.innerText.includes("Video unavailable") 
+    || document.body.innerText.includes("Watch this video on YouTube");
+    """,
           );
 
-          if (playerReady.toString().contains('false')) {
-            if (mounted) {
-              _showEmbedErrorDialog();
-            }
+          if (embedBlocked.toString().toLowerCase() == 'true') {
+            debugPrint(
+                '[WatchParty] YouTube embed is blocked – opening dialog');
+            if (mounted) _showEmbedErrorDialog();
           }
           if (!_isHost && !_hasSynced) {
             final synced = await GuestSyncHelper(
@@ -282,7 +285,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           if (!_isHost && _latestIsPlaying != state.isPlaying) {
             CoreUtils.showSnackBar(
               context,
-              state.isPlaying ? 'The host started the video' : 'The host paused the video',
+              state.isPlaying
+                  ? 'The host started the video'
+                  : 'The host paused the video',
             );
           }
 
@@ -301,13 +306,15 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
 
           // get the video position from device
-          final localPosition = await playback.getCurrentTime(streamingPlatform.currentTimeScript);
+          final localPosition = await playback
+              .getCurrentTime(streamingPlatform.currentTimeScript);
 
           // compare to saved host video positon from database (firebase)
           final drift = (_latestPlaybackPosition! - localPosition).abs();
 
           // update sync badge if difference is less then 3
-          _updateSyncBadge(drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
+          _updateSyncBadge(
+              drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
 
           // set the video to host position if difference is greater than 1.5
           if (drift >= 1.5) await playback.seek(_latestPlaybackPosition!);
@@ -321,7 +328,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           }
         }
 
-        if (state is WatchPartyLeft || state is WatchPartyEnded || state is WatchPartyEndedByHost) {
+        if (state is WatchPartyLeft ||
+            state is WatchPartyEnded ||
+            state is WatchPartyEndedByHost) {
           debugPrint('state is: $state');
           try {
             if (mounted) {
@@ -384,7 +393,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircularProgressIndicator(value: loadingPercentage / 100),
+                                CircularProgressIndicator(
+                                    value: loadingPercentage / 100),
                                 const SizedBox(height: 12),
                                 Text('Loading... $loadingPercentage%'),
                               ],
