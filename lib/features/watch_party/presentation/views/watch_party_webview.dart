@@ -290,6 +290,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         if (state is WatchPartyLeft ||
             state is WatchPartyEnded ||
             state is WatchPartyEndedByHost) {
+          debugPrint('state is: $state');
           try {
             if (mounted) {
               await Navigator.pushNamedAndRemoveUntil(

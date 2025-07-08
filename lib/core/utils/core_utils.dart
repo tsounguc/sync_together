@@ -15,9 +15,6 @@ class CoreUtils {
         SnackBar(
           content: Text(
             message,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
           ),
           duration: Duration(milliseconds: durationInMilliSecond),
           behavior: SnackBarBehavior.floating,
