@@ -362,8 +362,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             ),
             bottomNavigationBar: _isHost
                 ? WebPlaybackControls(
-                    controller: _webViewController!,
-                    watchParty: widget.watchParty,
+                    syncManager: syncManager,
                   )
                 : null,
           ),

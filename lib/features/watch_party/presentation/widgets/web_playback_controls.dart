@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -12,34 +13,23 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// Includes **Play**, **Pause**, and optional **Sync** feedback.
 class WebPlaybackControls extends StatefulWidget {
   const WebPlaybackControls({
-    required this.controller,
-    required this.watchParty,
+    required this.syncManager,
     super.key,
   });
 
-  final WebViewController controller;
-  final WatchParty watchParty;
+  final SyncManager syncManager;
 
   @override
   State<WebPlaybackControls> createState() => _WebPlaybackControlsState();
 }
 
 class _WebPlaybackControlsState extends State<WebPlaybackControls> {
-  late final PlaybackController playback;
   var _isPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    playback = PlaybackController(
-      controller: widget.controller,
-      platform: widget.watchParty.platform,
-    );
-  }
 
   Future<void> _playVideo(BuildContext context) async {
     try {
-      await playback.play();
+      await widget.syncManager.playback.play();
+      widget.syncManager.start();
       setState(() => _isPlaying = true);
       CoreUtils.showSnackBar(context, 'You started the video.');
     } catch (_) {
@@ -49,7 +39,8 @@ class _WebPlaybackControlsState extends State<WebPlaybackControls> {
 
   Future<void> _pauseVideo(BuildContext context) async {
     try {
-      await playback.pause();
+      await widget.syncManager.playback.pause();
+      await widget.syncManager.stop();
       setState(() => _isPlaying = false);
       CoreUtils.showSnackBar(context, 'You paused the video.');
     } catch (_) {
