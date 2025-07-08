@@ -27,7 +27,8 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
     super.initState();
     context.read<WatchPartySessionBloc>()
       ..add(ListenToPartyStartEvent(widget.watchParty.id))
-      ..add(ListenToParticipantsEvent(widget.watchParty.id));
+      ..add(ListenToParticipantsEvent(widget.watchParty.id))
+      ..add(ListenToPartyExistenceEvent(widget.watchParty.id));
   }
 
   void _startParty() {
