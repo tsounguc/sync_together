@@ -18,7 +18,8 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bubbleColor = isMe ? colorScheme.onPrimary : colorScheme.surfaceContainerHighest;
+    final bubbleColor =
+        isMe ? colorScheme.primary : colorScheme.surfaceContainerHighest;
 
     final textColor = isMe ? colorScheme.onPrimary : colorScheme.onSurface;
 
@@ -55,8 +56,12 @@ class MessageBubble extends StatelessWidget {
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
-                  bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
-                  bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                  bottomLeft: isMe
+                      ? const Radius.circular(16)
+                      : const Radius.circular(4),
+                  bottomRight: isMe
+                      ? const Radius.circular(4)
+                      : const Radius.circular(16),
                 ),
                 boxShadow: [
                   BoxShadow(
