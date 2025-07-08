@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/router/app_router.dart';
 import 'package:sync_together/core/utils/video_url_helper.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_screen.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
+import 'package:sync_together/themes/app_theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class PlatformVideoPickerScreen extends StatefulWidget {
@@ -27,13 +29,26 @@ class PlatformVideoPickerScreen extends StatefulWidget {
 
 class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
   WebViewController? _webViewController;
+  bool _isLoading = true;
+  double _fadeOpacity = 0;
 
   @override
   void initState() {
     super.initState();
+    _initWebView();
 
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() => _fadeOpacity = 1.0);
+      }
+    });
+  }
+
+  void _initWebView() {
+    final backgroundColor = AppTheme.darkTheme.scaffoldBackgroundColor;
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(backgroundColor)
       ..addJavaScriptChannel(
         'Flutter',
         onMessageReceived: (message) {
@@ -42,13 +57,7 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           debugPrint('[PlatformVideoPicker] onMessageReceived: $rawUrl');
 
           String? embedUrl;
-          // if (platformName == 'vimeo') {
-          //   final id = VideoUrlHelper.extractVimeoVideoId(rawUrl);
-          //   if (id.isNotEmpty) {
-          //     embedUrl =
-          //         VideoUrlHelper.getEmbedUrl(rawUrl, widget.platform.name);
-          //   }
-          // } else
+
           if (platformName == 'youtube') {
             final id = VideoUrlHelper.extractYoutubeVideoId(rawUrl);
             if (id.isNotEmpty) {
@@ -72,22 +81,54 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
                   ),
                 );
           } else {
-            debugPrint(
-                '[PlatformVideoPicker] No video ID could be extracted from: $rawUrl');
+            debugPrint('[PlatformVideoPicker] Could not extract video ID');
           }
         },
       )
       ..setNavigationDelegate(
         NavigationDelegate(
-          onNavigationRequest: (NavigationRequest request) {
+          onPageFinished: (url) {
+            setState(() => _isLoading = false);
+            final platform = widget.platform.name.toLowerCase();
+            if (platform == 'youtube') {
+              _webViewController?.runJavaScript('''
+                (function() {
+                  let lastUrl = location.href;
+                  new MutationObserver(() => {
+                    const currentUrl = location.href;
+                    if (currentUrl !== lastUrl && currentUrl.includes('watch?v=')) {
+                      lastUrl = currentUrl;
+                      window.Flutter.postMessage(currentUrl);
+                      history.back();
+                    }
+                  }).observe(document.body, { childList: true, subtree: true });
+                })();
+              ''');
+            } else if (platform == 'ted') {
+              _webViewController?.runJavaScript('''
+                (function() {
+                  let lastUrl = location.href;
+                  new MutationObserver(() => {
+                    const currentUrl = location.href;
+                    if (currentUrl !== lastUrl && currentUrl.includes('/talks/')) {
+                      lastUrl = currentUrl;
+                      window.Flutter.postMessage(currentUrl);
+                      history.back();
+                    }
+                  }).observe(document.body, { childList: true, subtree: true });
+                })();
+              ''');
+            }
+          },
+          onNavigationRequest: (request) {
             final url = request.url;
-            if (widget.platform.name.toLowerCase() == 'vimeo') {
-              final vimeoId = VideoUrlHelper.extractVimeoVideoId(url);
-              if (vimeoId.isNotEmpty) {
+            final platform = widget.platform.name.toLowerCase();
+            if (platform == 'vimeo') {
+              final id = VideoUrlHelper.extractVimeoVideoId(url);
+              if (id.isNotEmpty) {
                 final embedUrl =
                     VideoUrlHelper.getEmbedUrl(url, widget.platform.name);
-                debugPrint(
-                    '[PlatformVideoPicker] Intercepted Vimeo ID: $vimeoId');
+                debugPrint('[PlatformVideoPicker] Intercepted Vimeo ID: $id');
                 context.read<WatchPartySessionBloc>().add(
                       UpdateVideoUrlEvent(
                         partyId: widget.watchParty.id,
@@ -99,56 +140,17 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
             }
             return NavigationDecision.navigate;
           },
-          onPageFinished: (url) {
-            debugPrint(url);
-            if (widget.platform.name.toLowerCase() == 'youtube') {
-              _webViewController?.runJavaScript('''
-              (function() {
-                let lastUrl = location.href;
-                new MutationObserver(() => {
-                  const currentUrl = location.href;
-                  if (currentUrl !== lastUrl && currentUrl.includes('watch?v=')) {
-                    lastUrl = currentUrl;
-                    window.Flutter.postMessage(currentUrl);
-                    history.back();
-                  }
-                }).observe(document.body, { childList: true, subtree: true });
-              })();
-            ''');
-            } else if (widget.platform.name.toLowerCase() == 'ted') {
-              _webViewController?.runJavaScript('''
-              (function() {
-                let lastUrl = location.href;
-                new MutationObserver(() => {
-                  const currentUrl = location.href;
-                  if (currentUrl !== lastUrl && currentUrl.includes('/talks/')) {
-                    lastUrl = currentUrl;
-                    window.Flutter.postMessage(currentUrl);
-                    history.back();
-                  }
-                }).observe(document.body, { childList: true, subtree: true });
-              })();
-            ''');
-            }
-          },
         ),
       )
       ..loadRequest(Uri.parse(widget.platform.defaultUrl));
   }
 
   void _goToWatchParty(WatchParty party) {
-    Navigator.popUntil(
-      context,
-      ModalRoute.withName('/'),
-    );
-
+    Navigator.popUntil(context, ModalRoute.withName('/'));
     Navigator.pushNamed(
       context,
       WatchPartyScreen.id,
-      arguments: WatchPartyScreenArguments(
-        party,
-        party.platform,
-      ),
+      arguments: WatchPartyScreenArguments(party, party.platform),
     );
   }
 
@@ -159,17 +161,13 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
         if (state is VideoUrlUpdated) {
           debugPrint('Video URL updated. Starting party...');
           context.read<WatchPartySessionBloc>().add(
-                StartPartyEvent(
-                  widget.watchParty.id,
-                ),
+                StartPartyEvent(widget.watchParty.id),
               );
         }
         if (state is WatchPartyStarted) {
           debugPrint('Watch party started. Fetching latest party...');
           context.read<WatchPartySessionBloc>().add(
-                GetWatchPartyEvent(
-                  widget.watchParty.id,
-                ),
+                GetWatchPartyEvent(widget.watchParty.id),
               );
         }
         if (state is WatchPartyFetched) {
@@ -178,10 +176,27 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('Pick a Video (${widget.platform.name})')),
-        body: _webViewController == null
-            ? const Center(child: CircularProgressIndicator())
-            : WebViewWidget(controller: _webViewController!),
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: Text('Pick a Video (${widget.platform.name})'),
+          backgroundColor: Colors.black,
+        ),
+        body: Stack(
+          children: [
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeInOut,
+              opacity: _fadeOpacity,
+              child: _webViewController == null
+                  ? const SizedBox.shrink()
+                  : WebViewWidget(controller: _webViewController!),
+            ),
+            if (_isLoading)
+              const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+          ],
+        ),
       ),
     );
   }
