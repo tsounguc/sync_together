@@ -48,10 +48,20 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   bool _latestIsPlaying = false;
   bool _hasSynced = false;
 
+  double _opacity = 0;
+
   @override
   void initState() {
     super.initState();
     _initializeWebView();
+
+    Future<void>.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          _opacity = 1.0;
+        });
+      }
+    });
   }
 
   @override
@@ -306,78 +316,83 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           _isHost ? _confirmEndParty() : _leaveParty();
         },
         child: SafeArea(
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.watchParty.title),
-              leading: _isHost
-                  ? IconButton(
-                      icon: const Icon(Icons.close),
-                      tooltip: 'End Watch Party',
-                      onPressed: _confirmEndParty,
-                    )
-                  : null,
-              actions: [
-                IconButton(
-                  icon: Icon(
-                    _showChat ? Icons.chat : Icons.chat_bubble_outline,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 3000),
+            curve: Curves.easeInOut,
+            opacity: _opacity,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(widget.watchParty.title),
+                leading: _isHost
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        tooltip: 'End Watch Party',
+                        onPressed: _confirmEndParty,
+                      )
+                    : null,
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      _showChat ? Icons.chat : Icons.chat_bubble_outline,
+                    ),
+                    onPressed: () {
+                      if (!mounted) return;
+                      setState(() => _showChat = !_showChat);
+                    },
                   ),
-                  onPressed: () {
-                    if (!mounted) return;
-                    setState(() => _showChat = !_showChat);
-                  },
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: loadingPercentage < 100
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                ],
+              ),
+              body: Column(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: loadingPercentage < 100
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                    value: loadingPercentage / 100),
+                                const SizedBox(height: 12),
+                                Text('Loading... $loadingPercentage%'),
+                              ],
+                            ),
+                          )
+                        : Stack(
                             children: [
-                              CircularProgressIndicator(
-                                  value: loadingPercentage / 100),
-                              const SizedBox(height: 12),
-                              Text('Loading... $loadingPercentage%'),
+                              WebViewWidget(controller: _webViewController!),
+                              if (!_isHost && _showSyncBadge)
+                                Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: SyncStatusBadge(status: _syncStatus),
+                                ),
                             ],
                           ),
-                        )
-                      : Stack(
-                          children: [
-                            WebViewWidget(controller: _webViewController!),
-                            if (!_isHost && _showSyncBadge)
-                              Positioned(
-                                top: 12,
-                                right: 12,
-                                child: SyncStatusBadge(status: _syncStatus),
-                              ),
-                          ],
-                        ),
-                ),
-                if (_showChat)
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        border: Border(
-                          top: BorderSide(
-                            color: Colors.grey.withValues(alpha: 0.3),
+                  ),
+                  if (_showChat)
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.grey.withValues(alpha: 0.3),
+                            ),
                           ),
                         ),
+                        child: WatchPartyChat(partyId: widget.watchParty.id),
                       ),
-                      child: WatchPartyChat(partyId: widget.watchParty.id),
                     ),
-                  ),
-              ],
+                ],
+              ),
+              bottomNavigationBar: _isHost
+                  ? WebPlaybackControls(
+                      syncManager: syncManager,
+                    )
+                  : null,
             ),
-            bottomNavigationBar: _isHost
-                ? WebPlaybackControls(
-                    syncManager: syncManager,
-                  )
-                : null,
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:sync_together/features/watch_party/domain/entities/watch_party.d
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_native_app_mode.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_web_sync_overlay.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_webview.dart';
+import 'package:sync_together/themes/app_theme.dart';
 
 class WatchPartyScreen extends StatefulWidget {
   const WatchPartyScreen({
@@ -50,21 +51,13 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
       }
     }
     return Theme(
-      data: ThemeData.dark().copyWith(
+      data: AppTheme.darkTheme.copyWith(
         scaffoldBackgroundColor: Colors.black,
-        colorScheme: ThemeData.dark().colorScheme.copyWith(
-              secondary: Colors.white70,
-              onSurface: Colors.white,
-            ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           elevation: 0,
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        textTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'Inter',
-            ),
       ),
       child: Scaffold(
         body: watchView,
