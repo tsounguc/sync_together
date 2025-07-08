@@ -27,6 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchParties();
+  }
+
+  void _fetchParties() {
     context.read<PublicPartiesCubit>().fetchPublicParties();
   }
 
@@ -97,8 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         child: RefreshIndicator(
-          onRefresh: () async {},
+          onRefresh: () async {
+            _fetchParties();
+          },
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
@@ -240,9 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final party = state.parties[index];
 
                   // Dispatch to load host name (WatchPartyTile will read it)
-                  context
-                      .read<WatchPartySessionBloc>()
-                      .add(GetUserByIdEvent(userId: party.hostId));
+                  context.read<WatchPartySessionBloc>().add(GetUserByIdEvent(userId: party.hostId));
 
                   return WatchPartyTile(
                     party: party,
