@@ -73,6 +73,23 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   }
 
   @override
+  void dispose() {
+    _typingDebounce?.cancel();
+
+    final user = context.currentUser;
+    if (user != null) {
+      context.read<ChatCubit>().updateTypingStatus(
+            roomId: widget.partyId,
+            userId: user.uid,
+            userName: user.displayName!,
+            isTyping: false,
+          );
+    }
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<ChatCubit, ChatState>(
       listener: (context, state) {},
