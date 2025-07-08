@@ -388,11 +388,11 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                     ),
                 ],
               ),
-              bottomNavigationBar: _isHost
-                  ? WebPlaybackControls(
-                      syncManager: syncManager,
-                    )
-                  : null,
+              // bottomNavigationBar: _isHost
+              //     ? WebPlaybackControls(
+              //         syncManager: syncManager,
+              //       )
+              //     : null,
             ),
           ),
         ),
