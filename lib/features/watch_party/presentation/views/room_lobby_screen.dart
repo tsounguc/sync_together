@@ -144,9 +144,7 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          context.currentUser?.uid == widget.watchParty.hostId
-              ? _confirmEndParty()
-              : _leaveParty();
+          isHost ? _confirmEndParty() : _leaveParty();
         },
         child: Scaffold(
           appBar: AppBar(title: Text(widget.watchParty.title)),
