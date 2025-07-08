@@ -26,11 +26,6 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Start listening to live playback sync updates
-    // context.read<WatchPartySessionBloc>().add(
-    //       GetSyncedDataEvent(partyId: widget.watchParty.id),
-    //     );
   }
 
   @override
@@ -54,8 +49,26 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
         );
       }
     }
-    return Scaffold(
-      body: watchView,
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: ThemeData.dark().colorScheme.copyWith(
+              secondary: Colors.white70,
+              onSurface: Colors.white,
+            ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        textTheme: ThemeData.dark().textTheme.apply(
+              fontFamily: 'Inter',
+            ),
+      ),
+      child: Scaffold(
+        body: watchView,
+      ),
     );
   }
 }

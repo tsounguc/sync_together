@@ -120,9 +120,16 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
-        onProgress: (progress) => setState(() => loadingPercentage = progress),
-        onPageStarted: (_) => setState(() => loadingPercentage = 0),
+        onProgress: (progress) {
+          if (!mounted) return;
+          setState(() => loadingPercentage = progress);
+        },
+        onPageStarted: (_) {
+          if (!mounted) return;
+          setState(() => loadingPercentage = 0);
+        },
         onPageFinished: (_) async {
+          if (!mounted) return;
           setState(() => loadingPercentage = 100);
           if (!_isHost && !_hasSynced) {
             final synced = await GuestSyncHelper(
@@ -188,8 +195,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
+              await playback.pause();
+              await syncManager.stop();
               context.read<WatchPartySessionBloc>().add(
                     EndWatchPartyEvent(widget.watchParty.id),
                   );
@@ -272,7 +281,6 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             state is WatchPartyEnded ||
             state is WatchPartyEndedByHost) {
           try {
-            await syncManager.stop();
             if (mounted) {
               await Navigator.pushNamedAndRemoveUntil(
                 context,
@@ -280,7 +288,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                 (_) => false,
               );
             }
-            if (state is WatchPartyEndedByHost) {
+            if (state is WatchPartyEndedByHost || state is WatchPartyEnded) {
               CoreUtils.showSnackBar(
                 context,
                 'The host ended the watch party',
@@ -313,7 +321,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                   icon: Icon(
                     _showChat ? Icons.chat : Icons.chat_bubble_outline,
                   ),
-                  onPressed: () => setState(() => _showChat = !_showChat),
+                  onPressed: () {
+                    if (!mounted) return;
+                    setState(() => _showChat = !_showChat);
+                  },
                 ),
               ],
             ),
@@ -352,7 +363,9 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).scaffoldBackgroundColor,
                         border: Border(
-                          top: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                          top: BorderSide(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
                         ),
                       ),
                       child: WatchPartyChat(partyId: widget.watchParty.id),

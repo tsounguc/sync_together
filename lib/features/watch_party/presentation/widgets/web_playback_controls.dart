@@ -40,7 +40,6 @@ class _WebPlaybackControlsState extends State<WebPlaybackControls> {
   Future<void> _pauseVideo(BuildContext context) async {
     try {
       await widget.syncManager.playback.pause();
-      await widget.syncManager.stop();
       setState(() => _isPlaying = false);
       CoreUtils.showSnackBar(context, 'You paused the video.');
     } catch (_) {
