@@ -145,10 +145,12 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
       ..loadRequest(Uri.parse(widget.platform.defaultUrl));
   }
 
-  void _goToWatchParty(WatchParty party) {
-    Navigator.popUntil(context, ModalRoute.withName('/'));
-    Navigator.pushNamed(
-      context,
+  Future<void> _goToWatchParty(WatchParty party) async {
+    final navigator = Navigator.of(context);
+    await Future<void>.delayed(const Duration(seconds: 2));
+    navigator.popUntil(ModalRoute.withName('/'));
+    await Future<void>.delayed(const Duration(seconds: 2));
+    await navigator.pushNamed(
       WatchPartyScreen.id,
       arguments: WatchPartyScreenArguments(party, party.platform),
     );

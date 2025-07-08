@@ -48,20 +48,23 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
         .add(StartPartyEvent(widget.watchParty.id));
   }
 
-  void _goToWatchParty() {
-    Navigator.pushReplacementNamed(
-      context,
-      WatchPartyScreen.id,
-      arguments: WatchPartyScreenArguments(
-        widget.watchParty,
-        widget.watchParty.platform,
-      ),
-    );
+  void _goToWatchParty({WatchParty? party}) {
+    if (mounted) {
+      Navigator.pushReplacementNamed(
+        context,
+        WatchPartyScreen.id,
+        arguments: WatchPartyScreenArguments(
+          party ?? widget.watchParty,
+          widget.watchParty.platform,
+        ),
+      );
+    }
   }
 
-  void _goToPickVideo() {
-    Navigator.pushNamed(
-      context,
+  Future<void> _goToPickVideo() async {
+    final navigator = Navigator.of(context);
+    await Future<void>.delayed(const Duration(seconds: 2));
+    await navigator.pushNamed(
       PlatformVideoPickerScreen.id,
       arguments: PlatformVideoPickerScreenArgument(
         watchParty: widget.watchParty,
@@ -114,9 +117,14 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
     return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
       listener: (context, state) async {
         if (state is WatchPartyStarted && isHost) {
+          await Future<void>.delayed(const Duration(seconds: 2));
           _goToWatchParty();
+        } else if (state is WatchPartyFetched) {
+          _goToWatchParty(party: state.watchParty);
         } else if (state is PartyStartedRealtime) {
-          _goToWatchParty();
+          context
+              .read<WatchPartySessionBloc>()
+              .add(GetWatchPartyEvent(widget.watchParty.id));
         }
         if (state is WatchPartyLeft) {
           if (mounted) {
@@ -208,7 +216,12 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.video_library),
                           label: const Text('Pick Video'),
-                          onPressed: _goToPickVideo,
+                          onPressed: () async {
+                            await Future<void>.delayed(
+                              const Duration(seconds: 2),
+                            );
+                            await _goToPickVideo();
+                          },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(

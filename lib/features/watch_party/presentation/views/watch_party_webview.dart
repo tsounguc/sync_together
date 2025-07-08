@@ -222,7 +222,6 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await playback.pause();
               await syncManager.stop();
               bloc.add(
                 EndWatchPartyEvent(widget.watchParty.id),
@@ -330,6 +329,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
         }
 
         if (state is WatchPartyLeft) {
+          await syncManager.stop();
           if (mounted) {
             await Navigator.pushNamedAndRemoveUntil(
               context,
