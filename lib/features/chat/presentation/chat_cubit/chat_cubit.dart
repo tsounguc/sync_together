@@ -11,7 +11,9 @@ import 'package:sync_together/features/chat/domain/usecases/delete_message.dart'
 import 'package:sync_together/features/chat/domain/usecases/edit_message.dart';
 import 'package:sync_together/features/chat/domain/usecases/fetch_messages.dart';
 import 'package:sync_together/features/chat/domain/usecases/listen_to_messages.dart';
+import 'package:sync_together/features/chat/domain/usecases/listen_to_typing_users.dart';
 import 'package:sync_together/features/chat/domain/usecases/send_message.dart';
+import 'package:sync_together/features/chat/domain/usecases/set_typing_status.dart';
 
 part 'chat_state.dart';
 
@@ -23,6 +25,8 @@ class ChatCubit extends Cubit<ChatState> {
     required this.deleteMessage,
     required this.fetchMessages,
     required this.clearRoomMessages,
+    required this.setTypingStatus,
+    required this.listenToTypingUsers,
   }) : super(const ChatInitial());
 
   final ListenToMessages listenToMessages;
@@ -31,6 +35,9 @@ class ChatCubit extends Cubit<ChatState> {
   late DeleteMessage deleteMessage;
   late FetchMessages fetchMessages;
   late ClearRoomMessages clearRoomMessages;
+
+  final SetTypingStatus setTypingStatus;
+  final ListenToTypingUsers listenToTypingUsers;
 
   Future<void> sendTextMessage({
     required String roomId,
@@ -50,6 +57,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   StreamSubscription<Either<Failure, List<Message>>>? _subscription;
+
   void listenToMessagesStream(String roomId) {
     emit(const ChatLoading());
     _subscription?.cancel();
@@ -142,9 +150,49 @@ class ChatCubit extends Cubit<ChatState> {
     );
   }
 
+  Future<void> updateTypingStatus({
+    required String roomId,
+    required String userId,
+    required String userName,
+    required bool isTyping,
+  }) async {
+    await setTypingStatus(
+      SetTypingStatusParams(
+        roomId: roomId,
+        userId: userId,
+        userName: userName,
+        isTyping: isTyping,
+      ),
+    );
+  }
+
+  StreamSubscription<Either<Failure, List<String>>>? _typingSub;
+
+  void listenToTypingUsersStream(String roomId) {
+    _typingSub?.cancel();
+    _typingSub = listenToTypingUsers(roomId).listen(
+      (result) {
+        result.fold(
+          (failure) => debugPrint('[Typing Stream Error]: ${failure.message}'),
+          (typingUserNames) {
+            emit(TypingUsersUpdated(typingUserNames));
+          },
+        );
+      },
+      onError: (error) {
+        debugPrint('[Typing Stream Error]: $error');
+        _typingSub?.cancel();
+      },
+      onDone: () {
+        _typingSub?.cancel();
+      },
+    );
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();
+    _typingSub?.cancel();
     return super.close();
   }
 }

@@ -314,7 +314,8 @@ class ListenToParticipantsFailure extends WatchPartyFailure {
 
   /// Converts a [ListenToParticipantsException]
   /// into a [ListenToParticipantsFailure].
-  ListenToParticipantsFailure.fromException(ListenToParticipantsException exception)
+  ListenToParticipantsFailure.fromException(
+      ListenToParticipantsException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,
@@ -344,7 +345,8 @@ class ListenToPartyExistenceFailure extends WatchPartyFailure {
   });
 
   /// Converts a [ListenToPartyExistenceException] into a [ListenToPartyExistenceFailure].
-  ListenToPartyExistenceFailure.fromException(ListenToPartyExistenceException exception)
+  ListenToPartyExistenceFailure.fromException(
+      ListenToPartyExistenceException exception)
       : this(
           message: exception.message,
           statusCode: exception.statusCode,
@@ -547,6 +549,38 @@ class FetchMessagesFailure extends MessageFailure {
   /// Converts a [FetchMessagesException] into a [FetchMessagesFailure].
   FetchMessagesFailure.fromException(FetchMessagesException exception)
       : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when setting typing status.**
+class SetTypingStatusFailure extends MessageFailure {
+  SetTypingStatusFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [SetTypingStatusException] into a [SetTypingStatusFailure].
+  SetTypingStatusFailure.fromException(
+    SetTypingStatusException exception,
+  ) : this(
+          message: exception.message,
+          statusCode: exception.statusCode,
+        );
+}
+
+/// **Failure that occurs when listening to typing users**
+class ListenToTypingUsersFailure extends MessageFailure {
+  ListenToTypingUsersFailure({
+    required super.message,
+    required super.statusCode,
+  });
+
+  /// Converts a [ListenToTypingUsersException] into a [ListenToTypingUsersFailure].
+  ListenToTypingUsersFailure.fromException(
+    ListenToTypingUsersException exception,
+  ) : this(
           message: exception.message,
           statusCode: exception.statusCode,
         );

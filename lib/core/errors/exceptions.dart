@@ -348,3 +348,18 @@ class FetchMessagesException extends MessageException {
     required super.statusCode,
   });
 }
+
+/// **Exception thrown when setting typing status
+class SetTypingStatusException extends MessageException {
+  const SetTypingStatusException({
+    required super.message,
+    required super.statusCode,
+  });
+}
+
+class ListenToTypingUsersException extends MessageException {
+  const ListenToTypingUsersException({
+    required super.message,
+    required super.statusCode,
+  });
+}

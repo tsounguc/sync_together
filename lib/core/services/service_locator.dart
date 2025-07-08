@@ -24,7 +24,9 @@ import 'package:sync_together/features/chat/domain/usecases/delete_message.dart'
 import 'package:sync_together/features/chat/domain/usecases/edit_message.dart';
 import 'package:sync_together/features/chat/domain/usecases/fetch_messages.dart';
 import 'package:sync_together/features/chat/domain/usecases/listen_to_messages.dart';
+import 'package:sync_together/features/chat/domain/usecases/listen_to_typing_users.dart';
 import 'package:sync_together/features/chat/domain/usecases/send_message.dart';
+import 'package:sync_together/features/chat/domain/usecases/set_typing_status.dart';
 import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 import 'package:sync_together/features/friends/data/data_sources/friends_remote_data_source.dart';
 import 'package:sync_together/features/friends/data/repositories/friends_repository_impl.dart';

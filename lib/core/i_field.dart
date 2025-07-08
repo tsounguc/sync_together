@@ -27,13 +27,16 @@ class IField extends StatelessWidget {
     this.onEditingComplete,
     this.onFieldSubmitted,
     this.onTap,
+    this.onChanged,
     this.fontSize,
     super.key,
   });
+
   final String? Function(String?)? validator;
   final void Function()? onEditingComplete;
   final void Function(String)? onFieldSubmitted;
   final void Function()? onTap;
+  final void Function(String)? onChanged;
   final TextEditingController controller;
   final bool filled;
   final Color? fillColor;
@@ -71,6 +74,7 @@ class IField extends StatelessWidget {
       minLines: minLines,
       maxLines: maxLines,
       onTap: onTap,
+      onChanged: onChanged,
       onTapOutside: (_) {
         FocusScope.of(context).unfocus();
       },

@@ -56,6 +56,7 @@ class MessagesClearing extends ChatState {
 /// Success state when messages received
 class MessagesReceived extends ChatState {
   const MessagesReceived(this.messages);
+
   final List<Message> messages;
 
   @override
@@ -90,4 +91,14 @@ class MessagesFetched extends ChatState {
 /// Success state when messages cleared
 class MessagesCleared extends ChatState {
   const MessagesCleared();
+}
+
+/// Success state when typing users upated
+class TypingUsersUpdated extends ChatState {
+  const TypingUsersUpdated(this.userNames);
+
+  final List<String> userNames;
+
+  @override
+  List<Object> get props => [userNames];
 }

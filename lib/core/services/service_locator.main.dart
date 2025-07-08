@@ -21,8 +21,11 @@ Future<void> _initChat() async {
         deleteMessage: serviceLocator(),
         fetchMessages: serviceLocator(),
         clearRoomMessages: serviceLocator(),
+        setTypingStatus: serviceLocator(),
+        listenToTypingUsers: serviceLocator(),
       ),
     )
+
     // Use cases
     ..registerLazySingleton(() => ListenToMessages(serviceLocator()))
     ..registerLazySingleton(() => SendMessage(serviceLocator()))
@@ -30,6 +33,9 @@ Future<void> _initChat() async {
     ..registerLazySingleton(() => DeleteMessage(serviceLocator()))
     ..registerLazySingleton(() => FetchMessages(serviceLocator()))
     ..registerLazySingleton(() => ClearRoomMessages(serviceLocator()))
+    ..registerLazySingleton(() => SetTypingStatus(serviceLocator()))
+    ..registerLazySingleton(() => ListenToTypingUsers(serviceLocator()))
+
     // Repositories
     ..registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(serviceLocator()),

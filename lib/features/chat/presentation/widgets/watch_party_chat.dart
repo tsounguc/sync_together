@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +26,9 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  List<String> _typingUserNames = [];
+  Timer? _typingDebounce;
+
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -40,6 +45,14 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
           ),
         );
     _controller.clear();
+
+    // Stop typing
+    context.read<ChatCubit>().updateTypingStatus(
+          roomId: widget.partyId,
+          userId: currentUser.uid,
+          userName: currentUser.displayName!,
+          isTyping: false,
+        );
   }
 
   void _scrollToBottom() {
@@ -55,83 +68,128 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   @override
   void initState() {
     super.initState();
-    context.read<ChatCubit>().listenToMessagesStream(
-          widget.partyId,
-        );
+    context.read<ChatCubit>().listenToMessagesStream(widget.partyId);
+    context.read<ChatCubit>().listenToTypingUsersStream(widget.partyId);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: BlocBuilder<ChatCubit, ChatState>(
-            builder: (context, state) {
-              if (state is MessagesReceived) {
-                _scrollToBottom();
-                final messages = state.messages;
+    return BlocListener<ChatCubit, ChatState>(
+      listener: (context, state) {
+        if (state is TypingUsersUpdated) {
+          final currentUser = context.currentUser?.displayName;
+          setState(() {
+            _typingUserNames =
+                state.userNames.where((name) => name != currentUser).toList();
+          });
+        }
+      },
+      child: Column(
+        children: [
+          Expanded(
+            child: BlocBuilder<ChatCubit, ChatState>(
+              buildWhen: (prev, curr) => curr is! TypingUsersUpdated,
+              builder: (context, state) {
+                if (state is MessagesReceived) {
+                  _scrollToBottom();
+                  final messages = state.messages;
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == context.currentUser?.uid;
-                    final isSameSender = index == 0 || messages[index - 1].senderId != message.senderId;
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isMe = message.senderId == context.currentUser?.uid;
+                      final isSameSender = index == 0 ||
+                          messages[index - 1].senderId != message.senderId;
 
-                    return Align(
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                      child: GestureDetector(
-                        onLongPress: isMe
-                            ? () => _showMessageOptions(
-                                  context,
-                                  message,
-                                )
-                            : null,
-                        child: MessageBubble(
-                          isMe: isMe,
-                          isSamePerson: isSameSender,
-                          message: message,
+                      return Align(
+                        alignment:
+                            isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: GestureDetector(
+                          onLongPress: isMe
+                              ? () => _showMessageOptions(context, message)
+                              : null,
+                          child: MessageBubble(
+                            isMe: isMe,
+                            isSamePerson: isSameSender,
+                            message: message,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }
+                      );
+                    },
+                  );
+                }
 
-              if (state is ChatError) {
-                return Center(child: Text('Error: ${state.message}'));
-              }
+                if (state is ChatError) {
+                  return Center(child: Text('Error: ${state.message}'));
+                }
 
-              return const Center(child: CircularProgressIndicator());
-            },
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 24,
-          ).copyWith(bottom: 8, right: 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: IField(
-                  controller: _controller,
-                  onFieldSubmitted: (_) => _sendMessage(),
-                  hintText: 'Type your message...',
-                  borderRadius: BorderRadius.circular(10),
-                  textInputAction: TextInputAction.send,
+          if (_typingUserNames.isNotEmpty)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${_typingUserNames.join(', ')} is typing...',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: _sendMessage,
-              ),
-            ],
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 24,
+            ).copyWith(bottom: 8, right: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: IField(
+                    controller: _controller,
+                    onFieldSubmitted: (_) => _sendMessage(),
+                    hintText: 'Type your message...',
+                    borderRadius: BorderRadius.circular(10),
+                    textInputAction: TextInputAction.send,
+                    onChanged: (value) {
+                      final user = context.currentUser!;
+                      final cubit = context.read<ChatCubit>()
+                        ..updateTypingStatus(
+                          roomId: widget.partyId,
+                          userId: user.uid,
+                          userName: user.displayName!,
+                          isTyping: true,
+                        );
+
+                      _typingDebounce?.cancel();
+                      _typingDebounce = Timer(const Duration(seconds: 2), () {
+                        cubit.updateTypingStatus(
+                          roomId: widget.partyId,
+                          userId: user.uid,
+                          userName: user.displayName!,
+                          isTyping: false,
+                        );
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _sendMessage,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -147,7 +205,7 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
                 title: const Text('Edit'),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO(Edit-Message): Implement edit flow
+                  // TODO: Implement edit
                 },
               ),
               ListTile(

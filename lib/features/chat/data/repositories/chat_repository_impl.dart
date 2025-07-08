@@ -18,7 +18,8 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   ResultStream<List<Message>> listenToMessages({required String roomId}) {
     return remoteDataSource.listenToMessages(roomId: roomId).transform(
-          StreamTransformer<List<MessageModel>, Either<Failure, List<Message>>>.fromHandlers(
+          StreamTransformer<List<MessageModel>,
+              Either<Failure, List<Message>>>.fromHandlers(
             handleData: (messages, sink) {
               sink.add(Right(messages));
             },
@@ -114,6 +115,55 @@ class ChatRepositoryImpl implements ChatRepository {
       return Right(result);
     } on FetchMessagesException catch (e) {
       return Left(FetchMessagesFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid setTypingStatus({
+    required String roomId,
+    required String userId,
+    required String userName,
+    required bool isTyping,
+  }) async {
+    try {
+      await remoteDataSource.setTypingStatus(
+        roomId: roomId,
+        userId: userId,
+        userName: userName,
+        isTyping: isTyping,
+      );
+      return const Right(null);
+    } on SetTypingStatusException catch (e) {
+      return Left(SetTypingStatusFailure.fromException(e));
+    } catch (e) {
+      return Left(SetTypingStatusFailure(
+        message: e.toString(),
+        statusCode: 500,
+      ));
+    }
+  }
+
+  @override
+  ResultStream<List<String>> listenToTypingUsers({required String roomId}) {
+    try {
+      final stream = remoteDataSource.listenToTypingUsers(roomId: roomId);
+      return stream
+          .map<Right<Failure, List<String>>>(
+        (usernames) => Right(usernames),
+      )
+          .handleError((error) {
+        if (error is ListenToTypingUsersException) {
+          throw ListenToTypingUsersFailure.fromException(error);
+        } else {
+          throw ListenToTypingUsersFailure(
+              message: error.toString(), statusCode: 500);
+        }
+      });
+    } catch (e) {
+      return Stream.value(
+        Left(
+            ListenToTypingUsersFailure(message: e.toString(), statusCode: 500)),
+      );
     }
   }
 }

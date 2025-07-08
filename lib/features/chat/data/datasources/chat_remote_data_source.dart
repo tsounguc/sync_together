@@ -62,6 +62,23 @@ abstract class ChatRemoteDataSource {
   Future<void> clearRoomMessages({
     required String roomId,
   });
+
+  /// Updates typing status for a user in a specific room.
+  ///
+  /// - **Success:** Completes without return value.
+  /// - **Failure:** Throws a [ChatException].
+  Future<void> setTypingStatus({
+    required String roomId,
+    required String userId,
+    required String userName,
+    required bool isTyping,
+  });
+
+  /// Streams a list of names of users who are currently typing.
+  ///
+  /// - **Success:** Returns a stream of [List<String>].
+  /// - **Failure:** Throws a [ChatException].
+  Stream<List<String>> listenToTypingUsers({required String roomId});
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -238,6 +255,56 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       rethrow;
     } catch (e) {
       throw EditMessageException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Future<void> setTypingStatus({
+    required String roomId,
+    required String userId,
+    required String userName,
+    required bool isTyping,
+  }) async {
+    try {
+      await firestore
+          .collection(FirebaseConstants.watchPartiesCollection)
+          .doc(roomId)
+          .collection('typing_status')
+          .doc(userId)
+          .set({
+        'isTyping': isTyping,
+        'name': userName,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw SetTypingStatusException(
+        message: e.message ?? 'Failed to set typing status',
+        statusCode: e.code,
+      );
+    } catch (e) {
+      throw SetTypingStatusException(
+        message: e.toString(),
+        statusCode: '505',
+      );
+    }
+  }
+
+  @override
+  Stream<List<String>> listenToTypingUsers({required String roomId}) {
+    try {
+      return firestore
+          .collection(FirebaseConstants.watchPartiesCollection)
+          .doc(roomId)
+          .collection('typing_status')
+          .where('isTyping', isEqualTo: true)
+          .snapshots()
+          .map((snapshot) =>
+              snapshot.docs.map((doc) => doc['name'] as String).toList());
+    } catch (e) {
+      throw ListenToTypingUsersException(
         message: e.toString(),
         statusCode: '505',
       );

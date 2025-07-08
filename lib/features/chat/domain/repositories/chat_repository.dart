@@ -58,4 +58,23 @@ abstract class ChatRepository {
   ResultVoid clearRoomMessages({
     required String roomId,
   });
+
+  /// Sets a user's typing status in the room.
+  ///
+  /// - **Success:** Returns `void`
+  /// - **Failure:** Returns a `MessageFailure`
+  ResultVoid setTypingStatus({
+    required String roomId,
+    required String userId,
+    required String userName,
+    required bool isTyping,
+  });
+
+  /// Listens to users who are currently typing in the room.
+  ///
+  /// - **Success:** Returns a list of user names
+  /// - **Failure:** Returns a `MessageFailure`
+  ResultStream<List<String>> listenToTypingUsers({
+    required String roomId,
+  });
 }

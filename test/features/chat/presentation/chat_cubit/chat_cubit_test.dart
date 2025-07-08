@@ -9,7 +9,9 @@ import 'package:sync_together/features/chat/domain/usecases/delete_message.dart'
 import 'package:sync_together/features/chat/domain/usecases/edit_message.dart';
 import 'package:sync_together/features/chat/domain/usecases/fetch_messages.dart';
 import 'package:sync_together/features/chat/domain/usecases/listen_to_messages.dart';
+import 'package:sync_together/features/chat/domain/usecases/listen_to_typing_users.dart';
 import 'package:sync_together/features/chat/domain/usecases/send_message.dart';
+import 'package:sync_together/features/chat/domain/usecases/set_typing_status.dart';
 import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 
 class MockListenToMessages extends Mock implements ListenToMessages {}
@@ -24,6 +26,10 @@ class MockFetchMessages extends Mock implements FetchMessages {}
 
 class MockClearRoomMessages extends Mock implements ClearRoomMessages {}
 
+class MockSetTypingStatus extends Mock implements SetTypingStatus {}
+
+class MockListenToTypingUsers extends Mock implements ListenToTypingUsers {}
+
 void main() {
   late ListenToMessages listenToMessages;
   late SendMessage sendMessage;
@@ -31,6 +37,8 @@ void main() {
   late DeleteMessage deleteMessage;
   late FetchMessages fetchMessages;
   late ClearRoomMessages clearRoomMessages;
+  late SetTypingStatus setTypingStatus;
+  late ListenToTypingUsers listenToTypingUsers;
 
   late ChatCubit cubit;
 
@@ -54,6 +62,8 @@ void main() {
     deleteMessage = MockDeleteMessage();
     fetchMessages = MockFetchMessages();
     clearRoomMessages = MockClearRoomMessages();
+    setTypingStatus = MockSetTypingStatus();
+    listenToTypingUsers = MockListenToTypingUsers();
 
     cubit = ChatCubit(
       listenToMessages: listenToMessages,
@@ -62,6 +72,8 @@ void main() {
       deleteMessage: deleteMessage,
       fetchMessages: fetchMessages,
       clearRoomMessages: clearRoomMessages,
+      setTypingStatus: setTypingStatus,
+      listenToTypingUsers: listenToTypingUsers,
     );
 
     testMessage = Message.empty();
