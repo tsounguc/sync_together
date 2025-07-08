@@ -59,8 +59,10 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
           elevation: 0,
         ),
       ),
-      child: Scaffold(
-        body: watchView,
+      child: SafeArea(
+        child: Scaffold(
+          body: watchView,
+        ),
       ),
     );
   }

@@ -175,28 +175,67 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
           _goToWatchParty(state.watchParty);
         }
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          title: Text('Pick a Video (${widget.platform.name})'),
+      child: SafeArea(
+        child: Scaffold(
           backgroundColor: Colors.black,
-        ),
-        body: Stack(
-          children: [
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeInOut,
-              opacity: _fadeOpacity,
-              child: _webViewController == null
-                  ? const SizedBox.shrink()
-                  : WebViewWidget(controller: _webViewController!),
-            ),
-            if (_isLoading)
-              const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+          appBar: AppBar(
+            title: Text('Pick a Video (${widget.platform.name})'),
+            backgroundColor: Colors.black,
+          ),
+          body: Stack(
+            children: [
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeInOut,
+                opacity: _fadeOpacity,
+                child: _webViewController == null
+                    ? const SizedBox.shrink()
+                    : WebViewWidget(controller: _webViewController!),
               ),
-          ],
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+            ],
+          ),
+          bottomNavigationBar:
+              _webViewController != null ? _buildWebNavigationBar() : null,
         ),
+      ),
+    );
+  }
+
+  Widget _buildWebNavigationBar() {
+    return Container(
+      color: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            tooltip: 'Back',
+            onPressed: () async {
+              if (await _webViewController?.canGoBack() ?? false) {
+                _webViewController?.goBack();
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            tooltip: 'Reload',
+            onPressed: () => _webViewController?.reload(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            tooltip: 'Forward',
+            onPressed: () async {
+              if (await _webViewController?.canGoForward() ?? false) {
+                _webViewController?.goForward();
+              }
+            },
+          ),
+        ],
       ),
     );
   }

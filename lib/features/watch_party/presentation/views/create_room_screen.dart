@@ -75,123 +75,126 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       appBar: AppBar(
         title: const Text('Create Watch Party'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            /// Platform Info Header
-            Row(
-              children: [
-                Image.asset(
-                  isDark && !platform.logoPath.contains('disney')
-                      ? platform.logoDarkPath
-                      : platform.logoPath,
-                  width: 32,
-                  height: 32,
-                  color: isDark && platform.logoPath.contains('disney')
-                      ? Colors.white
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  platform.name,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            /// Room Title Input
-            IField(
-              controller: _titleController,
-              hintText: 'Room Title',
-              textInputAction: TextInputAction.next,
-            ),
-
-            const SizedBox(height: 20),
-
-            /// URL Section (if allowed)
-            if (!platform.isDRMProtected)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              /// Platform Info Header
+              Row(
                 children: [
-                  IField(
-                    controller: _urlController,
-                    hintText: 'Paste video URL (optional)',
-                    keyboardType: TextInputType.url,
-                    textInputAction: TextInputAction.done,
+                  Image.asset(
+                    isDark && !platform.logoPath.contains('disney')
+                        ? platform.logoDarkPath
+                        : platform.logoPath,
+                    width: 32,
+                    height: 32,
+                    color: isDark && platform.logoPath.contains('disney')
+                        ? Colors.white
+                        : null,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Or leave empty and pick the video later.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                  ),
-                ],
-              )
-            else
-              Text(
-                'This platform is DRM protected.\nEveryone must open the same video manually.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-
-            const SizedBox(height: 24),
-
-            /// Privacy Switch
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: theme.dividerColor),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.lock_outline, size: 20),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Private Room',
-                      style: theme.textTheme.bodyLarge,
+                  Text(
+                    platform.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                  Switch(
-                    value: _isPrivate,
-                    onChanged: (value) => setState(() => _isPrivate = value),
                   ),
                 ],
               ),
-            ),
 
-            const Spacer(),
+              const SizedBox(height: 30),
 
-            /// Create Button
-            BlocConsumer<WatchPartySessionBloc, WatchPartySessionState>(
-              listener: (context, state) {
-                if (state is WatchPartyError) {
-                  CoreUtils.showSnackBar(context, state.message);
-                }
-              },
-              builder: (context, state) {
-                return state is WatchPartyLoading
-                    ? const CircularProgressIndicator()
-                    : SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton.icon(
-                          onPressed: _onCreateRoomPressed,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Create Room'),
-                        ),
-                      );
-              },
-            ),
-          ],
+              /// Room Title Input
+              IField(
+                controller: _titleController,
+                hintText: 'Room Title',
+                textInputAction: TextInputAction.next,
+              ),
+
+              const SizedBox(height: 20),
+
+              /// URL Section (if allowed)
+              if (!platform.isDRMProtected)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IField(
+                      controller: _urlController,
+                      hintText: 'Paste video URL (optional)',
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.done,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Or leave empty and pick the video later.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Text(
+                  'This platform is DRM protected.\nEveryone must open the same video manually.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+
+              const SizedBox(height: 24),
+
+              /// Privacy Switch
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.dividerColor),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Private Room',
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ),
+                    Switch(
+                      value: _isPrivate,
+                      onChanged: (value) => setState(() => _isPrivate = value),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(),
+
+              /// Create Button
+              BlocConsumer<WatchPartySessionBloc, WatchPartySessionState>(
+                listener: (context, state) {
+                  if (state is WatchPartyError) {
+                    CoreUtils.showSnackBar(context, state.message);
+                  }
+                },
+                builder: (context, state) {
+                  return state is WatchPartyLoading
+                      ? const CircularProgressIndicator()
+                      : SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: _onCreateRoomPressed,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Create Room'),
+                          ),
+                        );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
