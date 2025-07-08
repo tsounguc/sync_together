@@ -16,45 +16,60 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final bubbleColor = isMe ? colorScheme.onPrimary : colorScheme.surfaceContainerHighest;
+
+    final textColor = isMe ? colorScheme.onPrimary : colorScheme.onSurface;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isSamePerson)
           const SizedBox(
-            height: 30,
+            height: 24,
           ),
         if (!isMe && isSamePerson)
           Padding(
             padding: const EdgeInsets.only(
-              bottom: 2,
-              left: 15,
+              bottom: 4,
+              left: 16,
             ),
             child: Text(
               message.senderName,
-              style: TextStyle(
-                // fontWeight: FontWeight.bold,
-                fontSize: 11,
-                color: Colors.grey.shade200,
-              ),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
             ),
           ),
-        Container(
-          margin: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
-          padding: const EdgeInsets.all(12),
-          constraints: BoxConstraints(
-            maxWidth: context.width * 0.7,
-          ),
-          decoration: BoxDecoration(
-            color: isMe ? Colors.blueAccent : Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            message.text,
-            style: TextStyle(
-              color: isMe ? Colors.white : Colors.black,
+        Align(
+          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            constraints: BoxConstraints(
+              maxWidth: context.width * 0.75,
+            ),
+            decoration: BoxDecoration(
+                color: bubbleColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
+                  bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ]),
+            child: Text(
+              message.text,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: textColor,
+                  ),
             ),
           ),
         ),
