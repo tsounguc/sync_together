@@ -118,28 +118,30 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
         } else if (state is PartyStartedRealtime) {
           _goToWatchParty();
         }
-        if (state is WatchPartyLeft ||
-            state is WatchPartyEnded ||
-            state is WatchPartyEndedByHost) {
-          debugPrint('state is: $state');
-          try {
+        if (state is WatchPartyLeft) {
+          if (mounted) {
+            await Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/',
+              (route) => false,
+            );
+          }
+        }
+        if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
+          if (mounted) {
+            CoreUtils.showSnackBar(context, 'The host ended the watch party');
+
+            await Future<void>.delayed(const Duration(seconds: 2));
             if (mounted) {
               await Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/',
-                (_) => false,
+                (route) => false,
               );
             }
-            if (state is WatchPartyEndedByHost || state is WatchPartyEnded) {
-              CoreUtils.showSnackBar(
-                context,
-                'The host ended the watch party',
-              );
-            }
-          } catch (e) {
-            debugPrint('Failure: $e');
           }
-        } else if (state is WatchPartyError) {
+        }
+        if (state is WatchPartyError) {
           CoreUtils.showSnackBar(context, state.message);
         }
       },

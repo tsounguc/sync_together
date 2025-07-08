@@ -75,15 +75,7 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChatCubit, ChatState>(
-      listener: (context, state) {
-        if (state is TypingUsersUpdated) {
-          final currentUser = context.currentUser?.displayName;
-          setState(() {
-            _typingUserNames =
-                state.userNames.where((name) => name != currentUser).toList();
-          });
-        }
-      },
+      listener: (context, state) {},
       child: Column(
         children: [
           Expanded(
@@ -129,21 +121,34 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
               },
             ),
           ),
-          if (_typingUserNames.isNotEmpty)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${_typingUserNames.join(', ')} is typing...',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey,
+          BlocBuilder<ChatCubit, ChatState>(
+            buildWhen: (previous, current) => current is TypingUsersUpdated,
+            builder: (context, state) {
+              if (state is TypingUsersUpdated) {
+                final currentUser = context.currentUser?.displayName;
+                final otherTyping = state.userNames
+                    .where((name) => name != currentUser)
+                    .toList();
+                if (otherTyping.isNotEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 4),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${otherTyping.join(', ')} is typing...',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
+                            ),
                       ),
-                ),
-              ),
-            ),
+                    ),
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 24,
