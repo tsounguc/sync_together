@@ -20,6 +20,8 @@ class RoomLobbyScreen extends StatefulWidget {
 }
 
 class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
+  bool get _isHost => context.currentUser?.uid == widget.watchParty.hostId;
+
   @override
   void initState() {
     super.initState();
@@ -144,7 +146,7 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          isHost ? _confirmEndParty() : _leaveParty();
+          _isHost ? _confirmEndParty() : _leaveParty();
         },
         child: Scaffold(
           appBar: AppBar(title: Text(widget.watchParty.title)),
