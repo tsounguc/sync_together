@@ -73,6 +73,12 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   }
 
   @override
+  void dispose() {
+    _typingDebounce?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<ChatCubit, ChatState>(
       listener: (context, state) {},

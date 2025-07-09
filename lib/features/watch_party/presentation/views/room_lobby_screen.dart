@@ -63,7 +63,6 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
 
   Future<void> _goToPickVideo() async {
     final navigator = Navigator.of(context);
-    await Future<void>.delayed(const Duration(seconds: 2));
     await navigator.pushNamed(
       PlatformVideoPickerScreen.id,
       arguments: PlatformVideoPickerScreenArgument(
@@ -87,6 +86,7 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
+
               context.read<WatchPartySessionBloc>().add(
                     EndWatchPartyEvent(widget.watchParty.id),
                   );
@@ -216,12 +216,7 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.video_library),
                           label: const Text('Pick Video'),
-                          onPressed: () async {
-                            await Future<void>.delayed(
-                              const Duration(seconds: 2),
-                            );
-                            await _goToPickVideo();
-                          },
+                          onPressed: _goToPickVideo,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(

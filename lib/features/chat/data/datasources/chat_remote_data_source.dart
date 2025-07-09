@@ -154,6 +154,19 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           .collection(FirebaseConstants.watchPartiesCollection)
           .doc(roomId)
           .collection(FirebaseConstants.messagesCollection);
+
+      final snapshot = await firestore
+          .collection(FirebaseConstants.watchPartiesCollection)
+          .doc(roomId)
+          .collection('typing_status')
+          .get();
+
+      final batch = firestore.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+
       return _deleteMessagesByQuery(query);
     } on FirebaseException catch (e) {
       throw ClearRoomMessagesException(
@@ -269,16 +282,20 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     required bool isTyping,
   }) async {
     try {
-      await firestore
-          .collection(FirebaseConstants.watchPartiesCollection)
-          .doc(roomId)
-          .collection('typing_status')
-          .doc(userId)
-          .set({
-        'isTyping': isTyping,
-        'name': userName,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final doc = await _watchParties.doc(roomId).get();
+
+      if (doc.exists) {
+        await firestore
+            .collection(FirebaseConstants.watchPartiesCollection)
+            .doc(roomId)
+            .collection('typing_status')
+            .doc(userId)
+            .set({
+          'isTyping': isTyping,
+          'name': userName,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
     } on FirebaseException catch (e) {
       throw SetTypingStatusException(
         message: e.message ?? 'Failed to set typing status',

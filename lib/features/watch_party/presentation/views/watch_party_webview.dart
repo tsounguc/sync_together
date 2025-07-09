@@ -6,6 +6,7 @@ import 'package:sync_together/core/extensions/context_extension.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/core/utils/video_url_helper.dart';
 import 'package:sync_together/core/utils/webview_loader.dart';
+import 'package:sync_together/features/chat/presentation/chat_cubit/chat_cubit.dart';
 import 'package:sync_together/features/chat/presentation/widgets/watch_party_chat.dart';
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
@@ -144,10 +145,10 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
           final embedBlocked =
               await _webViewController?.runJavaScriptReturningResult(
-            """
+            '''
     document.body.innerText.includes("Video unavailable") 
     || document.body.innerText.includes("Watch this video on YouTube");
-    """,
+    ''',
           );
 
           if (embedBlocked.toString().toLowerCase() == 'true') {
@@ -208,7 +209,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   }
 
   void _confirmEndParty() {
-    final bloc = context.read<WatchPartySessionBloc>();
+    final chatCubit = context.read<ChatCubit>();
     showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
@@ -223,8 +224,8 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
             onPressed: () async {
               Navigator.pop(context);
               await syncManager.stop();
-              bloc.add(
-                EndWatchPartyEvent(widget.watchParty.id),
+              await chatCubit.clearRoomTextMessages(
+                roomId: widget.watchParty.id,
               );
             },
             child: const Text('End'),
@@ -276,83 +277,99 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
-      listener: (context, state) async {
-        if (state is SyncUpdated) {
-          _latestPlaybackPosition = state.playbackPosition;
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<WatchPartySessionBloc, WatchPartySessionState>(
+          listener: (context, state) async {
+            if (state is SyncUpdated) {
+              _latestPlaybackPosition = state.playbackPosition;
 
-          // Update guests about host video playing status
-          if (!_isHost && _latestIsPlaying != state.isPlaying) {
-            CoreUtils.showSnackBar(
-              context,
-              state.isPlaying
-                  ? 'The host started the video'
-                  : 'The host paused the video',
-            );
-          }
+              // Update guests about host video playing status
+              if (!_isHost && _latestIsPlaying != state.isPlaying) {
+                CoreUtils.showSnackBar(
+                  context,
+                  state.isPlaying
+                      ? 'The host started the video'
+                      : 'The host paused the video',
+                );
+              }
 
-          // update saved playing status
-          _latestIsPlaying = state.isPlaying;
+              // update saved playing status
+              _latestIsPlaying = state.isPlaying;
 
-          // if guest not synced
-          if (!_isHost && !_hasSynced) {
-            // sync guest
-            final synced = await GuestSyncHelper(
-              playback: playback,
-              targetPosition: _latestPlaybackPosition ?? 0,
-              shouldPlay: _latestIsPlaying,
-            ).attemptInitialSync();
-            if (synced) _hasSynced = true;
-          }
+              // if guest not synced
+              if (!_isHost && !_hasSynced) {
+                // sync guest
+                final synced = await GuestSyncHelper(
+                  playback: playback,
+                  targetPosition: _latestPlaybackPosition ?? 0,
+                  shouldPlay: _latestIsPlaying,
+                ).attemptInitialSync();
+                if (synced) _hasSynced = true;
+              }
 
-          // get the video position from device
-          final localPosition = await playback
-              .getCurrentTime(streamingPlatform.currentTimeScript);
+              // get the video position from device
+              final localPosition = await playback
+                  .getCurrentTime(streamingPlatform.currentTimeScript);
 
-          // compare to saved host video positon from database (firebase)
-          final drift = (_latestPlaybackPosition! - localPosition).abs();
+              // compare to saved host video positon from database (firebase)
+              final drift = (_latestPlaybackPosition! - localPosition).abs();
 
-          // update sync badge if difference is less then 3
-          _updateSyncBadge(
-              drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
+              // update sync badge if difference is less then 3
+              _updateSyncBadge(
+                  drift < 3.0 ? SyncStatus.synced : SyncStatus.syncing);
 
-          // set the video to host position if difference is greater than 1.5
-          if (drift >= 1.5) await playback.seek(_latestPlaybackPosition!);
+              // set the video to host position if difference is greater than 1.5
+              if (drift >= 1.5) await playback.seek(_latestPlaybackPosition!);
 
-          // get video playing status
-          final playing = await playback.isPlaying();
+              // get video playing status
+              final playing = await playback.isPlaying();
 
-          // if host is playing status is different from guest
-          if (state.isPlaying != playing) {
-            state.isPlaying ? await playback.play() : await playback.pause();
-          }
-        }
-
-        if (state is WatchPartyLeft) {
-          await syncManager.stop();
-          if (mounted) {
-            await Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/',
-              (route) => false,
-            );
-          }
-        }
-        if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
-          if (mounted) {
-            CoreUtils.showSnackBar(context, 'The host ended the watch party');
-
-            await Future<void>.delayed(const Duration(seconds: 2));
-            if (mounted) {
-              await Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/',
-                (route) => false,
-              );
+              // if host is playing status is different from guest
+              if (state.isPlaying != playing) {
+                state.isPlaying
+                    ? await playback.play()
+                    : await playback.pause();
+              }
             }
-          }
-        }
-      },
+
+            if (state is WatchPartyLeft) {
+              await syncManager.stop();
+              if (mounted) {
+                await Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              }
+            }
+            if (state is WatchPartyEnded || state is WatchPartyEndedByHost) {
+              if (mounted) {
+                CoreUtils.showSnackBar(
+                    context, 'The host ended the watch party');
+
+                await Future<void>.delayed(const Duration(seconds: 2));
+                if (mounted) {
+                  await Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/',
+                    (route) => false,
+                  );
+                }
+              }
+            }
+          },
+        ),
+        BlocListener<ChatCubit, ChatState>(
+          listener: (context, state) {
+            if (state is MessagesCleared) {
+              context.read<WatchPartySessionBloc>().add(
+                    EndWatchPartyEvent(widget.watchParty.id),
+                  );
+            }
+          },
+        ),
+      ],
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
