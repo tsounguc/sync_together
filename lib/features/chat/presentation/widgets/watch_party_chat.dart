@@ -75,6 +75,20 @@ class _WatchPartyChatState extends State<WatchPartyChat> {
   @override
   void dispose() {
     _typingDebounce?.cancel();
+<<<<<<< HEAD
+=======
+
+    final user = context.currentUser;
+    if (user != null) {
+      context.read<ChatCubit>().updateTypingStatus(
+            roomId: widget.partyId,
+            userId: user.uid,
+            userName: user.displayName!,
+            isTyping: false,
+          );
+    }
+
+>>>>>>> 582330700bf4dc0f3efb4f41c7d18ca0f147c0de
     super.dispose();
   }
 

@@ -146,8 +146,12 @@ class _PlatformVideoPickerScreenState extends State<PlatformVideoPickerScreen> {
   }
 
   Future<void> _goToWatchParty(WatchParty party) async {
+<<<<<<< HEAD
     final navigator = Navigator.of(context);
     navigator.popUntil(ModalRoute.withName('/'));
+=======
+    final navigator = Navigator.of(context)..popUntil(ModalRoute.withName('/'));
+>>>>>>> 582330700bf4dc0f3efb4f41c7d18ca0f147c0de
     await navigator.pushNamed(
       WatchPartyScreen.id,
       arguments: WatchPartyScreenArguments(party, party.platform),
