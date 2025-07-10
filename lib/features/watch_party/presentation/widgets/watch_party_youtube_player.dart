@@ -55,7 +55,7 @@ class _WatchPartyYoutubePlayerState extends State<WatchPartyYoutubePlayer> {
     _ytController = YoutubePlayerController(
       initialVideoId: videoId!,
       flags: const YoutubePlayerFlags(
-        autoPlay: false,
+        // autoPlay: false,
         // controlsVisibleAtStart: false,
         enableCaption: false,
       ),
