@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/playback_controllers/playback_controller.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 
 class SyncManager {

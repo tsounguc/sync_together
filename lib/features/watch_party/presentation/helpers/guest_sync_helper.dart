@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/playback_controllers/playback_controller.dart';
 
 class GuestSyncHelper {
   final PlaybackController playback;
@@ -26,7 +25,7 @@ class GuestSyncHelper {
           continue;
         }
 
-        await _disableVideoControls();
+        await playback.disableControls();
         await playback.pause();
         await playback.seek(targetPosition);
 
@@ -43,18 +42,5 @@ class GuestSyncHelper {
       await Future<void>.delayed(const Duration(milliseconds: 300));
     }
     return false;
-  }
-
-  Future<void> _disableVideoControls() async {
-    const js = '''
-      var video = document.querySelector('video');
-      if (video) {
-        video.removeAttribute('controls');
-        video.style.pointerEvents = 'none';
-        video.muted = false;
-        video.volume = 1.0;
-      }
-    ''';
-    await playback.controller.runJavaScript(js);
   }
 }

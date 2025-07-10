@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sync_together/core/utils/core_utils.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
-import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/playback_controllers/playback_controller.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';

@@ -5,6 +5,7 @@ import 'package:sync_together/features/watch_party/domain/entities/watch_party.d
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_native_app_mode.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_web_sync_overlay.dart';
 import 'package:sync_together/features/watch_party/presentation/views/watch_party_webview.dart';
+import 'package:sync_together/features/watch_party/presentation/widgets/watch_party_youtube_player.dart';
 import 'package:sync_together/themes/app_theme.dart';
 
 class WatchPartyScreen extends StatefulWidget {
@@ -45,9 +46,15 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
           platform: widget.platform,
         );
       } else {
-        watchView = WatchPartyWebView(
-          watchParty: widget.watchParty,
-        );
+        if (widget.watchParty.platform.name == 'YouTube') {
+          watchView = WatchPartyYoutubePlayer(
+            watchParty: widget.watchParty,
+          );
+        } else {
+          watchView = WatchPartyWebView(
+            watchParty: widget.watchParty,
+          );
+        }
       }
     }
     return Theme(

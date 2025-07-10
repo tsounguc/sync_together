@@ -11,11 +11,10 @@ import 'package:sync_together/features/chat/presentation/widgets/watch_party_cha
 import 'package:sync_together/features/platforms/domain/entities/streaming_platform.dart';
 import 'package:sync_together/features/watch_party/domain/entities/watch_party.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/guest_sync_helper.dart';
-import 'package:sync_together/features/watch_party/presentation/helpers/playback_controller.dart';
+import 'package:sync_together/features/watch_party/presentation/helpers/playback_controllers/webview_playback_controller.dart';
 import 'package:sync_together/features/watch_party/presentation/helpers/sync_manager.dart';
 import 'package:sync_together/features/watch_party/presentation/watch_party_session_bloc/watch_party_session_bloc.dart';
 import 'package:sync_together/features/watch_party/presentation/widgets/sync_status_badge.dart';
-import 'package:sync_together/features/watch_party/presentation/widgets/web_playback_controls.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -33,7 +32,7 @@ class WatchPartyWebView extends StatefulWidget {
 
 class _WatchPartyWebViewState extends State<WatchPartyWebView> {
   WebViewController? _webViewController;
-  late final PlaybackController playback;
+  late final WebviewPlaybackController playback;
   late final SyncManager syncManager;
   late final StreamingPlatform streamingPlatform;
 
@@ -90,7 +89,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
       onUserTappedPlay: _onGuestTappedPlay,
     );
 
-    playback = PlaybackController(
+    playback = WebviewPlaybackController(
       controller: controller,
       platform: streamingPlatform,
     );
