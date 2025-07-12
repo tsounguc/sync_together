@@ -51,19 +51,18 @@ class _WatchPartyYoutubePlayerState extends State<WatchPartyYoutubePlayer> {
     final videoId = YoutubePlayer.convertUrlToId(
       widget.watchParty.videoUrl,
     );
+    final bloc = context.read<WatchPartySessionBloc>();
 
     _ytController = YoutubePlayerController(
       initialVideoId: videoId!,
       flags: const YoutubePlayerFlags(
-        // autoPlay: false,
+        autoPlay: false,
         // controlsVisibleAtStart: false,
         enableCaption: false,
       ),
     );
 
     playback = YoutubePlaybackController(_ytController);
-
-    final bloc = context.read<WatchPartySessionBloc>();
 
     syncManager = SyncManager(
       playback: playback,
@@ -91,6 +90,7 @@ class _WatchPartyYoutubePlayerState extends State<WatchPartyYoutubePlayer> {
   @override
   void dispose() {
     _ytController.dispose();
+    syncManager.stop();
     super.dispose();
   }
 

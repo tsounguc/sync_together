@@ -66,6 +66,7 @@ class _WatchPartyWebViewState extends State<WatchPartyWebView> {
 
   @override
   void dispose() {
+    debugPrint('[WatchPartyWebView] Disposing...');
     syncManager.stop();
     _syncBadgeTimer?.cancel();
     _webViewController = null;
